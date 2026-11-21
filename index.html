@@ -159,7 +159,7 @@ const saveInv=v=>{save();if(DB)DB.doc('invoices/'+v.no).set(v).catch(()=>toast('
 const SDK=['https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js','https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js','https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js'];
 const loadScript=u=>new Promise((res,rej)=>{const e=document.createElement('script');const t=setTimeout(()=>rej(new Error('timeout')),20000);e.src=u;e.onload=()=>{clearTimeout(t);res()};e.onerror=()=>{clearTimeout(t);rej(new Error('load'))};document.head.appendChild(e)});
 let tblSeen=false;let unsubs=[],WAITER=false,WEMAIL='',WORD=[],NEWO=[],menuSeen=false;
-const authMsg=c=>/invalid|wrong|not-found|credential/.test(c)?'Sign-in failed, please try again':/network/.test(c)?'No internet connection':/too-many/.test(c)?'Too many tries, wait a minute':'Could not sign in';
+const authMsg=c=>/invalid|wrong|not-found|credential/.test(c)?'Sign-in failed, please try again':/network/.test(c)?'No internet connection':/too-many/.test(c)?'Too many tries, wait a minute':/popup-closed|cancelled/.test(c)?'':'Could not sign in ('+c.replace('auth/','')+')';
 async function initCloud(){
 const cfg=window.FB_CONFIG;
 let SU=false;const err=m=>$('#lerr').textContent=m;
@@ -173,7 +173,7 @@ firebase.initializeApp(cfg);const auth=firebase.auth(),fs=firebase.firestore();w
 try{await Promise.race([fs.enablePersistence({synchronizeTabs:true}),new Promise(r=>setTimeout(r,2500))])}catch(e){}
 $('#lerr').textContent='';
 let CONF=null,RV=null;
-$('#gb').onclick=async()=>{err('');const gp=new firebase.auth.GoogleAuthProvider();try{await auth.signInWithPopup(gp)}catch(e){if(/popup/.test(e.code||''))auth.signInWithRedirect(gp);else err(authMsg(e.code||''))}};
+$('#gb').onclick=async()=>{err('');const gp=new firebase.auth.GoogleAuthProvider();try{await auth.signInWithPopup(gp)}catch(e){if(/popup-blocked|operation-not-supported|web-storage-unsupported/.test(e.code||''))auth.signInWithRedirect(gp);else err(authMsg(e.code||''))}};
 const emsg=c=>/email-already/.test(c)?'This email already has an account. Please log in':/weak-password/.test(c)?'Password must be at least 6 characters':/invalid-email/.test(c)?'Enter a valid email address':/user-not-found|wrong-password|invalid-credential|invalid-login/.test(c)?'Wrong email or password':/user-disabled/.test(c)?'This account is disabled':/operation-not-allowed/.test(c)?'Email sign-in is not enabled in Firebase yet':authMsg(c);
 $('#lb').onclick=async()=>{const e=$('#em').value.trim(),p=$('#pw').value;if(!e)return err('Enter your email');if(!p)return err('Enter your password');if(SU&&p!==$('#pw2').value)return err('Passwords do not match');err(SU?'Creating account…':'Signing in…');try{if(SU)await auth.createUserWithEmailAndPassword(e,p);else await auth.signInWithEmailAndPassword(e,p);err('')}catch(x){err(emsg(x.code||''))}};
 $('#fg').onclick=async()=>{const e=$('#em').value.trim();if(!e)return err('Enter your email above first');try{await auth.sendPasswordResetEmail(e);err('Password reset link sent to your email ✓')}catch(x){err(emsg(x.code||''))}};
@@ -986,21 +986,25 @@ function delSel(){const ids=[...document.querySelectorAll('.sel:checked')].map(c
 const AI_PROMPT='This is a photo (or one part of a photo) of a restaurant menu. List EVERY dish and drink you can read, without skipping any: all sections and all columns (starters, soups, rice, noodles, main course, tandoor, breads, desserts, drinks and so on). The image may cut off at its top or bottom edge: only list items whose name you can read fully. Use the section heading printed on the menu as "cat"; if the heading is not visible in this part, guess it from the neighbouring items. Keep dish names as printed. If one section holds both veg and non-veg dishes (like Rice, Noodles, Soups), name the category "Veg <section>" for the veg dishes and "Non-Veg <section>" for the non-veg dishes, for example "Veg Noodles" and "Non-Veg Noodles". Prices are numbers only. If an item has two prices (half/full, small/large), put the smaller in "half" and the larger in "full"; with one price use "full" and half null; if no price is visible use 0. "veg" is false if the dish has chicken, mutton, egg, fish, prawn or other meat, otherwise true. Return ONLY a JSON array, nothing else: [{"cat":"","name":"","veg":true,"half":null,"full":0}]';
 const parseItems=s=>{const a=s.indexOf('['),b=s.lastIndexOf(']');if(a<0||b<a)throw new Error('The AI returned no items');return JSON.parse(s.slice(a,b+1))};
 function askKey(){return new Promise(res=>{const d=$('#dlg');d.style.maxWidth='';d.innerHTML='<h3>Gemini AI key</h3><p class="mut" style="font-size:13px">Free key: open aistudio.google.com, tap Get API key, Create API key, then paste it here. It is saved only on this phone.</p><p><input id="gk" placeholder="AIza..." autocomplete="off" style="width:100%;box-sizing:border-box"></p><div class="row"><button class="btn alt" id="gk_n">Cancel</button><button class="btn" id="gk_y">Save</button></div>';if(!d.open)d.showModal();$('#gk_n').onclick=()=>{d.close();res('')};$('#gk_y').onclick=()=>{const v=$('#gk').value.trim();d.close();res(v)}})}
-const GEM_KEY='AQ.Ab8RN6Li6SiJMTKC6xnoGo27Ft29DD7sZOmpJHMa8Dsp3HHOOg';
+const GEM_KEY='AQ.Ab8RN6IM5LiPUc1sKhBF9jPSyzhX-75ThPbtNpT3ppt4pcEBSw';
 async function callGemini(d){
  let key=GEM_KEY;if(!key)try{key=localStorage.getItem('gemKey')||''}catch(e){}
  if(!key){window._kp=window._kp||askKey();key=await window._kp;window._kp=null;if(!key)throw new Error('AI key not added');try{localStorage.setItem('gemKey',key)}catch(e){}}
  const m=/^data:(image\/[\w+.-]+);base64,(.+)$/.exec(d);if(!m)throw new Error('Photo could not be read');
+ const gen={temperature:0,responseMimeType:'application/json'};
+ const ct={'Content-Type':'application/json'};
+ const std=(model,hdr)=>({u:'https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent'+(hdr?'':'?key='+encodeURIComponent(key)),h:hdr?{...ct,'x-goog-api-key':key}:ct,b:{contents:[{parts:[{text:AI_PROMPT},{inline_data:{mime_type:m[1],data:m[2]}}]}],generationConfig:gen}});
+ const vtx=(model)=>({u:'https://aiplatform.googleapis.com/v1/publishers/google/models/'+model+':generateContent?key='+encodeURIComponent(key),h:ct,b:{contents:[{role:'user',parts:[{text:AI_PROMPT},{inlineData:{mimeType:m[1],data:m[2]}}]}],generationConfig:gen}});
+ const models=['gemini-2.5-flash','gemini-flash-latest'];
+ const tries=[...models.map(x=>std(x,true)),...models.map(x=>std(x,false)),...models.map(vtx)];
  let last='';
- for(const model of['gemini-2.5-flash','gemini-flash-latest','gemini-2.0-flash']){
-  let r,j;try{r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent?key='+encodeURIComponent(key),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:AI_PROMPT},{inline_data:{mime_type:m[1],data:m[2]}}]}],generationConfig:{temperature:0,responseMimeType:'application/json'}})})}catch(e){throw new Error('No internet or Gemini is blocked')}
+ for(const t of tries){
+  let r,j;try{r=await fetch(t.u,{method:'POST',headers:t.h,body:JSON.stringify(t.b)})}catch(e){last='Network blocked';continue}
   try{j=await r.json()}catch(e){j={}}
-  if(r.ok){const t=(((j.candidates||[])[0]||{}).content||{}).parts;return parseItems((t||[]).map(p=>p.text||'').join(''))}
+  if(r.ok){const p=(((j.candidates||[])[0]||{}).content||{}).parts;return parseItems((p||[]).map(x=>x.text||'').join(''))}
   last=(j.error&&j.error.message)||('Gemini error '+r.status);
-  if(r.status===400&&/API key/i.test(last)||r.status===403){if(!GEM_KEY)try{localStorage.removeItem('gemKey')}catch(e){}throw new Error('Gemini key is wrong. Tap again and enter a new key. ('+last.slice(0,80)+')')}
-  if(r.status===429)throw new Error('Gemini free limit reached. Wait a minute and try again');
-  if(r.status!==404)throw new Error(last.slice(0,120))}
- throw new Error(last.slice(0,120))}
+  if(r.status===429)throw new Error('Gemini free limit reached. Wait a minute and try again')}
+ throw new Error(last.slice(0,140)+' | key '+key.slice(0,4)+'...'+key.slice(-3)+' ('+key.length+' chars)')}
 async function callAI(d){
  if(GEM_KEY||!window.AI_ENDPOINT)return callGemini(d);
  let r,j;try{r=await fetch(window.AI_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+await AUTH.currentUser.getIdToken()},body:JSON.stringify({image:d,prompt:AI_PROMPT})})}catch(e){throw new Error('Cannot reach AI server. Check the AI_ENDPOINT link ('+String(window.AI_ENDPOINT).slice(0,40)+')')}
