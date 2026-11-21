@@ -1001,7 +1001,7 @@ function delSel(){const ids=[...document.querySelectorAll('.sel:checked')].map(c
 const AI_PROMPT='This is a photo (or one part of a photo) of a restaurant menu. List EVERY dish and drink you can read, without skipping any: all sections and all columns (starters, soups, rice, noodles, main course, tandoor, breads, desserts, drinks and so on). The image may cut off at its top or bottom edge: only list items whose name you can read fully. Use the section heading printed on the menu as "cat"; if the heading is not visible in this part, guess it from the neighbouring items. Keep dish names as printed. If one section holds both veg and non-veg dishes (like Rice, Noodles, Soups), name the category "Veg <section>" for the veg dishes and "Non-Veg <section>" for the non-veg dishes, for example "Veg Noodles" and "Non-Veg Noodles". Prices are numbers only. If an item has two prices (half/full, small/large), put the smaller in "half" and the larger in "full"; with one price use "full" and half null; if no price is visible use 0. "veg" is false if the dish has chicken, mutton, egg, fish, prawn or other meat, otherwise true. Return ONLY a JSON array, nothing else: [{"cat":"","name":"","veg":true,"half":null,"full":0}]';
 const parseItems=s=>{const a=s.indexOf('['),b=s.lastIndexOf(']');if(a<0||b<a)throw new Error('The AI returned no items');return JSON.parse(s.slice(a,b+1))};
 function askKey(){return new Promise(res=>{const d=$('#dlg');d.style.maxWidth='';d.innerHTML='<h3>Gemini AI key</h3><p class="mut" style="font-size:13px">Free key: open aistudio.google.com, tap Get API key, Create API key, then paste it here. It is saved only on this phone.</p><p><input id="gk" placeholder="AIza..." autocomplete="off" style="width:100%;box-sizing:border-box"></p><div class="row"><button class="btn alt" id="gk_n">Cancel</button><button class="btn" id="gk_y">Save</button></div>';if(!d.open)d.showModal();$('#gk_n').onclick=()=>{d.close();res('')};$('#gk_y').onclick=()=>{const v=$('#gk').value.trim();d.close();res(v)}})}
-const GEM_KEY='AQ.Ab8RN6IM5LiPUc1sKhBF9jPSyzhX-75ThPbtNpT3ppt4pcEBSw';
+const GEM_KEY='';
 async function callGemini(d){
  let key=GEM_KEY;if(!key)try{key=localStorage.getItem('gemKey')||''}catch(e){}
  if(!key){window._kp=window._kp||askKey();key=await window._kp;window._kp=null;if(!key)throw new Error('AI key not added');try{localStorage.setItem('gemKey',key)}catch(e){}}
@@ -1010,7 +1010,7 @@ async function callGemini(d){
  const ct={'Content-Type':'application/json'};
  const std=(model,hdr)=>({u:'https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent'+(hdr?'':'?key='+encodeURIComponent(key)),h:hdr?{...ct,'x-goog-api-key':key}:ct,b:{contents:[{parts:[{text:AI_PROMPT},{inline_data:{mime_type:m[1],data:m[2]}}]}],generationConfig:gen}});
  const vtx=(model)=>({u:'https://aiplatform.googleapis.com/v1/publishers/google/models/'+model+':generateContent?key='+encodeURIComponent(key),h:ct,b:{contents:[{role:'user',parts:[{text:AI_PROMPT},{inlineData:{mimeType:m[1],data:m[2]}}]}],generationConfig:gen}});
- const models=['gemini-2.5-flash','gemini-flash-latest'];
+ const models=['gemini-3.8-flash','gemini-3.8-flash-lite'];
  const tries=[...models.map(x=>std(x,true)),...models.map(x=>std(x,false)),...models.map(vtx)];
  let last='';
  for(const t of tries){
