@@ -147,7 +147,7 @@ const clone=o=>JSON.parse(JSON.stringify(o));
 const pad=n=>'INV-'+String(n).padStart(4,'0');
 const nextNo=()=>Math.max(0,...S.invoices.map(v=>+String(v.no).replace(/\D/g,'')||0))+1;
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
-const setSync=t=>{const e=$('#sync');if(e)e.textContent=t+' · v5'};
+const setSync=t=>{const e=$('#sync');if(e)e.textContent=t+' · v8'};
 const saveMenu=()=>{save();lastMenu=JSON.stringify(S.items);
 if(!DB){toast('⚠ Not signed in to the cloud: the menu is saved on this device only');return}
 let done=false;setTimeout(()=>{if(!done)toast('Slow connection: the menu will sync as soon as you are back online')},4000);
@@ -943,8 +943,23 @@ function remind(){const r=$('#rem'),e=PROFILE&&PROFILE.plan&&PROFILE.plan.expire
  if(d>0&&d<=3){r.style.display='flex';r.innerHTML=`<span>⏰ Your plan ends in ${d} day${d>1?'s':''}. Renew to keep features unlocked.</span><button class="btn sm" id="rn">Renew</button>`;$('#rn').onclick=()=>{tab='set';render()};
   try{const k='rem'+new Date().toDateString();if(window.Notification){if(Notification.permission==='granted'&&!localStorage[k]){new Notification(BIZ.name,{body:'Plan ends in '+d+' day(s). Renew now.'});localStorage[k]=1}else if(Notification.permission==='default')Notification.requestPermission()}}catch(x){}}else r.style.display='none'}
 setInterval(()=>{if(PROFILE&&PROFILE.name){if(LOCKED()!==lastLock)render();remind()}},60000);
-function photosTab(){$('#app').innerHTML=`<div class="card"><h3>${tr('Menu photos')}</h3><p class="mut">Select your menu photos (any number at once). Items are read by AI and added to your menu automatically.</p><input id="pf" type="file" accept="image/*" multiple></div><div class="card ph" style="margin-top:12px">${PHOTOS.length?PHOTOS.map(p=>`<div><img src="${p.data}" data-z="${p.id}" alt="Menu"><button class="btn sm" data-e="${p.id}" style="width:100%;margin-top:4px">↻ Re-read menu</button><button class="btn alt sm" data-d="${p.id}" style="width:100%;margin-top:4px">Delete</button></div>`).join(''):'<div class="empty" style="grid-column:1/-1">No photos yet.</div>'}</div>`;
+async function aiTest(){const d=$('#dlg');d.style.maxWidth='';d.innerHTML='<h3>AI test</h3><pre id="atr" style="white-space:pre-wrap;word-break:break-word;font-size:12px;max-height:60vh;overflow:auto">Testing…</pre><button class="btn" style="width:100%" onclick="$(\'#dlg\').close()">Close</button>';if(!d.open)d.showModal();
+ const key=GEM_KEY||(()=>{try{return localStorage.getItem('gemKey')||''}catch(e){return ''}})(),out=['App '+APPV+' · key '+key.slice(0,4)+'…'+key.slice(-3)+' ('+key.length+' chars)'],body=JSON.stringify({contents:[{parts:[{text:'Reply with the single word OK'}]}]}),ct={'Content-Type':'application/json'};
+ for(const m of['gemini-2.5-flash','gemini-flash-latest']){
+  for(const [n,u,h] of[['header','https://generativelanguage.googleapis.com/v1beta/models/'+m+':generateContent',{...ct,'x-goog-api-key':key}],['query','https://generativelanguage.googleapis.com/v1beta/models/'+m+':generateContent?key='+encodeURIComponent(key),ct]]){
+   try{const r=await fetch(u,{method:'POST',headers:h,body});out.push(m+' ['+n+'] '+r.status+' '+(await r.text()).replace(/\s+/g,' ').slice(0,220))}catch(e){out.push(m+' ['+n+'] network error: '+e.message)}}}
+ const el=$('#atr');if(el)el.textContent=out.join('\n\n')}
+function parseMenuText(t){const out=[];let cat='Menu';const NV=/chicken|mutton|egg|fish|prawn|keema|lollipop|oyster|satay|crab|lamb|beef|pork|meat/i;
+ t.split(/\r?\n/).forEach(raw=>{let l=raw.replace(/^[\s\-*•·#>]+/,'').replace(/\s+/g,' ').trim();if(!l)return;
+  const m=/^(.*?[A-Za-z\u0900-\u097F\u0A80-\u0AFF].*?)[\s.:\-–—|_]*(?:₹|Rs\.?\s*)?(\d{1,5})(?:\s*[\/|,]\s*(?:₹|Rs\.?\s*)?(\d{1,5}))?\s*$/.exec(l);
+  if(!m){cat=l.replace(/[:\-–—\s]+$/,'').slice(0,40)||cat;return}
+  const name=m[1].replace(/[\s.:\-–—|_]+$/,'').trim();if(!name)return;const a=+m[2],b=m[3]?+m[3]:0;
+  const veg=/non[\s-]*veg/i.test(cat)?false:(/^\s*veg/i.test(cat)?!NV.test(name):!NV.test(name));
+  out.push({cat,name,veg,half:b?Math.min(a,b):null,full:b?Math.max(a,b):a})});return out}
+function photosTab(){$('#app').innerHTML=`<div class="card"><h3>${tr('Menu photos')}</h3><p class="mut">Select your menu photos (any number at once). Items are read by AI and added to your menu automatically.</p><input id="pf" type="file" accept="image/*" multiple></div><div class="card" style="margin-top:12px"><h3>Add menu from text (no AI)</h3><p class="mut" style="font-size:13px">Paste your dishes: one dish per line as name and price. For half and full write 70/130. A line without a price becomes a category.</p><textarea id="mtx" rows="8" placeholder="Starters&#10;Paneer Chilly 250&#10;Chicken Chilli Dry 160/300&#10;Veg Soups&#10;Manchow Soup 70/130" style="width:100%;box-sizing:border-box"></textarea><button class="btn" id="mtb" type="button" style="margin-top:8px;width:100%">Add to menu</button></div><button class="btn alt sm" id="att" type="button" style="margin-top:12px;width:100%">Test AI connection</button><div class="card ph" style="margin-top:12px">${PHOTOS.length?PHOTOS.map(p=>`<div><img src="${p.data}" data-z="${p.id}" alt="Menu"><button class="btn sm" data-e="${p.id}" style="width:100%;margin-top:4px">↻ Re-read menu</button><button class="btn alt sm" data-d="${p.id}" style="width:100%;margin-top:4px">Delete</button></div>`).join(''):'<div class="empty" style="grid-column:1/-1">No photos yet.</div>'}</div>`;
  $('#pf').onchange=e=>uploadAll([...e.target.files]);
+ $('#att').onclick=aiTest;
+ $('#mtb').onclick=()=>{if(!CAN)return toast('Only the owner can edit the menu');const it=parseMenuText($('#mtx').value);if(!it.length)return toast('No dishes found. Write each dish as: name price');const n=addItems(it);if(n)saveMenu();$('#mtx').value='';toast(n?n+' items added to the menu ✓':'No new items (all already in the menu)')};
  $('#app').onclick=e=>{const z=e.target.dataset.z,d=e.target.dataset.d,ex=e.target.dataset.e;if(ex)extractMenu(ex);if(d)ask('Delete this photo?',0,()=>phDel(d));if(z){const p=PHOTOS.find(x=>x.id===z),w=$('#dlg');w.innerHTML=`<img src="${p.data}" style="width:100%" alt=""><button class="btn" style="width:100%;margin-top:8px" onclick="$('#dlg').close()">Close</button>`;w.showModal()}}}
 function planLine(P){const e=P.plan&&P.plan.expiresAt;if(e>8e15)return '<span class="tag paid">Active</span> <b>Lifetime</b>';
  const d=Math.max(1,Math.ceil((e-Date.now())/864e5)),t=P.plan.type||(d>62?'yearly':'monthly'),per=t==='yearly'?'1 Year':'1 Month';
@@ -1006,7 +1021,7 @@ async function callGemini(d){
   if(r.status===429)throw new Error('Gemini free limit reached. Wait a minute and try again')}
  throw new Error(last.slice(0,140)+' | key '+key.slice(0,4)+'...'+key.slice(-3)+' ('+key.length+' chars) '+APPV)}
 async function callAI(d){
- if(GEM_KEY||!window.AI_ENDPOINT)return callGemini(d);
+ if(!window.AI_ENDPOINT)return callGemini(d);
  let r,j;try{r=await fetch(window.AI_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+await AUTH.currentUser.getIdToken()},body:JSON.stringify({image:d,prompt:AI_PROMPT})})}catch(e){throw new Error('Cannot reach AI server. Check the AI_ENDPOINT link ('+String(window.AI_ENDPOINT).slice(0,40)+')')}
  try{j=await r.json()}catch(e){throw new Error('AI server gave a bad reply (status '+r.status+'). Check the Worker code')}
  if(!r.ok)throw new Error((j&&j.error)||('AI server error '+r.status));return j.items}
@@ -1041,7 +1056,7 @@ function fit(){const w=W();if(!w||L.style.display==='none')return;w.style.zoom=1
 const f=()=>setTimeout(fit,0);addEventListener('resize',fit);L.addEventListener('click',f);L.addEventListener('input',f);new MutationObserver(f).observe(L,{attributes:true,attributeFilter:['style']});[200,800,2000].forEach(t=>setTimeout(fit,t));
 const ig=document.querySelector('#login .dev a');if(ig)ig.onclick=e=>{const u='_.9.9.9.0._',web=ig.href,ua=navigator.userAgent;if(/Android/i.test(ua)){e.preventDefault();location.href='intent://instagram.com/_u/'+u+'/#Intent;package=com.instagram.android;scheme=https;S.browser_fallback_url='+encodeURIComponent(web)+';end'}else if(/iPhone|iPad|iPod/i.test(ua)){e.preventDefault();const t=Date.now();location.href='instagram://user?username='+u;setTimeout(()=>{if(!document.hidden&&Date.now()-t<2500)location.href=web},1200)}};})();
 initCloud();
-const APPV='v3-2026-11-21';
+const APPV='v8-2026-11-21';
 (async()=>{try{if(localStorage.getItem('appv')!==APPV&&'serviceWorker' in navigator){const rs=await navigator.serviceWorker.getRegistrations();for(const r of rs)await r.unregister();if(window.caches){for(const k of await caches.keys())await caches.delete(k)}localStorage.setItem('appv',APPV);location.reload();return}}catch(e){}
 if(!window.AndroidBridge&&'serviceWorker' in navigator&&location.protocol.indexOf('http')===0)navigator.serviceWorker.register('sw.js').catch(()=>{})})();
 </script>
