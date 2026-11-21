@@ -18,4 +18,4 @@ window.ADMIN_EMAIL = "khanaasim027@gmail.com";
 
 // OPTIONAL, leave these two lines commented out for now.
 // window.RZP_KEY = "rzp_live_xxxxxxxx";        // Razorpay key, only when you start taking plan payments
-// window.AI_ENDPOINT = "https://menu-ai.khanaasim027.workers.dev/";          // Menu photo scan endpoint, only when you set it up
+// window.AI_ENDPOINT = "https://...";          // Menu photo scan endpoint, only when you set it up
