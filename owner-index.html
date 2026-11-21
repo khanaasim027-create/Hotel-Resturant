@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Restaurant POS</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0c2a23">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#eff3f1;--card:#fff;--ink:#10241f;--mut:#62776f;--line:#dbe3df;--pri:#0f3d33;--pri-ink:#fff;--gold:#a87a1f;--red:#c0392b;--ok:#1f8a5b;--chip:#e4ebe7;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a1512;--card:#12251f;--ink:#eaf1ee;--mut:#8fa69e;--line:#24403a;--pri:#d4a843;--pri-ink:#1a1405;--gold:#d4a843;--red:#ef6a56;--ok:#43c68b;--chip:#1b332c}}
+:root[data-theme="dark"]{--bg:#0a1512;--card:#12251f;--ink:#eaf1ee;--mut:#8fa69e;--line:#24403a;--pri:#d4a843;--pri-ink:#1a1405;--gold:#d4a843;--red:#ef6a56;--ok:#43c68b;--chip:#1b332c}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{overscroll-behavior:none}body{overflow-x:hidden;margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 Inter,system-ui,sans-serif}
+h1,h2,h3{font-family:Cinzel,Georgia,serif;margin:0}
+header{background:#0c2a23;color:#f3e9cf;padding:10px 16px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;border-bottom:2px solid #c9a24a}
+header h1{font-size:20px;letter-spacing:1.5px;color:#e3c274}header small{display:block;font:500 11px Inter;color:#9fb8b0;letter-spacing:.5px}
+nav{display:flex;gap:2px;overflow-x:auto;max-width:100%;order:3;width:100%}.lg{width:46px;height:46px;border-radius:50%;flex:none}.sy{order:2;margin-left:auto;font:600 11px Inter;color:#9fb8b0}@media(min-width:861px){nav{order:1;width:auto}}
+nav button{background:none;border:0;color:#cfe0da;padding:8px 14px;border-radius:8px;font:600 13px Inter;cursor:pointer;white-space:nowrap}
+nav button.on{background:#c9a24a;color:#1a1405}
+main{max-width:1200px;margin:0 auto;padding:14px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:14px;align-items:start}.grid>*{min-width:0}@media(max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+.sticky{position:sticky;top:10px}@media(max-width:860px){.sticky{position:static}}
+input,select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.row{display:flex;gap:8px;align-items:center}.row>*{flex:1}.row>.fit{flex:none}
+.btn{background:var(--pri);color:var(--pri-ink);border:0;border-radius:8px;padding:10px 14px;font:600 14px Inter;cursor:pointer}
+.btn.alt{background:none;color:var(--ink);border:1px solid var(--line)}.btn.sm{padding:5px 10px;font-size:13px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:10px 0;scrollbar-width:thin}
+.chip{flex:none;background:var(--chip);color:var(--ink);border:0;border-radius:99px;padding:6px 12px;font:500 13px Inter;cursor:pointer}
+.chip.on{background:var(--pri);color:var(--pri-ink)}
+#list{max-height:68vh;overflow:auto}
+.ch{font:700 13px Cinzel,serif;color:var(--gold);padding:12px 2px 4px;border-bottom:1px solid var(--line);letter-spacing:.5px}
+.li{display:flex;align-items:center;gap:10px;padding:8px 2px;border-bottom:1px solid var(--line)}
+.li .nm{flex:1;min-width:0;overflow-wrap:anywhere}.dot{width:12px;height:12px;border:1.5px solid;border-radius:3px;display:inline-grid;place-items:center;flex:none}
+.dot::after{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}.dot.v{color:#1f8a5b}.dot.n{color:#c0392b}
+.pb{background:none;border:1px solid var(--line);border-radius:8px;padding:7px 10px;color:var(--ink);font:600 13px Inter;cursor:pointer;min-width:66px}
+.pb:hover{border-color:var(--gold);background:var(--chip)}.pb small{display:block;color:var(--mut);font:500 10px Inter}
+table{width:100%;border-collapse:collapse}th,td{padding:8px 6px;text-align:left;border-bottom:1px solid var(--line)}th{color:var(--mut);font-weight:500;font-size:12px}
+td.n,th.n{text-align:right}.wrap{overflow-x:auto}
+.tot{display:flex;justify-content:space-between;padding:3px 0}.tot.big{font:700 20px Cinzel,serif;border-top:2px solid var(--ink);margin-top:6px;padding-top:8px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:12px}
+.stat b{display:block;font:700 22px Cinzel,serif}.stat span{color:var(--mut);font-size:12px}
+.tag{display:inline-block;padding:2px 8px;border-radius:99px;font-size:12px;font-weight:600;border:1px solid var(--line)}
+.tag.due{color:var(--red);border-color:var(--red)}.tag.paid{color:var(--ok);border-color:var(--ok)}
+.mut{color:var(--mut)}.empty{padding:22px;text-align:center;color:var(--mut)}
+.cl{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);gap:8px}
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);max-width:420px;width:92%;max-height:92vh;overflow:auto}
+dialog::backdrop{background:rgba(0,0,0,.55)}
+#toast{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:#0c2a23;color:#f3e9cf;padding:9px 16px;border-radius:8px;display:none;z-index:9}
+#bar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:25;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));background:var(--card);border-top:1px solid var(--line);gap:12px;align-items:center}
+.x{display:none}
+@media(max-width:860px){
+.bt #bar{display:flex}.x{display:inline-block}
+main{padding:10px 10px 90px}.card{padding:12px}
+input,select{font-size:16px}
+#list{max-height:none;overflow:visible}
+.chips{position:sticky;top:0;z-index:2;background:var(--card);margin:0 -12px;padding:8px 12px}
+.btn.sm{padding:8px 13px}
+#bcard{display:none}
+#bcard.open{display:block;position:fixed;inset:0;z-index:30;overflow:auto;border-radius:0;padding:16px;padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+}
+#nob{position:fixed;top:60px;right:8px;width:min(380px,calc(100vw - 16px));z-index:2000;max-height:70vh;overflow:auto}
+.bell .bn{background:var(--red);color:#fff;border-radius:99px;font-size:11px;padding:1px 6px;margin-left:4px}.bell .bn:empty{display:none}
+.bell.ring{color:#e3c274}.bell.ring .bi{display:inline-block;animation:bellp 1.2s ease-in-out infinite}
+@keyframes bellp{0%,60%,100%{transform:rotate(0)}15%{transform:rotate(14deg)}30%{transform:rotate(-12deg)}45%{transform:rotate(8deg)}}
+.ob{pointer-events:auto;background:var(--card);color:var(--ink);border:2px solid var(--gold);border-radius:12px;padding:10px 12px;margin:0 auto 8px;max-width:560px;box-shadow:0 6px 20px rgba(0,0,0,.3);animation:obin .25s ease-out}
+@keyframes obin{from{transform:translateY(-30px);opacity:0}to{transform:none;opacity:1}}
+@media print{header,main,#bar,#toast,.noprint{display:none!important}body{background:#fff;color:#000}dialog{border:0;position:static;max-width:none;width:100%;max-height:none}}
+#rem{display:none;justify-content:space-between;align-items:center;gap:8px;padding:8px 16px;background:#c9a24a;color:#1a1405;font:600 13px Inter}
+.ph{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}.ph img{width:100%;height:150px;object-fit:cover;border-radius:8px;cursor:zoom-in}
+.plan{flex:1;border:2px solid var(--line);border-radius:12px;padding:12px;text-align:center}.plan b{display:block;font:700 22px Cinzel,serif}
+</style>
+<script src="firebase-config.js"></script>
+</head>
+<body>
+<header><img class="lg" id="hl" alt="Logo"><div><h1 id="hn"></h1><small id="hs"></small></div><span class="sy" id="sync"></span><button id="so" style="display:none;order:2;background:none;border:1px solid #3a5b52;color:#cfe0da;border-radius:8px;padding:5px 10px;font:600 12px Inter,sans-serif;cursor:pointer">Sign out</button><button id="vo" style="display:none;order:2;background:none;border:1px solid #3a5b52;color:#cfe0da;border-radius:8px;padding:5px 10px;font:600 12px Inter,sans-serif;cursor:pointer">🔊 Voice ON</button><button id="gs" type="button" title="Settings" aria-label="Settings" style="background:none;border:1px solid #3a5b52;color:#e3c274;border-radius:10px;width:42px;height:42px;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;order:2"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button><nav id="nav"></nav></header><div id="rem"></div>
+<main id="app"></main>
+<dialog id="dlg"></dialog>
+<style>
+#login{overflow:hidden!important;touch-action:manipulation;overscroll-behavior:none;background:#f5f2f2!important;padding:0!important;font-family:"Plus Jakarta Sans",Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#111}
+#login .blob{position:absolute;left:-25%;top:-130px;width:150%;height:calc(clamp(70px,11dvh,120px) + 100px);background:#000;border-radius:50%}
+#login .wrap2{position:relative;max-width:420px;margin:0 auto;padding:clamp(70px,11dvh,120px) 28px 18px;min-height:100%;display:flex;flex-direction:column;box-sizing:border-box}
+#login h2{font-family:inherit;font-size:30px;font-weight:600;letter-spacing:-.5px;margin:0 0 16px;color:#111}
+#login label{display:block;font-weight:700;font-size:14px;margin:0 0 6px;color:#111}
+#login .fld{position:relative;margin-bottom:14px}
+#login .fld input{width:100%;box-sizing:border-box;height:50px;border-radius:16px;border:1.5px solid transparent;background:#fff;padding:0 52px 0 22px;font:500 17px "Plus Jakarta Sans",Inter,system-ui,sans-serif;color:#111;outline:none;margin:0;box-shadow:none;transition:.15s}
+#login .fld input:focus{border-color:#111;box-shadow:0 8px 24px rgba(0,0,0,.12)}
+#login .fld input::placeholder{color:#c4c4c4;letter-spacing:2px}
+#login .eye{position:absolute;right:14px;bottom:0;height:50px;width:36px;background:none;border:0;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center}
+#login .fg{align-self:flex-end;background:none;border:0;padding:0;margin:-4px 0 14px;font:600 14px inherit;color:#111;cursor:pointer}
+#login .lb{height:54px;border-radius:27px;border:0;background:#000;color:#fff;font:500 18px "Plus Jakarta Sans",Inter,system-ui,sans-serif;cursor:pointer;width:100%}
+#login .lb:active{transform:scale(.99)}
+#login .or{display:flex;align-items:center;gap:14px;color:#9a9a9a;font-size:14px;margin:16px 0 14px}
+#login .or:before,#login .or:after{content:"";flex:1;height:1px;background:#ddd}
+#login .gb2{width:56px;height:56px;border-radius:50%;border:0;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.1);cursor:pointer;display:flex;align-items:center;justify-content:center;margin:0 auto}
+#login .gl{text-align:center;font-size:12px;color:#777;margin-top:6px;font-weight:600}
+#login .lerr2{color:#c0392b;font-size:14px;min-height:18px;text-align:center;margin-top:8px}
+#login .bt2{margin-top:auto;padding-top:12px;text-align:center;color:#9a9a9a;font-size:15px}
+#login .bt2 button{background:none;border:0;padding:0;font:700 15px inherit;color:#111;cursor:pointer;margin-left:4px}
+#login .dev{text-align:center;color:#9a9a9a;font-size:13px;margin:10px 0 0}#login .dev b{color:#111}#login .dev a{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:6px;color:#111;font-weight:700;font-size:14px;text-decoration:none}#login .dev a svg{color:#d6249f}
+</style><div id="login" style="display:none;position:fixed;inset:0;z-index:60;overflow:auto"><div class="blob"></div><div class="wrap2"><img id="ll" alt="" style="display:none"><h2 id="lt">Login</h2><label for="em">Email</label><div class="fld"><input id="em" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" style="letter-spacing:0"></div><label for="pw">Password</label><div class="fld"><input id="pw" type="password" autocomplete="current-password" placeholder="••••••••"><button class="eye" id="eye" type="button" aria-label="Show password" onclick="var p=document.getElementById('pw'),p2=document.getElementById('pw2'),h=p.type==='password';p.type=p2.type=h?'text':'password';document.getElementById('slash').style.display=h?'none':''"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#777" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path id="slash" d="M3 3l18 18"/></svg></button></div><div id="pw2w" class="fld" style="display:none"><label for="pw2">Confirm password</label><input id="pw2" type="password" autocomplete="new-password" placeholder="••••••••"></div><button class="fg" id="fg" type="button">Forgot password?</button><button class="lb" id="lb" type="button">Login</button><div class="or">Or</div><button class="gb2" id="gb" type="button" aria-label="Continue with Google"><svg width="26" height="26" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/><path fill="#FBBC05" d="M10.5 28.7a14.5 14.5 0 0 1 0-9.4l-7.9-6.1a24 24 0 0 0 0 21.6l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.9 2.3-8.4 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg></button><div class="gl">Continue with Google</div><div class="lerr2" id="lerr"></div><div class="bt2"><span id="tgt">Don't have an account?</span><button id="tg" type="button">Sign up</button></div><div class="dev">Developed by <b>Aasim</b><a href="https://www.instagram.com/_.9.9.9.0._?jplx=NTVlMzEzbDlocGlw" target="_blank" rel="noopener noreferrer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>Follow on Instagram</a></div></div></div>
+<div id="onb" style="display:none;position:fixed;inset:0;z-index:61;background:var(--bg);overflow:auto;padding:24px 16px"></div>
+<div id="bar"></div>
+<div id="toast" role="status"></div><div id="nob" style="display:none"></div>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const inr=n=>'₹'+(+n||0).toLocaleString('en-IN',{maximumFractionDigits:2});
+const FORCE_ROLE='owner';let KEY='rms.guest';
+// category, veg(v)/non-veg(n), "Name:full" or "Name:half/full" or "Name:/full"
+const MENU=[
+['Veg Starters','v','Paneer Chilly:250;Veg Manchurian:220;Paneer 65:240;Paneer Crispy:250;Veg Crispy:210;Veg Spring Roll:200;Veg Chilly:200;Baby Corn Chilli:230;Mushroom Chilli:240;Honey Chilli Potato:210'],
+['Non-Veg Starters','n','Spring Roll:300;Chicken Chilli Dry:160/300;Chicken 65:130/250;Chicken Hot Garlic:160/300;Chicken Wings (BBQ-Honey):280;Chicken Crispy:280;Chicken Lollipop:150/280;Chicken Schezwan Dry:280;Masala Lollipop:280;Apple Chicken Lollipop:280;Chicken Oyster:300;Chicken Satay Stick:300'],
+['Veg Soups','v','Manchow Soup:70/130;Hot & Sour Soup:80/150;Cream of Soup:80/150;Tomato Soup:70/130;Lemon Coriander Soup:80/150;Sweet Corn Soup:70/130;Lung Fung Soup:90/170;Clear Soup:70/130'],
+['Non-Veg Soups','n','Chicken Manchow Soup:70/130;Chicken Hot & Sour Soup:80/150;Chicken Cream of Soup:80/150;Chicken Lemon Coriander Soup:80/150;Chicken Sweet Corn Soup:70/130;Chicken Lung Fung Soup:90/170;Chicken Clear Soup:70/130'],
+['Veg Rice','v','Fried Rice:110/220;Schezwan Rice:130/250;Singapuri Rice:130/260;Triple Rice:170/340;Hong Kong Rice:130/250;Manchurian Rice:150/290;Chilli Rice:150/290;Hot Garlic Rice:130/260;Combination Rice:120/250;Egg Rice:100/200;Egg Schezwan Rice:110/220;Thousand Rice:/260;Garden Rice:/240;Crisp Rice:/260;Lemon Rice:120/240;American Rice:130/260'],
+['Non-Veg Rice','n','Fried Rice:110/220;Schezwan Rice:130/250;Singapuri Rice:130/260;Triple Rice:170/340;Hong Kong Rice:130/250;Manchurian Rice:150/290;Chilli Rice:150/290;Hot Garlic Rice:130/260;Combination Rice:120/250;Egg Rice:100/200;Egg Schezwan Rice:110/220;Thousand Rice:/260;Garden Rice:/240;Crisp Rice:/260;Lemon Rice:120/240;American Rice:130/260'],
+['Noodles','n','Hakka Noodles:110/130;Schezwan Noodles:130/250;Chilly Noodles:150/290;Manchurian Noodles:150/290;Triple Noodles:170/340;Singapuri Noodles:130/260;Garden Noodles:/240'],
+['Veg Chinese Main Course','v','Veg Chilli Gravy:150/300;Veg Manchurian Gravy:150/300;Veg Dragon Gravy:150/300;Veg Schezwan Gravy:150/300;Veg Hot Garlic Gravy:150/300;Veg Hong Kong Gravy:150/300;Veg Oyster Sauce Gravy:150/300;Veg Black Pepper Gravy:150/300;Veg Mushroom Gravy:150/300'],
+['Non-Veg Chinese Main Course','n','Chicken Chilli Gravy:150/300;Chicken Manchurian Gravy:150/300;Chicken Dragon Gravy:150/300;Chicken Schezwan Gravy:150/300;Chicken Hot Garlic Gravy:150/300;Chicken Hong Kong Gravy:150/300;Chicken Oyster Sauce Gravy:150/300;Chicken Black Pepper Gravy:150/300;Chicken Mushroom Gravy:150/300'],
+['Tandoori Starter','n','Chicken Tandoori:260/500;Chicken Tikka Kabab (6 pcs):280;Chicken Pahadi Kabab (6 pcs):280;Chicken Reshmi Kabab (6 pcs):330;Chicken Seekh Kabab (6 pcs):210;Chicken Schezwan Tandoori:280/540;Chicken Barra (6 pcs):350;Chicken Banjara (6 pcs):300;Chicken Malai Tikka (6 pcs):330;Chicken Garlic Tikka (6 pcs):300;Chicken Platter (Tikka, Malai Tikka, Pahadi Kabab, Banjara):999;Chicken Kaleji Tandoori (8 pcs):220'],
+['Indian Main Course Veg','v','Paneer Tikka Masala:330;Paneer Butter Masala:330;Paneer Burjee:200;Paneer Handi:250;Paneer Lajawab:250;Dal Tadka:160;Dal Fry:130;Dal Khecdi:230;Dal Kolhapuri:150;Mix Veg:230;Veg Kolhapuri:240;Veg Hyderabadi:240;Veg Patyala:350;Veg Handi:280'],
+['Indian Main Course Non-Veg','n','Butter Chicken:280/500;Chicken Tikka Masala:280/350;Chicken Handi:280/350;Chicken Kolhapuri:300;Chicken Murghmusallam:380/750;Chicken Hydrabadi:340;Chicken Bhuna Dry:350;Chicken Angara:350;Chicken Tawa:350;Chicken Lababdar:320;Chicken Patyala:380;Chicken Chat Pata:380;Chicken Toofani:380;Chicken Lajawab:400;Chicken Bhuna Gravy:380;Mutton Handi:350/680;Mutton Bhuna Masala:430;Mutton Kadai:380;Mutton Masala:380'],
+['Special Arabian Grill','n','Chicken Classic Alfaham:480;Chicken Alfaham Black Pepper:490;Chicken Alfaham Peri Peri:500;Chicken Sawaya Grill Black Pepper:659;Chicken Sawaya Normal:649;Mandi Rice:650;Kabsa Rice:600;Madbi Rice:690;Hamoos:80'],
+['Biryani','n','Mutton Matka Dum Biryani:440;Chicken Matka Dum Biryani:220;Paneer Matka Dum Biryani:200'],
+['Roti','v','Tandoor Wheat Roti:20;Tandoor Wheat Garlic Roti:40;Butter Naan:40;Plain Naan:35;Garlic Naan:50;Butter Kulcha:35;Plain Kulcha:30;Garlic Kulcha:40;Plain Lachha Paratha:35;Butter Lachha Paratha:40;Garlic Lachha Paratha:45;Butter Roti:25;Cheese Butter Garlic Naan:99'],
+['Plain Rice','v','Jeera Rice:100;Steam Rice:80;Biryani Rice:120'],
+['Fries & Papad','v','French Fries Salty:100;French Fries Peri Peri:120;Roasted Papad:50;Masala Papad:80'],
+['Dessert','v','Caramel Pudding:0;Sizzling Brownie:0;Gulab Jamun:0'],
+['Special Menu','n','Mushroom Capichino Soup:200;Dumpling Soup:250;Noodles Thukpa Soup:200;Chicken Golden Fry:300;Chicken Sizzlers:400;Chicken Kung Pao:320;Thai Curry Rice (Red/Green/Yellow):300;Malaysia Rice:140/270;Cheese Packing Rice:320;Paneer Pasanda:280;Chicken Lazeez:350;American Chopsey Noodles:280;Burnt Garlic Noodles:300;Chef Special Kabab Lazeez:380;Chef Special Chicken Roti Shoti Kabab:390;Murg Kabaabe Lazeez:380']
+];
+function seed(){let id=1;const items=[];MENU.forEach(([c,t,s])=>s.split(';').forEach(x=>{const i=x.lastIndexOf(':');const nm=x.slice(0,i),p=x.slice(i+1).split('/');
+ const it={id:id++,cat:c,t,name:nm};if(p.length>1){it.h=+p[0]||0;it.f=+p[1]}else it.f=+p[0];
+ if(c==='Special Menu'&&/Paneer/.test(nm))it.t='v';items.push(it)}));return{seq:1,nid:id,items,invoices:[]}}
+const BIZ={name:'',addr:'',phone:''};
+let LOGO='';
+let S;const blank=()=>({seq:1,nid:1,items:[],invoices:[]});function loadS(){try{S=JSON.parse(localStorage.getItem(KEY))||blank()}catch(e){S=blank()}if(!S.invoices)S.invoices=[];if(!S.items)S.items=[]}loadS();
+let DB=null,CAN=true,lastMenu='';
+const clone=o=>JSON.parse(JSON.stringify(o));
+const pad=n=>'INV-'+String(n).padStart(4,'0');
+const nextNo=()=>Math.max(0,...S.invoices.map(v=>+String(v.no).replace(/\D/g,'')||0))+1;
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const setSync=t=>{const e=$('#sync');if(e)e.textContent=t+' · v5'};
+const saveMenu=()=>{save();lastMenu=JSON.stringify(S.items);
+if(!DB){toast('⚠ Not signed in to the cloud: the menu is saved on this device only');return}
+let done=false;setTimeout(()=>{if(!done)toast('Slow connection: the menu will sync as soon as you are back online')},4000);
+DB.doc('store/menu').set({items:S.items,nid:S.nid,at:new Date().toISOString()}).then(()=>{done=true;toast('Menu saved ✓')}).catch(e=>{done=true;toast(/permission/i.test(String(e&&(e.code||e.message)))?'⚠ Menu could not be saved. Please sign in again':'⚠ Menu could not be saved. Check your connection')})};
+function pullMenu(manual){if(!DB)return;DB.doc('store/menu').get().then(sn=>{if(!sn.exists)return;const d=sn.data(),j=JSON.stringify(d.items);
+ if(j!==lastMenu){lastMenu=j;S.items=clone(d.items);S.nid=d.nid||S.nid;save();if(tab==='bill'){chips();list()}else if(tab==='menu')menu();toast('Menu updated ✓')}else if(manual)toast('Menu is up to date ✓')}).catch(()=>{if(manual)toast('Could not load the menu. Check your connection')})}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&WAITER)pullMenu()});window.addEventListener('online',()=>{if(WAITER)pullMenu()});
+const saveInv=v=>{save();if(DB)DB.doc('invoices/'+v.no).set(v).catch(()=>toast('Bill could not sync'))};
+const SDK=['https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js','https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js','https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js'];
+const loadScript=u=>new Promise((res,rej)=>{const e=document.createElement('script');e.src=u;e.onload=res;e.onerror=rej;document.head.appendChild(e)});
+let tblSeen=false;let unsubs=[],WAITER=false,WEMAIL='',WORD=[],NEWO=[],menuSeen=false;
+const authMsg=c=>/invalid|wrong|not-found|credential/.test(c)?'Sign-in failed, please try again':/network/.test(c)?'No internet connection':/too-many/.test(c)?'Too many tries, wait a minute':'Could not sign in';
+async function initCloud(){
+const cfg=window.FB_CONFIG;
+let SU=false;const err=m=>$('#lerr').textContent=m;
+const setMode=su=>{SU=su;err('');$('#lt').textContent=su?'Create account':'Login';$('#lb').textContent=su?'Create account':'Login';$('#pw2w').style.display=su?'block':'none';$('#fg').style.display=su?'none':'';$('#tgt').textContent=su?'Already have an account?':"Don't have an account?";$('#tg').textContent=su?'Login':'Sign up';$('#pw').autocomplete=su?'new-password':'current-password'};
+$('#tg').onclick=()=>setMode(!SU);
+if(!cfg||!cfg.apiKey||/PASTE/i.test(cfg.apiKey)){LOCAL=true;$('#login').style.display='block';$('#ll').src=mkLogo('R');$('#gb').onclick=$('#lb').onclick=$('#fg').onclick=()=>err('Firebase is not set up yet. Add your firebase-config.js file.');return setSync('Not configured')}
+$('#login').style.display='block';$('#ll').src=mkLogo('R');$('#lerr').textContent='Loading…';
+try{
+for(const u of SDK)await loadScript(u);
+firebase.initializeApp(cfg);const auth=firebase.auth(),fs=firebase.firestore();window.FS=fs;window.AUTH=auth;
+try{await fs.enablePersistence({synchronizeTabs:true})}catch(e){}
+$('#lerr').textContent='';
+let CONF=null,RV=null;
+$('#gb').onclick=async()=>{err('');const gp=new firebase.auth.GoogleAuthProvider();try{await auth.signInWithPopup(gp)}catch(e){if(/popup/.test(e.code||''))auth.signInWithRedirect(gp);else err(authMsg(e.code||''))}};
+const emsg=c=>/email-already/.test(c)?'This email already has an account. Please log in':/weak-password/.test(c)?'Password must be at least 6 characters':/invalid-email/.test(c)?'Enter a valid email address':/user-not-found|wrong-password|invalid-credential|invalid-login/.test(c)?'Wrong email or password':/user-disabled/.test(c)?'This account is disabled':/operation-not-allowed/.test(c)?'Email sign-in is not enabled in Firebase yet':authMsg(c);
+$('#lb').onclick=async()=>{const e=$('#em').value.trim(),p=$('#pw').value;if(!e)return err('Enter your email');if(!p)return err('Enter your password');if(SU&&p!==$('#pw2').value)return err('Passwords do not match');err(SU?'Creating account…':'Signing in…');try{if(SU)await auth.createUserWithEmailAndPassword(e,p);else await auth.signInWithEmailAndPassword(e,p);err('')}catch(x){err(emsg(x.code||''))}};
+$('#fg').onclick=async()=>{const e=$('#em').value.trim();if(!e)return err('Enter your email above first');try{await auth.sendPasswordResetEmail(e);err('Password reset link sent to your email ✓')}catch(x){err(emsg(x.code||''))}};
+['#em','#pw','#pw2'].forEach(q=>$(q).addEventListener('keydown',ev=>{if(ev.key==='Enter')$('#lb').click()}));
+
+auth.onAuthStateChanged(u=>{unsubs.forEach(f=>f());unsubs=[];
+ if(!u){PROFILE=undefined;$('#app').innerHTML='';$('#onb').style.display='none';DB=null;WAITER=false;$('#login').style.display='block';$('#so').style.display='none';$('#vo').style.display='none';return setSync('Signed out')}
+ $('#login').style.display='none';$('#so').style.display='';CUID=u.uid;KEY='rms.'+u.uid;loadS();startProfile(u);
+ DB={doc:p=>{const r=fs.doc(PFX()+p);return{set:o=>r.set(clone(o)),get:()=>r.get(),delete:()=>r.delete(),update:o=>r.update(o),onSnapshot:(a,b)=>r.onSnapshot(a,b)}},collection:p=>fs.collection(PFX()+p)};
+ WAITER=false;WEMAIL=u.email||u.phoneNumber||'';CAN=true;
+  if((FORCE_ROLE==='waiter')!==WAITER){$('#lerr').textContent=FORCE_ROLE==='owner'?'This is the owner app. Please use the waiter app to sign in as a waiter.':'This is the waiter app. Owners must sign in from the owner app.';auth.signOut();return}
+ setSync('☁ '+(u.email||'Cloud sync on'));firstOpen=true;menuSeen=false;tblSeen=false;if(WAITER&&!WT.includes(cur)){cur='Counter';loadT(cur)}$('#vo').style.display=CAN?'':'none';voiceBtn();if(WAITER&&tab!=='sent')tab='bill';render();
+ unsubs.push(DB.doc('store/menu').onSnapshot(sn=>{
+  if(sn.exists){const d=sn.data(),j=JSON.stringify(d.items);if(j!==lastMenu){lastMenu=j;S.items=clone(d.items);S.nid=d.nid||S.nid;save();if(WAITER&&menuSeen)toast('Menu updated by the owner ✓');if(tab==='bill'){chips();list()}else if(tab==='menu')menu()}menuSeen=true}
+  else if(CAN){lastMenu=JSON.stringify(S.items);DB.doc('store/menu').set({items:S.items,nid:S.nid}).catch(()=>{})}
+ },()=>setSync('Sync paused')));
+ unsubs.push(DB.doc('store/tables').onSnapshot(sn=>{if(!sn.exists)return;const l=(sn.data().list||[]).map(String).filter(Boolean);if(!l.length)return;
+   if(JSON.stringify(l)!==JSON.stringify(WT)){WT=l;S.wt=l;save();if(tab==='bill')tables();if(WAITER&&tblSeen)toast('Tables updated ✓')}tblSeen=true},()=>{}));
+  if(WAITER){unsubs.push(DB.collection('orders').where('by','==',u.email).limit(60).onSnapshot(sn=>{WORD=sn.docs.map(d=>({...clone(d.data()),_p:d.metadata.hasPendingWrites}));if(tab==='sent')sent()},()=>setSync('Sync paused')))}else{
+ unsubs.push(DB.collection('invoices').orderBy('date','desc').limit(1000).onSnapshot(sn=>{
+  S.invoices=sn.docs.map(d=>clone(d.data()));save();
+  if(['inv','cust','rep'].includes(tab)&&!$('#dlg').open)render()
+ },()=>setSync('Sync paused')));
+ unsubs.push(DB.collection('open').onSnapshot(sn=>{const seen={};
+  sn.docs.forEach(d=>{const o=clone(d.data());if(!o.name||o.name==='Counter')return;seen[o.name]=1;if(o.name!==cur&&!pts[o.name])OPEN[o.name]=o});
+  Object.keys(OPEN).forEach(k=>{if(k==='Counter'||seen[k]||pts[k])return;
+   if(firstOpen)DB.doc('open/'+slug(k)).set(OPEN[k]).catch(()=>{});else if(k!==cur)delete OPEN[k]});
+  firstOpen=false;persist();if(tab==='bill')tables()},()=>{}));
+ if(CAN){unsubs.push(DB.collection('orders').where('status','==','new').onSnapshot(sn=>{sn.docChanges().forEach(ch=>{if(ch.type==='added'){const dd=clone(ch.doc.data());if(dd.type==='shift')applyShift(dd);else applyWaiterOrder(dd)}})},()=>{}));cleanOrders()}}
+});
+}catch(e){$('#login').style.display='none';setSync('This device only (could not reach Firebase)')}}
+const cats=()=>[...new Set(S.items.map(i=>i.cat))];
+let tab='bill',cart=[],q='',cat='All',editMode=false,otype='Dine-in',cx=[],cust={name:'',phone:''},disc=0,mode='Cash';
+const OKEY=KEY+'.open',slug=k=>k.replace(/[^A-Za-z0-9_-]/g,'_')||'t';
+let OPEN={},cur='Counter',pts={},firstOpen=true;
+try{OPEN=JSON.parse(localStorage.getItem(OKEY))||{};cur=localStorage.getItem(OKEY+'.cur')||'Counter'}catch(e){}
+if(!OPEN[cur])cur='Counter';loadT(cur);
+function loadT(k){const o=OPEN[k]||{};cart=clone(o.cart||[]);cust={name:(o.cust&&o.cust.name)||'',phone:(o.cust&&o.cust.phone)||''};disc=o.disc||0;mode=o.mode||'Cash';otype=o.otype||(k==='Counter'?'Takeaway':'Dine-in');cx=clone(o.cx||[])}
+function persist(){try{localStorage.setItem(OKEY,JSON.stringify(OPEN));localStorage.setItem(OKEY+'.cur',cur)}catch(e){}}
+function park(){OPEN[cur]={name:cur,cart:clone(cart),cust:{name:cust.name,phone:cust.phone},disc,mode,otype,cx:clone(cx)};persist();
+ if(DB&&cur!=='Counter'&&!WAITER){const k=cur;clearTimeout(pts[k]);pts[k]=setTimeout(()=>{delete pts[k];if(OPEN[k])DB.doc('open/'+slug(k)).set(OPEN[k]).catch(()=>{})},500)}}
+function switchT(k){park();cur=k;loadT(k);persist();bill()}
+function closeT(r){const k=cur;
+ if(k==='Counter')OPEN.Counter={name:'Counter',cart:[],cust:{name:'',phone:''},disc:0,mode:'Cash'};
+ else{clearTimeout(pts[k]);delete pts[k];delete OPEN[k];if(DB&&!WAITER)DB.doc('open/'+slug(k)).delete().catch(()=>{})}
+ cur='Counter';loadT(cur);persist();if(r!==false)bill()}
+function clearT(){if(!cart.length&&cur!=='Counter')return closeT();cart=[];cust={name:'',phone:''};disc=0;mode='Cash';otype=cur==='Counter'?'Takeaway':'Dine-in';cx=[];bill()}
+function newT(){const d=$('#dlg');d.innerHTML='<h3>New table</h3><p><input id="tn" placeholder="Table name or number (e.g. 3, T4, Takeaway)" maxlength="20"></p><div class="row"><button class="btn alt" id="tc">Cancel</button><button class="btn" id="tk">Open table</button></div>';d.showModal();
+ $('#tc').onclick=()=>d.close();$('#tn').onkeydown=e=>{if(e.key==='Enter')$('#tk').click()};
+ $('#tk').onclick=()=>{const n=$('#tn').value.trim();if(!n)return toast('Enter a table name');d.close();if(!OPEN[n])OPEN[n]={name:n,cart:[],cust:{name:'',phone:''},disc:0,mode:'Cash'};switchT(n)}}
+function tables(){const el=$('#tbl');if(!el)return;if(WAITER)return tablesW(el);
+ const ks=['Counter',...Object.keys(OPEN).filter(k=>k!=='Counter').sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}))];
+ el.innerHTML='<div class="mut" style="font-size:12px;margin-bottom:6px">Running orders: tap a table to switch, nothing is lost</div><div class="chips" style="margin:0;padding:0;position:static">'+ks.map(k=>{const o=OPEN[k];const n=o?o.cart.reduce((a,l)=>a+l.qty,0):0;return `<button class="chip ${k===cur?'on':''}" data-t="${esc(k)}">${k==='Counter'?'Counter':'Table '+esc(k)}${n?' · '+n:''}</button>`}).join('')+'<button class="chip" data-new="1" style="border:1px dashed var(--mut);background:none">+ New table</button>'+(CAN?'<button class="chip" data-wt="1" style="border:1px dashed var(--mut);background:none">⚙ Waiter tables</button>':'')+'</div>'}
+const tabs={bill:'New bill',kot:'KOTs',menu:'Menu',photos:'Menu photos',inv:'Invoices',cust:'Customers',rep:'Reports',set:'Settings'};
+function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display='none',2200)}
+const calc=(L,d)=>{const sub=L.reduce((s,l)=>s+l.price*l.qty,0);const dv=sub*Math.min(Math.max(+d||0,0),100)/100;return{sub,dv,total:sub-dv}};
+function render(){if(!PROFILE||!PROFILE.name)return;lastLock=LOCKED();if(lastLock){expired();return}if(WAITER&&tab!=='bill'&&tab!=='sent')tab='bill';document.body.classList.toggle("bt",tab==="bill");$('#nav').innerHTML=Object.entries(LOCKED()?{}:tabs).filter(([k])=>k!=='set').map(([k,v])=>`<button class="${k===tab?'on':''}" data-t="${k}">${tr(v)}</button>`).join('')+(WAITER?'':`<button class="bell ${NEWO.length?'ring':''}" id="bell" aria-label="Notifications"><span class="bi">🔔</span><span class="bn">${NEWO.length||''}</span></button>`);({bill,kot:kots,menu,inv,cust:custs,rep,sent,photos:photosTab,set:settingsTab})[tab]()}
+$('#nav').onclick=e=>{const t=e.target.dataset.t;if(t){tab=t;render()}};
+function bill(){
+const custF=`<div class="row" style="margin:10px 0"><input id="cn" placeholder="${WAITER?'Customer name (optional)':'Customer name'}" value="${esc(cust.name)}"></div><input id="cp" placeholder="WhatsApp number (optional)" inputmode="tel" value="${esc(cust.phone)}">`;
+$('#app').innerHTML=`<div class="card" id="tbl" style="margin-bottom:12px"></div><div class="grid"><div class="card"><input id="q" placeholder="Search dishes" aria-label="Search dishes" value="${esc(q)}"><div class="chips" id="chips"></div><div id="list"></div></div>
+<div class="card sticky" id="bcard"><div class="row"><h3>${WAITER?'Order · Table '+esc(cur==='Counter'?'?':cur):'Bill · '+esc(cur)}</h3><button class="btn alt sm fit x" id="bx">Close</button></div>${WAITER?'':custF}<div id="cart"></div>${WAITER?'<div class="mut" style="font-size:12px;margin:14px 0 2px">Customer details (optional) · shown on the bill</div>'+custF+'<div id="wact"></div>':''}</div></div>`;
+$('#q').oninput=e=>{q=e.target.value;list()};$('#cn').oninput=e=>{cust.name=e.target.value;park()};$('#cp').oninput=e=>{cust.phone=e.target.value;park()};$('#tbl').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.new)newT();else if(b.dataset.rf)pullMenu(true);else if(b.dataset.wt)tablesDlg();else if(b.dataset.t)switchT(b.dataset.t)};
+$('#chips').onclick=e=>{if(e.target.dataset.c){cat=e.target.dataset.c;chips();list()}};
+$('#list').onclick=e=>{const b=e.target.closest('[data-a]');if(!b)return;const[id,sz]=b.dataset.a.split(':');add(+id,sz)};
+$('#bx').onclick=()=>$('#bcard').classList.remove('open');chips();list();cartUI()}
+function chips(){$('#chips').innerHTML=['All',...cats()].map(c=>`<button class="chip ${c===cat?'on':''}" data-c="${esc(c)}">${esc(c)}</button>`).join('')}
+function list(){
+const L=S.items.filter(i=>(cat==='All'||i.cat===cat)&&mt(i,q));let h='',last='';
+L.forEach(i=>{if(i.cat!==last){h+=`<div class="ch">${esc(i.cat)}</div>`;last=i.cat}
+const two=i.h!=null;h+=`<div class="li"><span class="dot ${i.t}"></span><span class="nm">${esc(i.name)}</span>${two?`<button class="pb" data-a="${i.id}:H"><small>Half</small>${inr(i.h)}</button>`:''}<button class="pb" data-a="${i.id}:F">${two?'<small>Full</small>':''}${i.f?inr(i.f):'Set price'}</button></div>`});
+$('#list').innerHTML=h||'<div class="empty">No dishes match. Add dishes in the Menu tab.</div>'}
+function add(id,sz){if(WAITER&&cur==='Counter')return toast('Select a table number first');const it=S.items.find(i=>i.id===id);if(!it)return;const price=sz==='H'?it.h:it.f;if(!price)return toast('Set a price for this dish in the Menu tab');
+const k=id+sz;const l=cart.find(x=>x.k===k);l?l.qty++:cart.push({k,name:it.name,size:it.h!=null?(sz==='H'?'Half':'Full'):'',price,qty:1});cartUI()}
+function cartUI(){
+if(WAITER)return cartUIW();
+const c=calc(cart,disc);park();tables();{const n=cart.reduce((a,l)=>a+l.qty,0);$('#bar').innerHTML=`<div style="flex:1"><b>${cur==='Counter'?'Counter':'Table '+esc(cur)} · ${n} item${n===1?'':'s'}</b><br><span class="mut">${inr(c.total)}</span></div><button class="btn" id="vb">View bill</button>`;$('#vb').onclick=()=>$('#bcard').classList.add('open')}
+$('#cart').innerHTML=(cart.length?cart.map((l,i)=>`<div class="cl"><div>${esc(l.name)}${l.size?` <span class="tag">${l.size}</span>`:''}${l.sent?` <span class="tag paid">KOT ${l.sent}</span>`:''}<br><small class="mut">${inr(l.price)} each</small>${l.note?`<br><small>✎ ${esc(l.note)}</small>`:''}</div><div style="white-space:nowrap"><button class="btn alt sm" data-m="${i}" aria-label="Decrease">−</button> ${l.qty} <button class="btn alt sm" data-p="${i}" aria-label="Increase">+</button> <button class="btn alt sm" data-nt="${i}" aria-label="Kitchen note">✎</button></div><b>${inr(l.price*l.qty)}</b></div>`).join(''):'<div class="empty">Tap a dish to start the bill.</div>')+
+`<div class="row" style="margin:10px 0"><select id="ot" aria-label="Order type">${['Dine-in','Takeaway','Delivery'].map(m=>`<option value="${m}" ${m===otype?'selected':''}>${m}</option>`).join('')}</select></div><div class="row" style="margin:10px 0"><label class="fit mut">Discount %</label><input id="ds" type="number" min="0" max="100" value="${disc||''}"><select id="md" aria-label="Payment mode">${['Cash','UPI','Card','Due'].map(m=>`<option value="${m}" ${m===mode?'selected':''}>${m}</option>`).join('')}</select></div>
+<div class="tot"><span>Subtotal</span><span>${inr(c.sub)}</span></div>${c.dv?`<div class="tot"><span>Discount</span><span>−${inr(c.dv)}</span></div>`:''}<div class="tot big"><span>Total</span><span>${inr(c.total)}</span></div>
+${cur!=='Counter'?'<div style="margin-top:10px"><button class="btn alt sm" id="shf">⇄ Table shift</button></div>':''}<div class="row" style="margin-top:12px"><button class="btn alt" id="clr">${cart.length||cur==='Counter'?'Clear':'Remove table'}</button><button class="btn alt" id="kt">${kotLabel()}</button><button class="btn" id="sv">Save bill</button></div>`;
+$('#ds').onchange=e=>{disc=+e.target.value||0;cartUI()};$('#md').onchange=e=>{mode=e.target.value;park()};
+$('#clr').onclick=clearT;{const sf=$('#shf');if(sf)sf.onclick=shiftDlg}$('#sv').onclick=saveBill;$('#kt').onclick=sendKot;$('#ot').onchange=e=>{otype=e.target.value;park()};
+document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{cart[b.dataset.p].qty++;cartUI()});
+document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{const l=cart[b.dataset.m];if(--l.qty<1){if(l.sent>0)cx.push({name:l.name,size:l.size,qty:l.sent});cart.splice(b.dataset.m,1)}cartUI()});document.querySelectorAll('[data-nt]').forEach(b=>b.onclick=()=>noteDlg(+b.dataset.nt))}
+let saving=false;
+async function saveBill(){
+if(saving)return;if(!cart.length)return toast('Add at least one dish to the bill');
+saving=true;try{
+const c=calc(cart,disc);let n=nextNo();
+if(DB){try{while((await DB.doc('invoices/'+pad(n)).get()).exists)n++}catch(e){}}
+const v={no:pad(n),date:new Date().toISOString(),cust:cust.name.trim()||'Walk-in',phone:cust.phone.trim(),table:cur==='Counter'?'':cur,lines:cart.map(l=>{const o={...l};delete o.sent;return o}),otype,disc,mode,sub:c.sub,total:c.total,paid:mode!=='Due'};
+S.invoices.unshift(v);saveInv(v);closeT(false);toast('Saved '+v.no);showInv(v.no)
+}finally{saving=false}}
+function menu(){
+const L=S.items.filter(i=>(cat==='All'||i.cat===cat)&&mt(i,q));
+$('#app').innerHTML=`<div class="card">${CAN?'':'<div style="background:var(--chip);border:1px solid var(--red);border-radius:8px;padding:10px;margin-bottom:10px;font-size:14px"><b>Only the owner can edit the menu.</b><br>Please sign in with the owner account.</div>'}<div class="row"><input id="q" placeholder="Search dishes" aria-label="Search dishes" value="${esc(q)}"><button class="btn alt fit" id="mc">Categories</button><button class="btn alt fit" id="md" style="display:none">🗑 Delete (0)</button><button class="btn fit" id="ai">Add dish</button></div><div style="margin-top:8px"><button class="btn alt sm" id="vs">⚖ Veg / Non-Veg split</button></div><div class="chips" id="chips"></div><div class="wrap"><table id="mt"></table></div></div>`;
+chips();const draw=()=>{const L=S.items.filter(i=>(cat==='All'||i.cat===cat)&&mt(i,q));
+$('#mt').innerHTML='<tr><th><input type="checkbox" id="sa" style="width:auto" aria-label="Select all"></th><th>Dish</th><th>Category</th><th class="n">Half</th><th class="n">Full</th><th></th></tr>'+L.map(i=>`<tr><td><input type="checkbox" class="sel" data-s="${i.id}" style="width:auto"></td><td><span class="dot ${i.t}"></span> ${esc(i.name)}</td><td class="mut">${esc(i.cat)}</td><td class="n">${i.h!=null?inr(i.h):'–'}</td><td class="n">${i.f?inr(i.f):'<span style="color:var(--red)">Set price</span>'}</td><td class="n">${CAN?`<button class="btn alt sm" data-e="${i.id}">Edit</button>`:''}</td></tr>`).join('');menuSel()};draw();
+$('#q').oninput=e=>{q=e.target.value;draw()};$('#chips').onclick=e=>{if(e.target.dataset.c){cat=e.target.dataset.c;chips();draw()}};
+$('#ai').onclick=()=>editItem();if(!CAN)$('#ai').style.display='none';$('#mc').onclick=catMgr;if(!CAN)$('#mc').style.display='none';$('#mt').onclick=e=>{const b=e.target.closest('[data-e]');if(b)editItem(+b.dataset.e)};$('#mt').onchange=e=>{if(e.target.id==='sa')document.querySelectorAll('.sel').forEach(c=>c.checked=e.target.checked);menuSel()};$('#md').onclick=delSel;$('#vs').onclick=()=>{const all=new Set(S.items.map(i=>baseCat(i.cat)));const n=splitVeg(all);saveMenu();render();toast(n?n+' items updated ✓':'Everything is already set up')}}
+function editItem(id,pre){
+const it=S.items.find(i=>i.id===id)||{name:'',cat:cat==='All'?cats()[0]:cat,t:'v',h:null,f:''};const d=$('#dlg');
+d.innerHTML=`<h3>${id?'Edit dish':'Add dish'}</h3><p><input id="f1" placeholder="Dish name" value="${esc(it.name)}"></p><p><select id="f5s" aria-label="Category">${cats().map(c=>`<option value="${esc(c)}" ${!pre&&c===it.cat?'selected':''}>${esc(c)}</option>`).join('')}<option value="__new" ${pre?'selected':''}>＋ Create new category…</option></select></p><p><input id="f5" placeholder="New category name" value="${esc(pre||'')}" style="${pre?'':'display:none'}"></p>
+<div class="row"><input id="f2" type="number" min="0" placeholder="Half price (optional)" value="${it.h??''}"><input id="f3" type="number" min="0" placeholder="Full price" value="${it.f}"><select id="f4" aria-label="Veg or non-veg"><option value="v" ${it.t==='v'?'selected':''}>Veg</option><option value="n" ${it.t==='n'?'selected':''}>Non-veg</option></select></div>
+<div class="row" style="margin-top:14px">${id?'<button class="btn alt" id="fd">Delete</button>':''}<button class="btn alt" id="fc">Cancel</button><button class="btn" id="fs">Save dish</button></div>`;d.style.maxWidth='';if(!d.open)d.showModal();
+$('#fc').onclick=()=>d.close();$('#f5s').onchange=e=>{const n=e.target.value==='__new';$('#f5').style.display=n?'':'none';if(n)$('#f5').focus()};if(id)$('#fd').onclick=()=>{S.items=S.items.filter(i=>i.id!==id);saveMenu();d.close();render()};
+$('#fs').onclick=()=>{const n=$('#f1').value.trim(),c=$('#f5s').value==='__new'?$('#f5').value.trim():$('#f5s').value,f=$('#f3').value;if(!n||!c||f==='')return toast('Enter name, category and full price');
+const h=$('#f2').value;const o={name:n,cat:c,t:$('#f4').value,f:+f,h:h===''?null:+h};if(!o.h&&o.h!==0)delete o.h;if(id){delete it.h;Object.assign(it,o)}else S.items.push({id:S.nid++,...o});saveMenu();d.close();render()}}
+function inv(){
+$('#app').innerHTML=`<div class="card">${CAN?'':'<div style="background:var(--chip);border:1px solid var(--red);border-radius:8px;padding:10px;margin-bottom:10px;font-size:14px">Only the owner can edit or delete bills.</div>'}<div class="row" style="margin-bottom:10px"><h3>Invoices</h3>${CAN?`<button class="btn ${editMode?'':'alt'} sm fit" id="em">Edit mode: ${editMode?'ON':'OFF'}</button>`:''}</div>${S.invoices.length?`<div class="wrap"><table><tr><th>No.</th><th>Date</th><th>Customer</th><th>Table</th><th class="n">Total</th><th>Status</th><th></th></tr>${S.invoices.map(v=>`<tr><td>${v.no}</td><td>${new Date(v.date).toLocaleDateString('en-IN')}</td><td>${esc(v.cust)}</td><td>${esc(v.table)||'–'}</td><td class="n">${inr(v.total)}</td><td><span class="tag ${v.paid?'paid':'due'}">${v.paid?v.mode:'Due'}</span></td><td class="n" style="white-space:nowrap"><button class="btn alt sm" data-v="${v.no}">Open</button>${editMode&&CAN?` <button class="btn alt sm" data-ed="${v.no}">Edit</button> <button class="btn alt sm" data-dl="${v.no}" style="color:var(--red)">Delete</button>`:''}</td></tr>`).join('')}</table></div>`:'<div class="empty">No invoices yet. Create one from New bill.</div>'}</div>`;
+document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>showInv(b.dataset.v));document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>editInv(b.dataset.ed));document.querySelectorAll('[data-dl]').forEach(b=>b.onclick=()=>delInv(b.dataset.dl));const em=$('#em');if(em)em.onclick=()=>{editMode=!editMode;inv()}}
+function showInv(no){
+const v=S.invoices.find(x=>x.no===no);if(!v)return;const d=$('#dlg');d.style.maxWidth='';
+d.innerHTML=`<div style="text-align:center"><img src="${LOGO}" alt="" width="64" height="64" style="border-radius:50%"><h3>${BIZ.name}</h3><div class="mut" style="font-size:12px">${BIZ.addr}<br>Phone: ${BIZ.phone}</div></div><div class="mut" style="margin:8px 0">${v.no} · ${new Date(v.date).toLocaleString('en-IN')}<br>${esc(v.cust)}${v.table?' · Table '+esc(v.table):''}${v.phone?' · '+esc(v.phone):''}</div>
+<table>${v.lines.map(l=>`<tr><td>${esc(l.name)}${l.size?' ('+l.size+')':''} × ${l.qty}</td><td class="n">${inr(l.price*l.qty)}</td></tr>`).join('')}</table>
+<div class="tot"><span>Subtotal</span><span>${inr(v.sub)}</span></div>${v.disc?`<div class="tot"><span>Discount ${v.disc}%</span><span>−${inr(v.sub-v.total)}</span></div>`:''}<div class="tot big"><span>Total</span><span>${inr(v.total)}</span></div>
+<p><span class="tag ${v.paid?'paid':'due'}">${v.paid?'Paid · '+v.mode:'Payment due'}</span></p><p class="mut" style="text-align:center">Thank you! Good Food · Good Mood</p>
+<div class="row noprint" style="flex-wrap:wrap">${v.paid?'':'<button class="btn" id="mp">Mark paid</button>'}<button class="btn alt" id="pr">Print</button><button class="btn alt" id="im">Save image</button><button class="btn" id="wa">WhatsApp</button>${CAN?'<button class="btn alt" id="eb">Edit bill</button><button class="btn alt" id="db" style="color:var(--red)">Delete</button>':''}<button class="btn alt" id="cl">Close</button></div>`;
+if(!d.open)d.showModal();$('#cl').onclick=()=>{d.close();render()};$('#pr').onclick=()=>doPrint(v);$('#im').onclick=()=>doImg(v);$('#wa').onclick=()=>askWa(v);if(CAN){$('#eb').onclick=()=>editInv(no);$('#db').onclick=()=>delInv(no)}
+if(!v.paid)$('#mp').onclick=()=>{v.paid=true;v.mode='Cash';saveInv(v);showInv(no)}}
+
+function delInv(no){const v=S.invoices.find(x=>x.no===no);if(!v||!CAN)return;const d=$('#dlg');d.style.maxWidth='';
+d.innerHTML=`<h3>Delete bill?</h3><p><b>${esc(v.no)}</b> · ${esc(v.cust)} · ${inr(v.total)}</p><p class="mut">This bill will be permanently deleted and removed from reports.</p><div class="row"><button class="btn alt" id="dn">No, keep it</button><button class="btn" id="dy" style="background:var(--red);color:#fff">Yes, delete</button></div>`;
+if(!d.open)d.showModal();
+$('#dn').onclick=()=>{d.close();render()};
+$('#dy').onclick=()=>{S.invoices=S.invoices.filter(x=>x.no!==no);save();if(DB)DB.doc('invoices/'+no).delete().catch(()=>toast('Delete could not sync'));d.close();render();toast('Deleted '+no)}}
+function editInv(no){const v0=S.invoices.find(x=>x.no===no);if(!v0||!CAN)return;const d=$('#dlg');d.style.maxWidth='620px';
+const modes=['Cash','UPI','Card','Due'];if(v0.mode&&!modes.includes(v0.mode))modes.push(v0.mode);
+const E={disc:+v0.disc||0,mode:v0.mode||'Cash',lines:clone(v0.lines)};
+const items=S.items.map(i=>({label:i.name+' · '+i.cat,i}));
+d.innerHTML=`<h3>Edit bill · ${esc(v0.no)}</h3>
+<div class="row" style="margin:10px 0"><input id="e_n" placeholder="Customer name" value="${esc(v0.cust||'')}"><input id="e_t" placeholder="Table" value="${esc(v0.table||'')}" style="max-width:120px"></div>
+<p><input id="e_p" placeholder="WhatsApp number" inputmode="tel" value="${esc(v0.phone||'')}"></p>
+<div class="mut" style="font-size:12px;margin-top:6px">You can change quantity and price here</div><div id="e_l"></div>
+<div class="row" style="margin:10px 0"><input id="e_a" list="e_dl" placeholder="Add a dish: type its name" autocomplete="off"><select id="e_s" style="display:none;max-width:90px" aria-label="Size"><option value="F">Full</option><option value="H">Half</option></select><button class="btn alt sm fit" id="e_add">＋ Add</button></div><datalist id="e_dl">${items.map(x=>`<option value="${esc(x.label)}">`).join('')}</datalist>
+<div class="row" style="margin:10px 0"><label class="fit mut">Discount %</label><input id="e_d" type="number" min="0" max="100" value="${E.disc||''}"><select id="e_m" aria-label="Payment mode">${modes.map(m=>`<option value="${esc(m)}" ${m===E.mode?'selected':''}>${esc(m)}</option>`).join('')}</select></div>
+<div id="e_tot"></div>
+<div class="row" style="margin-top:12px"><button class="btn alt" id="e_c">Cancel</button><button class="btn" id="e_save">Save changes</button></div>`;
+if(!d.open)d.showModal();
+const find=()=>{const x=items.find(y=>y.label===$('#e_a').value.trim());return x&&x.i};
+const drawTot=()=>{const c=calc(E.lines.filter(l=>l.qty>0),E.disc);$('#e_tot').innerHTML=`<div class="tot"><span>Subtotal</span><span>${inr(c.sub)}</span></div>${c.dv?`<div class="tot"><span>Discount</span><span>−${inr(c.dv)}</span></div>`:''}<div class="tot big"><span>Total</span><span>${inr(c.total)}</span></div>`};
+const drawLines=()=>{$('#e_l').innerHTML=E.lines.length?E.lines.map((l,i)=>`<div class="cl" style="flex-wrap:wrap"><div style="flex:1 1 140px;min-width:0">${esc(l.name)}${l.size?` <span class="tag">${esc(l.size)}</span>`:''}</div><input type="number" min="0" step="1" value="${l.qty}" data-q="${i}" style="width:64px" aria-label="Quantity"><input type="number" min="0" step="any" value="${l.price}" data-r="${i}" style="width:84px" aria-label="Price each"><b data-lt="${i}" style="min-width:64px;text-align:right">${inr(l.price*l.qty)}</b><button class="btn alt sm" data-x="${i}" aria-label="Remove">✕</button></div>`).join(''):'<div class="empty">No dishes yet. Add one below.</div>';drawTot()};
+drawLines();
+$('#e_l').oninput=e=>{const t=e.target,isQ=t.dataset.q!==undefined,i=+(isQ?t.dataset.q:t.dataset.r);if(isNaN(i)||!E.lines[i])return;
+ if(isQ)E.lines[i].qty=Math.max(0,Math.floor(+t.value)||0);else E.lines[i].price=Math.max(0,+t.value||0);
+ const b=$('#e_l').querySelector('[data-lt="'+i+'"]');if(b)b.textContent=inr(E.lines[i].price*E.lines[i].qty);drawTot()};
+$('#e_l').onclick=e=>{const b=e.target.closest('[data-x]');if(!b)return;E.lines.splice(+b.dataset.x,1);drawLines()};
+$('#e_a').oninput=()=>{const it=find();$('#e_s').style.display=it&&it.h!=null?'':'none'};
+$('#e_add').onclick=()=>{const it=find();if(!it)return toast('Select a dish from the list');const sz=it.h!=null?$('#e_s').value:'F',price=sz==='H'?it.h:it.f;if(!price)return toast('Set the price for this dish in the Menu');
+ const k=it.id+sz,l=E.lines.find(x=>x.k===k&&x.price===price);l?l.qty++:E.lines.push({k,name:it.name,size:it.h!=null?(sz==='H'?'Half':'Full'):'',price,qty:1});
+ $('#e_a').value='';$('#e_s').style.display='none';drawLines()};
+$('#e_d').oninput=e=>{E.disc=Math.min(100,Math.max(0,+e.target.value||0));drawTot()};
+$('#e_m').onchange=e=>{E.mode=e.target.value};
+$('#e_c').onclick=()=>showInv(no);
+$('#e_save').onclick=()=>{const L=E.lines.filter(l=>l.qty>0);
+ if(!L.length)return toast('Keep at least one dish. To remove the bill, use Delete');
+ const v=S.invoices.find(x=>x.no===no);if(!v)return;const c=calc(L,E.disc);
+ Object.assign(v,{cust:$('#e_n').value.trim()||'Walk-in',phone:$('#e_p').value.trim(),table:$('#e_t').value.trim(),lines:L,disc:E.disc,mode:E.mode,sub:c.sub,total:c.total,paid:E.mode!=='Due'});
+ saveInv(v);toast('Bill updated');showInv(no)}}
+function catMgr(){const d=$('#dlg');d.style.maxWidth='';
+d.innerHTML=`<h3>Categories</h3><div id="cm">${cats().map(c=>`<div class="cl"><span>${esc(c)} <small class="mut">(${S.items.filter(i=>i.cat===c).length})</small></span><button class="btn alt sm" data-rn="${esc(c)}">Rename</button></div>`).join('')}</div><div class="row" style="margin-top:12px"><button class="btn alt" id="cc">Close</button><button class="btn" id="cnw">＋ New category</button></div>`;
+if(!d.open)d.showModal();$('#cc').onclick=()=>d.close();$('#cnw').onclick=()=>askCat(false);
+$('#cm').onclick=e=>{const b=e.target.closest('[data-rn]');if(b)askCat(b.dataset.rn)}}
+function askCat(old){const d=$('#dlg');
+d.innerHTML=`<h3>${old?'Rename category':'New category'}</h3><p><input id="cnm" placeholder="Category name" maxlength="40" value="${esc(old||'')}"></p>${old?'':'<p class="mut" style="font-size:13px">Category pehli dish add karte hi ban jayegi.</p>'}<div class="row"><button class="btn alt" id="cb">Back</button><button class="btn" id="cs">${old?'Save':'Next: add dish'}</button></div>`;
+setTimeout(()=>{const i=$('#cnm');if(i){i.focus();i.select()}},50);
+$('#cb').onclick=()=>catMgr();$('#cnm').onkeydown=e=>{if(e.key==='Enter')$('#cs').click()};
+$('#cs').onclick=()=>{const n=$('#cnm').value.trim();if(!n)return toast('Enter a category name');
+ if(old){if(n!==old){S.items.forEach(i=>{if(i.cat===old)i.cat=n});if(cat===old)cat=n;saveMenu()}d.close();render()}
+ else{if(cats().includes(n))return toast('This category already exists');editItem(undefined,n)}}}
+
+function kotPending(){const items=[],cancels=cx.map(c=>({...c}));
+cart.forEach(l=>{const d=l.qty-(l.sent||0);if(d>0)items.push({name:l.name,size:l.size,qty:d,note:l.note||''});else if(d<0)cancels.push({name:l.name,size:l.size,qty:-d})});
+return{items,cancels}}
+function kotLabel(){if(!cart.length&&!cx.length)return'Send KOT';const p=kotPending(),n=p.items.reduce((a,l)=>a+l.qty,0)+p.cancels.reduce((a,l)=>a+l.qty,0);return n?'Send KOT ('+n+')':'KOT sent ✓'}
+function noteDlg(i){const l=cart[i];if(!l)return;const d=$('#dlg');d.style.maxWidth='';
+d.innerHTML=`<h3>${esc(l.name)}</h3><p><input id="nt" maxlength="60" placeholder="Kitchen note (jaise: kam teekha, bina pyaaz)" value="${esc(l.note||'')}"></p><div class="chips" id="nq" style="position:static;margin:0 0 10px;padding:0">${['Less spicy','Extra spicy','No onion','No garlic','Parcel'].map(t=>`<button class="chip" data-qn="${t}">${t}</button>`).join('')}</div><div class="row"><button class="btn alt" id="nc">Cancel</button><button class="btn" id="ns">Save note</button></div>`;
+if(!d.open)d.showModal();
+$('#nq').onclick=e=>{const t=e.target.dataset.qn;if(t){const v=$('#nt').value.trim();$('#nt').value=v?v+', '+t:t}};
+$('#nc').onclick=()=>d.close();
+$('#ns').onclick=()=>{const v=$('#nt').value.trim();if(v)l.note=v;else delete l.note;d.close();cartUI()}}
+async function sendKot(){const p=kotPending();if(!p.items.length&&!p.cancels.length)return toast(cart.length?'No new items. The KOT has already been sent':'Add a dish first');
+const t=new Date(),day=t.toLocaleDateString('en-CA');if(!S.kot||S.kot.d!==day)S.kot={d:day,n:0};S.kot.n++;
+const k={no:S.kot.n,day,time:t.toISOString(),type:otype,table:cur==='Counter'?'':cur,cust:cust.name.trim(),items:p.items,cancels:p.cancels};
+cart.forEach(l=>{l.sent=l.qty});cx=[];S.kots=[k,...(S.kots||[])].slice(0,300);save();cartUI();toast('KOT #'+k.no);await deliverKot(k)}
+async function kotCanvas(k,S){S=S||1;
+const W=576,P=24,H=520+(k.items.length+k.cancels.length)*150,c=document.createElement('canvas');c.width=W*S;c.height=H*S;const x=c.getContext('2d');x.scale(S,S);
+x.fillStyle='#fff';x.fillRect(0,0,W,H);let y=20;
+const F=(w,s)=>x.font=`${w} ${s}px Arial, Helvetica, sans-serif`;
+const wrap=(t,mw)=>{const out=[];let ln='';String(t).split(' ').forEach(w=>{const tt=ln?ln+' '+w:w;if(x.measureText(tt).width>mw&&ln){out.push(ln);ln=w}else ln=tt});if(ln)out.push(ln);return out};
+const ctr=(t,s,w)=>{F(w||'400',s);x.fillStyle='#000';x.textAlign='center';wrap(t,W-2*P).forEach(l=>{y+=s;x.fillText(l,W/2,y);y+=s*.3})};
+const dash=()=>{y+=8;x.strokeStyle='#000';x.setLineDash([6,5]);x.beginPath();x.moveTo(P,y);x.lineTo(W-P,y);x.stroke();y+=14};
+const row=(q,nm,s,note)=>{F('700',s);x.fillStyle='#000';x.textAlign='left';wrap(nm,W-2*P-84).forEach((t,i)=>{y+=s;if(i===0)x.fillText(q,P,y);x.fillText(t,P+84,y);y+=s*.25});
+ if(note){F('italic 600',24);wrap('-> '+note,W-2*P-84).forEach(t=>{y+=24;x.fillText(t,P+84,y);y+=6})}y+=12};
+ctr(BIZ.name,22,'700');ctr('KOT #'+k.no,46,'700');
+if(k.shift){ctr('TABLE SHIFT',34,'700');ctr('TABLE '+k.shift.from+'  ->  TABLE '+k.shift.to,38,'700')}else ctr((k.type||'Dine-in').toUpperCase()+(k.table?' · TABLE '+k.table:''),32,'700');
+ctr(new Date(k.time).toLocaleString('en-IN',{dateStyle:'short',timeStyle:'short'})+(k.cust?' · '+k.cust:''),20);dash();
+k.items.forEach(l=>row(l.qty+' ×',l.name+(l.size?' ('+l.size+')':''),32,l.note));
+if(k.cancels.length){if(k.items.length)dash();ctr('*** CANCELLED ***',28,'700');y+=6;k.cancels.forEach(l=>row(l.qty+' ×','CANCEL: '+l.name+(l.size?' ('+l.size+')':''),28))}
+dash();if(!k.shift)ctr('Total items: '+k.items.reduce((a,l)=>a+l.qty,0),22,'700');
+const o=document.createElement('canvas');o.width=W*S;o.height=Math.ceil((y+30)*S);const g=o.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,W*S,o.height);g.drawImage(c,0,0);return o}
+async function doKot(k){try{await printCv(await kotCanvas(k,window.AndroidBridge?2:1),'KOT-'+k.no)}catch(e){toast('Could not print the KOT')}}
+function kotText(k){const B='```',dt=new Date(k.time).toLocaleString('en-IN',{dateStyle:'short',timeStyle:'short'}),ln=l=>l.qty+' x '+l.name+(l.size?' ('+l.size+')':'');
+if(k.shift)return `🔁 *TABLE SHIFT · KOT #${k.no}*\nTable ${k.shift.from} → Table ${k.shift.to}\n${dt}\nKitchen: order naye table pe dena`;
+let t=`🍳 *KOT #${k.no}*\n${k.type||'Dine-in'}${k.table?' · Table '+k.table:''}\n${dt}${k.cust?'\n'+k.cust:''}\n`;
+if(k.items.length)t+=`${B}\n${k.items.map(l=>ln(l)+(l.note?'\n   -> '+l.note:'')).join('\n')}\n${B}\n`;
+if(k.cancels.length)t+=`❌ *CANCELLED*\n${B}\n${k.cancels.map(ln).join('\n')}\n${B}\n`;
+return t+`Total items: ${k.items.reduce((a,l)=>a+l.qty,0)}`}
+function kotNum(){let p=String((S.kcfg&&S.kcfg.num)||'').replace(/\D/g,'');if(p.length>10&&p.indexOf('91')===0)p=p.slice(2);return p.length===10?p:''}
+function kotWa(k){const p=kotNum();if(!p){kotSetup(k);return false}
+const ph='91'+p,text=kotText(k);
+if(window.AndroidBridge&&AndroidBridge.chat)AndroidBridge.chat(ph,text);else window.open('https://wa.me/'+ph+'?text='+encodeURIComponent(text),'_blank');return true}
+async function deliverKot(k){const m=(S.kcfg&&S.kcfg.mode)||'wa';
+if(m==='wa'||m==='both'){if(!kotWa(k))return}
+if(m==='print'||m==='both')await doKot(k)}
+function kotSetup(k){const d=$('#dlg');d.style.maxWidth='';const c=S.kcfg||{num:'',mode:'wa'};
+d.innerHTML=`<h3>KOT settings</h3><p class="mut" style="font-size:13px">Enter the kitchen's WhatsApp number. The KOT opens in that chat and you just tap Send.</p><p><input id="kn" type="tel" inputmode="tel" placeholder="10 digit kitchen WhatsApp number" value="${esc(c.num||'')}"></p><p id="ke" style="color:var(--red);font-size:13px;min-height:16px"></p><p><select id="km" aria-label="How to send the KOT">${[['wa','Send on WhatsApp'],['print','Print on a printer'],['both','WhatsApp + Print'],['none','Keep a record only']].map(([v,t])=>`<option value="${v}" ${v===(c.mode||'wa')?'selected':''}>${t}</option>`).join('')}</select></p><div class="row"><button class="btn alt" id="kc">Cancel</button><button class="btn" id="ks">${k?'Save & send KOT':'Save'}</button></div>`;
+if(!d.open)d.showModal();
+$('#kc').onclick=()=>d.close();
+$('#ks').onclick=()=>{let p=$('#kn').value.replace(/\D/g,'');if(p.length>10&&p.indexOf('91')===0)p=p.slice(2);const m=$('#km').value;
+ if((m==='wa'||m==='both')&&p.length!==10){$('#ke').textContent='Enter a valid 10-digit number';return}
+ S.kcfg={num:p.length===10?p:'',mode:m};save();d.close();toast('KOT settings saved');if(k)deliverKot(k);else if(tab==='kot')kots()}}
+function kots(){const L=S.kots||[],m=(S.kcfg&&S.kcfg.mode)||'wa',ml={wa:'WhatsApp',print:'Printer',both:'WhatsApp + Print',none:'Record only'}[m]||'WhatsApp';
+$('#app').innerHTML=`<div class="card"><div class="row" style="margin-bottom:6px"><h3>KOTs</h3><button class="btn alt sm fit" id="ksb">⚙ KOT settings</button></div><div class="mut" style="font-size:13px;margin-bottom:10px">Send KOT: <b>${ml}</b>${kotNum()?' · Kitchen number: '+kotNum():' · Kitchen number not set'}</div>${L.length?`<div class="wrap"><table><tr><th>KOT</th><th>Time</th><th>Type</th><th>Table</th><th>Items</th><th></th></tr>${L.map((k,i)=>`<tr><td>#${k.no}</td><td>${new Date(k.time).toLocaleString('en-IN',{dateStyle:'short',timeStyle:'short'})}</td><td>${esc(k.type)}</td><td>${esc(k.table)||'–'}</td><td>${k.shift?'🔁 Table '+esc(k.shift.from)+' → '+esc(k.shift.to):esc(k.items.map(l=>l.qty+'× '+l.name+(l.size?' ('+l.size+')':'')).join(', '))}${k.cancels.length?' <b style="color:var(--red)">· cancel: '+esc(k.cancels.map(l=>l.qty+'× '+l.name).join(', '))+'</b>':''}</td><td class="n" style="white-space:nowrap"><button class="btn alt sm" data-kw="${i}">WhatsApp</button> <button class="btn alt sm" data-kr="${i}">Print</button></td></tr>`).join('')}</table></div>`:'<div class="empty">No KOTs sent yet. Tap "Send KOT" on the New bill screen.</div>'}</div>`;
+$('#ksb').onclick=()=>kotSetup();
+document.querySelectorAll('[data-kw]').forEach(b=>b.onclick=()=>kotWa(L[+b.dataset.kw]));
+document.querySelectorAll('[data-kr]').forEach(b=>b.onclick=()=>doKot(L[+b.dataset.kr]))}
+
+let WT=(Array.isArray(S.wt)&&S.wt.length)?S.wt.slice():['1','2','3','4','5'];
+function tablesW(el){
+const cnt=k=>{const c=k===cur?cart:(OPEN[k]&&OPEN[k].cart)||[];return c.reduce((a,l)=>a+l.qty,0)};
+el.innerHTML='<div class="mut" style="font-size:12px;margin-bottom:6px">Select a table first, then add dishes</div><div class="chips" style="margin:0;padding:0;position:static;flex-wrap:wrap">'+WT.map(k=>`<button class="chip ${k===cur?'on':''}" data-t="${k}" style="padding:8px 16px;font-size:15px">Table ${k}${cnt(k)?' · '+cnt(k):''}</button>`).join('')+'<button class="chip" data-rf="1" style="border:1px dashed var(--mut);background:none;padding:8px 14px;font-size:14px">↻ Menu</button></div>'}
+function cartUIW(){park();tables();const n=cart.reduce((a,l)=>a+l.qty,0),tl=cur==='Counter'?'Table ?':'Table '+esc(cur);
+$('#bar').innerHTML=`<div style="flex:1"><b>${tl} · ${n} item${n===1?'':'s'}</b></div><button class="btn" id="vb">View order</button>`;$('#vb').onclick=()=>$('#bcard').classList.add('open');
+$('#cart').innerHTML=cart.length?cart.map((l,i)=>`<div class="cl"><div>${esc(l.name)}${l.size?` <span class="tag">${esc(l.size)}</span>`:''}${l.note?`<br><small>✎ ${esc(l.note)}</small>`:''}</div><div style="white-space:nowrap"><button class="btn alt sm" data-m="${i}" aria-label="Decrease">−</button> ${l.qty} <button class="btn alt sm" data-p="${i}" aria-label="Increase">+</button> <button class="btn alt sm" data-nt="${i}" aria-label="Kitchen note">✎</button></div><span></span></div>`).join(''):`<div class="empty">${cur==='Counter'?'Select a table number above first.':'Tap a dish to start an order.'}</div>`;
+$('#wact').innerHTML=`<div class="row" style="margin-top:12px"><button class="btn alt" id="clr">Clear</button><button class="btn" id="sw">Send to counter ➤</button></div>${cur!=='Counter'?'<div style="margin-top:8px"><button class="btn alt" id="shw" style="width:100%">⇄ Table shift</button></div>':''}`;
+$('#clr').onclick=()=>{cart=[];cx=[];cust={name:'',phone:''};const a=$('#cn'),b=$('#cp');if(a)a.value='';if(b)b.value='';cartUIW()};$('#sw').onclick=sendOrder;{const sw=$('#shw');if(sw)sw.onclick=shiftDlgW}
+document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{cart[b.dataset.p].qty++;cartUIW()});
+document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{if(--cart[b.dataset.m].qty<1)cart.splice(b.dataset.m,1);cartUIW()});
+document.querySelectorAll('[data-nt]').forEach(b=>b.onclick=()=>noteDlg(+b.dataset.nt))}
+function shiftDlgW(){if(cur==='Counter')return toast('Select a table first');const d=$('#dlg');d.style.maxWidth='';
+d.innerHTML=`<h3>Shift from table ${esc(cur)}</h3><p class="mut" style="font-size:13px">Select the table the customer moved to. Any running counter order moves with them.</p><div class="chips" id="swc" style="position:static;margin:0 0 12px;padding:0;flex-wrap:wrap">${WT.filter(t=>t!==cur).map(t=>`<button class="chip" data-sw="${t}" style="padding:10px 20px;font-size:17px">Table ${t}</button>`).join('')}</div><button class="btn alt" id="sc" style="width:100%">Cancel</button>`;
+if(!d.open)d.showModal();$('#sc').onclick=()=>d.close();
+$('#swc').onclick=e=>{const t=e.target.dataset.sw;if(!t)return;d.close();waiterShift(t)}}
+function waiterShift(to){const from=cur;if(from===to)return;park();mergeTable(from,to);cur=to;loadT(to);persist();
+if(DB){const id='o'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+ DB.doc('orders/'+id).set({id,type:'shift',from,to,table:to,by:WEMAIL,byName:WEMAIL.split('@')[0],time:new Date().toISOString(),status:'new',items:[]}).catch(()=>toast('The shift did not reach the counter'))}
+bill();toast('Table '+from+' → '+to+' shifted');if(navigator.vibrate)navigator.vibrate(40)}
+async function sendOrder(){if(cur==='Counter')return toast('Select a table number first');
+if(!cart.length)return toast('Add a dish first');if(!DB)return toast('Check your login or internet connection');
+let ph=String(cust.phone||'').replace(/\D/g,'');if(ph.length>10&&ph.indexOf('91')===0)ph=ph.slice(2);
+if(String(cust.phone||'').trim()&&ph.length!==10)return toast('WhatsApp number must be 10 digits (or leave it empty)');
+const id='o'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),
+o={id,table:cur,by:WEMAIL,byName:WEMAIL.split('@')[0],time:new Date().toISOString(),status:'new',cname:String(cust.name||'').trim().slice(0,40),cphone:ph,items:cart.map(l=>({k:l.k,name:l.name,size:l.size||'',price:l.price,qty:l.qty,note:l.note||''}))};
+const w=DB.doc('orders/'+id).set(o);
+const done=await Promise.race([w.then(()=>true),new Promise(r=>setTimeout(()=>r(false),4000))]).catch(()=>null);
+if(done===null)return toast('Order could not be sent. Please try again');
+cart=[];cx=[];cust={name:'',phone:''};{const a=$('#cn'),b=$('#cp');if(a)a.value='';if(b)b.value=''}cartUIW();$('#bcard').classList.remove('open');
+toast(done?'Order sent to the counter ✓ · Table '+o.table:'Slow connection: the order is queued and will be sent when you are back online');if(navigator.vibrate)navigator.vibrate(60)}
+function sent(){const L=[...WORD].sort((a,b)=>String(b.time).localeCompare(String(a.time)));
+$('#app').innerHTML=`<div class="card"><h3 style="margin-bottom:10px">Sent orders</h3>${L.length?L.map(o=>{const rc=o.status==='received'&&!o._p,st=o._p?'Sending…':rc?'Received by counter ✓':'Sent ✓';return `<div class="cl" style="grid-template-columns:1fr auto"><div><b>${o.type==='shift'?'🔁 Table '+esc(o.from)+' → '+esc(o.to):'Table '+esc(o.table)}</b> <small class="mut">${new Date(o.time).toLocaleTimeString('en-IN',{timeStyle:'short'})}</small><br><small>${esc((o.items||[]).map(l=>l.qty+'× '+l.name+(l.size?' ('+l.size+')':'')).join(', '))}</small></div><span class="tag ${rc?'paid':''}">${st}</span></div>`}).join(''):'<div class="empty">No orders sent yet.</div>'}</div>`}
+function beep(){try{const a=new(window.AudioContext||window.webkitAudioContext)(),o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=880;g.gain.value=.08;o.start();setTimeout(()=>{o.stop();a.close()},350)}catch(e){}}
+function markRecv(id){if(DB)DB.doc('orders/'+id).update({status:'received',at:new Date().toISOString()}).catch(()=>{})}
+function applyWaiterOrder(o){const id=o&&o.id;if(!id||!CAN)return;
+if((S.seenO||[]).includes(id)){markRecv(id);return}
+const t=String(o.table||'').trim(),its=Array.isArray(o.items)?o.items:[];if(!t||!its.length){markRecv(id);return}
+if(!OPEN[t])OPEN[t]={name:t,cart:[],cust:{name:'',phone:''},disc:0,mode:'Cash',otype:'Dine-in',cx:[]};
+const tgt=cur===t?cart:OPEN[t].cart;let n=0;
+its.forEach(it=>{const q=Math.max(1,Math.floor(+it.qty)||1),price=+it.price||0,note=String(it.note||'').slice(0,60);n+=q;
+ const ex=tgt.find(l=>l.k===it.k&&l.price===price&&(l.note||'')===note);
+ if(ex)ex.qty+=q;else{const l={k:it.k,name:String(it.name||''),size:it.size||'',price,qty:q};if(note)l.note=note;tgt.push(l)}});
+const cname=String(o.cname||'').trim().slice(0,40),cpn=String(o.cphone||'').replace(/\D/g,'').slice(-10),cc=cur===t?cust:(OPEN[t].cust=OPEN[t].cust||{name:'',phone:''});
+if(cname&&!cc.name)cc.name=cname;if(cpn.length===10&&!cc.phone)cc.phone=cpn;
+if(cur===t&&tab==='bill'){const a=$('#cn'),b=$('#cp');if(a)a.value=cust.name;if(b)b.value=cust.phone}
+S.seenO=[...(S.seenO||[]),id].slice(-300);save();
+if(cur===t){park();if(tab==='bill')cartUI()}else{persist();if(DB)DB.doc('open/'+slug(t)).set(OPEN[t]).catch(()=>{});if(tab==='bill')tables()}
+markRecv(id);beep();speak('टेबल '+t+' पर नया ऑर्डर आया है, '+n+' आइटम','New order, table '+t+', '+n+' items');NEWO.unshift({t,by:o.byName||'waiter',cust:[cname,cpn.length===10?cpn:''].filter(Boolean).join(' · '),n,items:its.map(l=>l.qty+'× '+l.name+(l.size?' ('+l.size+')':'')).join(', ')});NEWO=NEWO.slice(0,5);orderBanner()}
+let NOB_OPEN=false;
+function nobPos(){const r=$('#bell'),b=$('#nob');if(r&&b)b.style.top=(r.getBoundingClientRect().bottom+6)+'px'}
+function orderBanner(){const b=$('#nob');if(!b)return;
+if(!NEWO.length)NOB_OPEN=false;
+const bl=$('#bell');if(bl){bl.classList.toggle('ring',NEWO.length>0);bl.querySelector('.bn').textContent=NEWO.length||''}
+b.style.display=NOB_OPEN?'block':'none';if(NOB_OPEN)nobPos();
+b.innerHTML=NEWO.map((o,i)=>o.shift?`<div class="ob"><b>🔁 Table ${esc(o.shift.from)} → Table ${esc(o.shift.to)}</b> <small class="mut">· ${esc(o.by)} shifted the table</small><div class="row" style="margin-top:8px">${o.hadSent?`<button class="btn sm" data-ob="s${i}">Notify kitchen</button>`:''}<button class="btn alt sm" data-ob="o${i}">Open</button><button class="btn alt sm fit" data-ob="x${i}" aria-label="Dismiss">✕</button></div></div>`:`<div class="ob"><b>🔔 Table ${esc(o.t)} · ${esc(o.by)}</b>${o.cust?`<br><small>👤 ${esc(o.cust)}</small>`:''}<br><small>${esc(o.items)}</small><div class="row" style="margin-top:8px"><button class="btn sm" data-ob="k${i}">Send KOT</button><button class="btn alt sm" data-ob="o${i}">Open</button><button class="btn alt sm fit" data-ob="x${i}" aria-label="Dismiss">✕</button></div></div>`).join('');
+b.onclick=e=>{const v=(e.target.closest('[data-ob]')||{dataset:{}}).dataset.ob;if(!v)return;const i=+v.slice(1),o=NEWO[i];if(!o)return;
+ if(v[0]==='x'){NEWO.splice(i,1);orderBanner();return}
+ if(v[0]==='s'){NEWO.splice(i,1);orderBanner();shiftKot(o.shift.from,o.shift.to);return}
+ NOB_OPEN=false;park();cur=o.t;loadT(cur);persist();tab='bill';render();NEWO.splice(i,1);orderBanner();if(v[0]==='k')sendKot()}}
+document.addEventListener('click',e=>{const pa=e.composedPath();if(pa.some(n=>n.id==='bell')){if(!NEWO.length){toast('No new notifications');return}NOB_OPEN=!NOB_OPEN;orderBanner();return}if(NOB_OPEN&&!pa.some(n=>n.id==='nob')){NOB_OPEN=false;orderBanner()}});
+window.addEventListener('scroll',nobPos,{passive:true});window.addEventListener('resize',nobPos);
+let VOICE=true;try{VOICE=localStorage.getItem(KEY+'.voice')!=='0'}catch(e){}
+function voiceBtn(){const b=$('#vo');if(b)b.textContent=VOICE?'🔊 Voice ON':'🔇 Voice OFF'}
+function speak(hi,en){if(!VOICE||!('speechSynthesis' in window))return;try{const h=(speechSynthesis.getVoices()||[]).find(v=>/^hi/i.test(v.lang)),u=new SpeechSynthesisUtterance(h?hi:en);u.lang=h?'hi-IN':'en-IN';if(h)u.voice=h;u.rate=.95;u.volume=1;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
+$('#vo').onclick=()=>{VOICE=!VOICE;try{localStorage.setItem(KEY+'.voice',VOICE?'1':'0')}catch(e){}voiceBtn();if(VOICE)speak('आवाज़ चालू','Voice on');else try{speechSynthesis.cancel()}catch(e){}};
+try{if('speechSynthesis' in window)speechSynthesis.getVoices()}catch(e){}
+voiceBtn();
+function mergeTable(a,b){const s=OPEN[a];if(!s)return;const t=OPEN[b];
+if(!t)OPEN[b]={...clone(s),name:b};
+else{s.cart.forEach(l=>{const ex=t.cart.find(x=>x.k===l.k&&x.price===l.price&&(x.note||'')===(l.note||''));if(ex){ex.qty+=l.qty;ex.sent=(ex.sent||0)+(l.sent||0)}else t.cart.push(clone(l))});
+ t.cx=[...(t.cx||[]),...(s.cx||[])];t.cust=t.cust||{name:'',phone:''};
+ if(!t.cust.name&&s.cust&&s.cust.name)t.cust.name=s.cust.name;if(!t.cust.phone&&s.cust&&s.cust.phone)t.cust.phone=s.cust.phone}
+delete OPEN[a]}
+function shiftCore(a,b){park();const s=OPEN[a];if(!s)return null;const hadSent=s.cart.some(l=>l.sent>0);
+mergeTable(a,b);if(cur===a)cur=b;loadT(cur);persist();
+if(DB){clearTimeout(pts[a]);delete pts[a];clearTimeout(pts[b]);delete pts[b];DB.doc('open/'+slug(a)).delete().catch(()=>{});DB.doc('open/'+slug(b)).set(OPEN[b]).catch(()=>{})}
+return{hadSent}}
+function applyShift(o){const id=o&&o.id;if(!id||!CAN)return;
+if((S.seenO||[]).includes(id)){markRecv(id);return}
+S.seenO=[...(S.seenO||[]),id].slice(-300);save();
+const a=String(o.from||'').trim(),b=String(o.to||'').trim();
+if(!a||!b||a===b||/^counter$/i.test(a)||/^counter$/i.test(b)){markRecv(id);return}
+const r=shiftCore(a,b);markRecv(id);if(!r)return;
+beep();speak('टेबल '+a+' से टेबल '+b+' पर शिफ्ट','Table '+a+' shifted to table '+b);
+NEWO.unshift({t:b,shift:{from:a,to:b},by:o.byName||'waiter',hadSent:r.hadSent});NEWO=NEWO.slice(0,5);orderBanner();
+if(tab==='bill')bill()}
+async function shiftKot(a,b){const t=new Date(),day=t.toLocaleDateString('en-CA');if(!S.kot||S.kot.d!==day)S.kot={d:day,n:0};S.kot.n++;
+const k={no:S.kot.n,day,time:t.toISOString(),type:'Shift',table:b,cust:'',items:[],cancels:[],shift:{from:a,to:b}};
+S.kots=[k,...(S.kots||[])].slice(0,300);save();toast('Shift KOT #'+k.no);await deliverKot(k)}
+function tablesDlg(){if(!CAN)return;const d=$('#dlg');d.style.maxWidth='';
+d.innerHTML=`<h3>Waiter tables</h3><p class="mut" style="font-size:13px">These tables appear in the waiter app. Separate them with commas, e.g. 1, 2, 3, 4, 5, 6. Add a name to create a new table. All waiter phones update automatically.</p><p><input id="tl" value="${esc(WT.join(', '))}" autocomplete="off"></p><div class="row"><button class="btn alt" id="tc2">Cancel</button><button class="btn" id="ts">Save</button></div>`;
+if(!d.open)d.showModal();$('#tc2').onclick=()=>d.close();
+$('#ts').onclick=()=>{const l=[...new Set($('#tl').value.split(/[,\n]/).map(x=>x.trim().slice(0,20)).filter(x=>x&&!/^counter$/i.test(x)))].slice(0,40);
+ if(!l.length)return toast('Enter at least one table');
+ WT=l;S.wt=l;save();d.close();tables();
+ if(!DB)return toast('Not signed in: tables are saved on this device only');
+ DB.doc('store/tables').set({list:l,at:new Date().toISOString()}).then(()=>toast('Waiter tables updated ✓')).catch(()=>toast('⚠ Tables could not be saved. Check your login or connection'))}}
+function shiftDlg(){if(cur==='Counter')return toast('Select a table first');const d=$('#dlg');d.style.maxWidth='';
+const others=Object.keys(OPEN).filter(k=>k!=='Counter'&&k!==cur).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})),hs=cart.some(l=>l.sent>0);
+d.innerHTML=`<h3>Shift table ${esc(cur)}</h3><p class="mut" style="font-size:13px">The full order moves to the other table. If that table already has an order, the two are merged.</p><p><input id="sh" placeholder="New table number (e.g. 7)" maxlength="20" autocomplete="off"></p>${others.length?`<div class="mut" style="font-size:12px;margin-bottom:4px">Chal rahe tables:</div><div class="chips" id="shc" style="position:static;margin:0 0 10px;padding:0;flex-wrap:wrap">${others.map(k=>`<button class="chip" data-st="${esc(k)}">${esc(k)}</button>`).join('')}</div>`:''}${hs?'<p><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="sk" checked style="width:auto"> Send shift KOT to kitchen</label></p>':''}<div class="row"><button class="btn alt" id="sc">Cancel</button><button class="btn" id="sg">Shift</button></div>`;
+if(!d.open)d.showModal();
+$('#sc').onclick=()=>d.close();const sc=$('#shc');if(sc)sc.onclick=e=>{const t=e.target.dataset.st;if(t)$('#sh').value=t};
+$('#sh').onkeydown=e=>{if(e.key==='Enter')$('#sg').click()};
+$('#sg').onclick=()=>{const to=$('#sh').value.trim().slice(0,20),a=cur;if(!to)return toast('Enter a table number');if(to===a)return toast('That is the same table');if(/^counter$/i.test(to))return toast('Cannot shift to Counter');
+ const kot=!!($('#sk')&&$('#sk').checked),r=shiftCore(a,to);d.close();bill();toast('Table '+a+' → '+to+' shifted');if(r&&r.hadSent&&kot)shiftKot(a,to)}}
+function cleanOrders(){if(!DB)return;DB.collection('orders').where('status','==','received').get().then(sn=>{const lim=Date.now()-3*864e5;sn.docs.forEach(d=>{const o=d.data();if(new Date(o.time).getTime()<lim)d.ref.delete().catch(()=>{})})}).catch(()=>{})}
+
+const waText=v=>{const W=26,fm=n=>String(+(+n||0).toFixed(2)),pad=(t,n)=>t+' '.repeat(Math.max(0,n-t.length)),lp=(t,n)=>' '.repeat(Math.max(0,n-t.length))+t,
+wrap=(t,n)=>{const out=[];let ln='';String(t).split(' ').forEach(w=>{while(w.length>n){if(ln){out.push(ln);ln=''}out.push(w.slice(0,n));w=w.slice(n)}const tt=ln?ln+' '+w:w;if(tt.length>n){out.push(ln);ln=w}else ln=tt});if(ln)out.push(ln);return out},
+lr=(a,b)=>pad(a,W-b.length)+b,dash='-'.repeat(W),
+info=[['Bill',v.no],['Date',new Date(v.date).toLocaleString('en-IN',{dateStyle:'short',timeStyle:'short'})]];
+if(v.cust)info.push(['Name',v.cust]);if(v.table)info.push(['Table',v.table]);if(v.otype&&v.otype!=='Dine-in')info.push(['Type',v.otype]);
+const inf=[];info.forEach(r=>{const w=wrap(r[1],W-8);inf.push(pad(r[0],6)+': '+(w[0]||''));for(let j=1;j<w.length;j++)inf.push(' '.repeat(8)+w[j])});
+const rows=[];v.lines.forEach(l=>{wrap(l.name,W).forEach(t=>rows.push(t));rows.push('  '+pad(l.size||'-',6)+lp(String(l.qty),3)+lp(fm(l.price*l.qty),W-11))});
+const sub=v.lines.reduce((a,l)=>a+l.price*l.qty,0),dv=sub*Math.min(Math.max(+v.disc||0,0),100)/100,total=sub-dv;
+const tot=[lr('Subtotal',inr(sub))];if(dv>0)tot.push(lr('Discount '+v.disc+'%','-'+inr(dv)));tot.push(dash,lr('TOTAL',inr(total)));
+const B='```',big=t=>[...t].map(c=>c>='A'&&c<='Z'?String.fromCodePoint(0x1D5D4+c.charCodeAt(0)-65):c).join(''),nw=BIZ.name.toUpperCase().split(' '),n2=nw.pop(),n1=nw.join(' '),bar='━━━━━━━━━━━━━━━━';
+return `🍽️ *${BIZ.name.toUpperCase()}*\n📍 ${BIZ.addr}\n📞 ${BIZ.phone}\n\n🧾 *BILL ${v.no}*\n${B}\n${inf.join('\n')}\n${B}\n${B}\nItem\n  ${pad('Size',6)}${lp('Qty',3)}${lp('Amount',W-11)}\n${dash}\n${rows.join('\n')}\n${dash}\n${tot.join('\n')}\n${B}\n${v.paid?'✅ *Paid · '+v.mode+'*':'⏳ *Payment due*'}\n\n🙏 Thank you! Visit again\n`};
+const loadImg=src=>new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=src});
+async function billCanvas(v,S){S=S||1;
+const W=576,P=28,H=900+v.lines.length*110,c=document.createElement('canvas');c.width=W*S;c.height=H*S;const x=c.getContext('2d');x.scale(S,S);
+x.fillStyle='#fff';x.fillRect(0,0,W,H);let y=26;
+const F=(w,s)=>x.font=`${w} ${s}px Arial, Helvetica, sans-serif`;
+const wrap=(t,mw)=>{const out=[];let ln='';String(t).split(' ').forEach(w=>{const tt=ln?ln+' '+w:w;if(x.measureText(tt).width>mw&&ln){out.push(ln);ln=w}else ln=tt});if(ln)out.push(ln);return out};
+const ctr=(t,s,w)=>{F(w||'400',s);x.fillStyle='#111';x.textAlign='center';wrap(t,W-2*P).forEach(l=>{y+=s;x.fillText(l,W/2,y);y+=s*.3})};
+const dash=()=>{y+=8;x.strokeStyle='#555';x.setLineDash([6,5]);x.beginPath();x.moveTo(P,y);x.lineTo(W-P,y);x.stroke();y+=14};
+const lr=(a,b,s,w)=>{F(w||'400',s);x.fillStyle='#111';y+=s;x.textAlign='left';x.fillText(a,P,y);x.textAlign='right';x.fillText(b,W-P,y);y+=s*.4};
+const img=await loadImg(LOGO);if(img){x.drawImage(img,W/2-50,y,100,100);y+=110}
+ctr(BIZ.name,30,'700');ctr(BIZ.addr,19);ctr('Phone: '+BIZ.phone,20,'600');dash();
+lr(v.no,new Date(v.date).toLocaleString('en-IN',{dateStyle:'short',timeStyle:'short'}),20);
+lr(v.cust+(v.phone?' · '+v.phone:''),(v.otype&&v.otype!=='Dine-in'?v.otype+(v.table?' · ':''):'')+(v.table?'Table '+v.table:''),20);dash();
+const fm=n=>(+n||0).toLocaleString('en-IN',{maximumFractionDigits:2}),QX=352,RX=452,AX=W-P;
+F('700',18);x.fillStyle='#111';y+=18;x.textAlign='left';x.fillText('Item',P,y);x.textAlign='center';x.fillText('Qty',QX,y);x.textAlign='right';x.fillText('Rate',RX,y);x.fillText('Amt',AX,y);y+=4;dash();
+v.lines.forEach(l=>{const nm=l.name+(l.size?' ('+l.size+')':'');F('600',21);const ls=wrap(nm,QX-P-34);
+ ls.forEach((t,i)=>{y+=21;x.textAlign='left';x.fillStyle='#111';x.fillText(t,P,y);if(i===0){x.textAlign='center';x.fillText(String(l.qty),QX,y);x.textAlign='right';x.fillText(fm(l.price),RX,y);x.fillText(fm(l.price*l.qty),AX,y)}y+=7});y+=9});
+dash();lr('Subtotal',inr(v.sub),21);if(v.disc)lr('Discount '+v.disc+'%','−'+inr(v.sub-v.total),21);
+y+=6;lr('TOTAL',inr(v.total),30,'700');y+=8;
+ctr(v.paid?'Paid · '+v.mode:'PAYMENT DUE',20,'700');dash();ctr('Thank you! Visit again',20);ctr('Good Food · Good Mood',17);
+const o=document.createElement('canvas');o.width=W*S;o.height=Math.ceil((y+24)*S);const g=o.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,W*S,o.height);g.drawImage(c,0,0);return o}
+function makePdf(jpg,w,h){const enc=new TextEncoder(),pw=227,ph=+(h*pw/w).toFixed(2),parts=[],offs=[];let len=0;
+const push=b=>{parts.push(b);len+=b.length},txt=t=>push(enc.encode(t));
+const obj=(n,body,st)=>{offs[n]=len;txt(n+' 0 obj\n'+body);if(st){push(st);txt('\nendstream')}txt('\nendobj\n')};
+txt('%PDF-1.4\n');obj(1,'<< /Type /Catalog /Pages 2 0 R >>');obj(2,'<< /Type /Pages /Kids [3 0 R] /Count 1 >>');
+obj(3,`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pw} ${ph}] /Resources << /XObject << /Im0 5 0 R >> >> /Contents 4 0 R >>`);
+const cs=`q ${pw} 0 0 ${ph} 0 0 cm /Im0 Do Q`;obj(4,`<< /Length ${cs.length} >>\nstream\n${cs}\nendstream`);
+obj(5,`<< /Type /XObject /Subtype /Image /Width ${w} /Height ${h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpg.length} >>\nstream\n`,jpg);
+const xr=len;txt('xref\n0 6\n0000000000 65535 f \n');for(let i=1;i<=5;i++)txt(String(offs[i]).padStart(10,'0')+' 00000 n \n');
+txt(`trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xr}\n%%EOF`);return new Blob(parts,{type:'application/pdf'})}
+const blobB64=b=>new Promise(r=>{const f=new FileReader();f.onload=()=>r(String(f.result).split(',')[1]);f.readAsDataURL(b)});
+async function saveFile(name,blob){if(window.AndroidBridge){AndroidBridge.save(name,blob.type||'application/octet-stream',await blobB64(blob));return true}let dl=null;try{dl=window.claude&&claude.use?await claude.use('downloads'):null}catch(e){}
+if(!dl){if(window.claude)return false;const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);return true}try{await dl.save({filename:name,data:blob})}catch(e){if(!e||e.code!=='declined')toast('Could not save the file')}return true}
+async function doPdf(v){try{const cv=await billCanvas(v),bin=atob(cv.toDataURL('image/jpeg',.92).split(',')[1]),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+ if(!(await saveFile(v.no+'.pdf',makePdf(u,cv.width,cv.height))))window.print()}catch(e){toast('Could not create the PDF')}}
+async function printCv(cv,name){const B=window.AndroidBridge,blob=()=>new Promise(r=>cv.toBlob(r,'image/png'));
+if(B){if(typeof B.print==='function'){try{B.print(await blobB64(await blob()));return}catch(e){}}
+ await saveFile(name+'.png',await blob());toast('Could not print; the image was saved instead');return}
+try{const url=cv.toDataURL('image/png'),mm=Math.ceil(72*cv.height/cv.width)+10,f=document.createElement('iframe');
+ f.setAttribute('aria-hidden','true');f.style.cssText='position:fixed;right:0;bottom:0;width:1px;height:1px;border:0;opacity:0;pointer-events:none';document.body.appendChild(f);
+ const w=f.contentWindow,doc=w.document;doc.open();
+ doc.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(name)}</title><style>@page{size:80mm ${mm}mm;margin:0}html,body{margin:0;background:#fff}img{display:block;width:72mm;margin:4mm}</style></head><body><img id="i" src="${url}"></body></html>`);doc.close();
+ await new Promise(r=>{const i=doc.getElementById('i');if(i.complete)r();else{i.onload=r;i.onerror=r}});
+ setTimeout(()=>{try{w.focus();w.print()}catch(e){}},50);setTimeout(()=>f.remove(),120000)}
+catch(e){await saveFile(name+'.png',await blob());toast('Could not print, image save kar di')}}
+async function doPrint(v){try{await printCv(await billCanvas(v,window.AndroidBridge?2:1),v.no)}catch(e){toast('Could not print')}}
+async function doImg(v){try{const cv=await billCanvas(v),b=await new Promise(r=>cv.toBlob(r,'image/png'));if(!(await saveFile(v.no+'.png',b)))toast('Saving is not available here')}catch(e){toast('Could not create the image')}}
+function waChat(v,p){const text=waText(v),ph='91'+p;
+if(window.AndroidBridge&&AndroidBridge.chat){AndroidBridge.chat(ph,text);return}
+window.open('https://wa.me/'+ph+'?text='+encodeURIComponent(text),'_blank')}
+function askWa(v){const d=$('#dlg');
+d.innerHTML=`<h3>Send bill on WhatsApp</h3><p class="mut">Enter the customer's WhatsApp number. It does not need to be saved in your phone.</p><p><input id="wp" type="tel" inputmode="tel" placeholder="10 digit mobile number" value="${esc(v.phone||'')}"></p><p id="we" style="color:var(--red);font-size:13px;min-height:16px"></p><p><button class="btn" id="wt" style="width:100%">Send bill on WhatsApp</button></p><p><button class="btn alt" id="wb" style="width:100%">Back</button></p><p class="mut" style="font-size:12px">The customer's chat opens with the bill attached. Just tap Send.</p>`;
+setTimeout(()=>{const i=$('#wp');if(i&&!i.value)i.focus()},100);
+const num=()=>{let p=$('#wp').value.replace(/\D/g,'');if(p.length>10&&p.indexOf('91')===0)p=p.slice(2);
+ if(p.length!==10){$('#we').textContent='Enter a valid 10-digit number';return null}
+ if(v.phone!==p){v.phone=p;saveInv(v)}return p};
+$('#wb').onclick=()=>showInv(v.no);
+$('#wt').onclick=()=>{const p=num();if(p)waChat(v,p)};
+$('#wp').onkeydown=e=>{if(e.key==='Enter')$('#wt').click()}}
+async function shareWa(v){const text=waText(v);
+if(window.AndroidBridge){try{const cv=await billCanvas(v),b=await new Promise(r=>cv.toBlob(r,'image/png'));AndroidBridge.share(v.no+'.png','image/png',await blobB64(b),text,(()=>{const p=(v.phone||'').replace(/\D/g,'');return p.length===10?'91'+p:p})(),v.cust||'');return}catch(e){}}
+try{const cv=await billCanvas(v),b=await new Promise(r=>cv.toBlob(r,'image/png')),f=new File([b],v.no+'.png',{type:'image/png'});
+ if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],text});return}}catch(e){if(e&&e.name==='AbortError')return}
+const p=(v.phone||'').replace(/\D/g,'');window.open('https://wa.me/'+(p.length===10?'91'+p:p)+'?text='+encodeURIComponent(text),'_blank');toast('For the picture bill: Save image, then attach it in WhatsApp')}
+function custs(){
+const m={};S.invoices.forEach(v=>{const k=v.cust+'|'+v.phone;const c=m[k]=m[k]||{name:v.cust,phone:v.phone,n:0,t:0,due:0};c.n++;c.t+=v.total;if(!v.paid)c.due+=v.total});const L=Object.values(m).sort((a,b)=>b.t-a.t);
+$('#app').innerHTML=`<div class="card"><h3 style="margin-bottom:10px">Customers</h3>${L.length?`<div class="wrap"><table><tr><th>Name</th><th>Phone</th><th class="n">Bills</th><th class="n">Spent</th><th class="n">Due</th></tr>${L.map(c=>`<tr><td>${esc(c.name)}</td><td>${esc(c.phone)||'–'}</td><td class="n">${c.n}</td><td class="n">${inr(c.t)}</td><td class="n" style="${c.due?'color:var(--red);font-weight:600':''}">${inr(c.due)}</td></tr>`).join('')}</table></div>`:'<div class="empty">Customers appear here once you save a bill with a name.</div>'}</div>`}
+function rep(){
+const td=new Date().toDateString(),T=S.invoices.filter(v=>new Date(v.date).toDateString()===td);const sum=(a,f)=>a.reduce((s,v)=>s+f(v),0);
+const pm={};S.invoices.forEach(v=>{const k=v.paid?v.mode:'Due';pm[k]=(pm[k]||0)+v.total});
+const top={};S.invoices.forEach(v=>v.lines.forEach(l=>{const k=l.name+(l.size?' ('+l.size+')':'');top[k]=(top[k]||0)+l.qty}));const tp=Object.entries(top).sort((a,b)=>b[1]-a[1]).slice(0,8);
+$('#app').innerHTML=`<div class="stats"><div class="card stat"><b>${inr(sum(T,v=>v.total))}</b><span>Today's sales (${T.length} bills)</span></div><div class="card stat"><b>${inr(sum(S.invoices,v=>v.total))}</b><span>All-time sales</span></div><div class="card stat"><b>${S.invoices.length}</b><span>Total bills</span></div><div class="card stat"><b>${inr(sum(S.invoices.filter(v=>!v.paid),v=>v.total))}</b><span>Payments due</span></div></div>
+<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))"><div class="card"><h3>Payment split</h3>${Object.keys(pm).length?Object.entries(pm).map(([k,v])=>`<div class="tot"><span>${k}</span><span>${inr(v)}</span></div>`).join(''):'<div class="empty">No sales yet.</div>'}</div><div class="card"><h3>Top sellers</h3>${tp.length?tp.map(([k,v])=>`<div class="tot"><span>${esc(k)}</span><span>${v} sold</span></div>`).join(''):'<div class="empty">No sales yet.</div>'}</div></div>`}
+$('#dlg').addEventListener('close',()=>{$('#dlg').style.maxWidth=''});
+
+// ===== Multi-restaurant layer: profile, plans, language, photos, settings =====
+let PROFILE,CUID='',LOCAL=false,LANG='en',PHOTOS=[],lastLock=null;
+const PFX=()=>'restaurants/'+CUID+'/';
+const PLANS={monthly:{amt:300,days:31,label:'Monthly'},yearly:{amt:3500,days:366,label:'Yearly'}};
+const LANGS=[['en','English'],['hi','हिन्दी'],['mr','मराठी'],['gu','ગુજરાતી'],['bn','বাংলা'],['ta','தமிழ்'],['te','తెలుగు'],['kn','ಕನ್ನಡ'],['ml','മലയാളം'],['pa','ਪੰਜਾਬੀ'],['or','ଓଡ଼ିଆ'],['as','অসমীয়া'],['ur','اردو'],['ne','नेपाली'],['sa','संस्कृतम्'],['kok','कोंकणी'],['sd','سنڌي'],['ks','کٲشُر'],['doi','डोगरी'],['mai','मैथिली'],['sat','ᱥᱟᱱᱛᱟᱲᱤ'],['brx','बड़ो'],['mni','মৈতৈলোন্']];
+const GL=`menu=मेन्यू|મેનુ
+Menu photos=मेन्यू फ़ोटो|મેનુ ફોટા|मेन्यू फोटो
+New bill=नया बिल|નવું બિલ|नवीन बिल
+invoices=इनवॉइस|ઇનવોઇસ|इनव्हॉइस
+customers=ग्राहक|ગ્રાહકો
+reports=रिपोर्ट|રિપોર્ટ|अहवाल
+settings=सेटिंग्स|સેટિંગ્સ|सेटिंग्ज
+Sign out=साइन आउट|સાઇન આઉટ
+OWNER APP · POS & KOT=मालिक ऐप · POS और KOT|માલિક એપ · POS અને KOT|मालक ॲप · POS आणि KOT
+Search dishes=डिश खोजें|વાનગી શોધો|डिश शोधा
+all=सभी|બધા|सर्व
+counter=काउंटर|કાઉન્ટર
+table=टेबल|ટેબલ
+New table=नया टेबल|નવું ટેબલ|नवीन टेबल
++ New table=+ नया टेबल|+ નવું ટેબલ|+ नवीन टेबल
+Open table=टेबल खोलें|ટેબલ ખોલો|टेबल उघडा
+⚙ Waiter tables=⚙ वेटर टेबल|⚙ વેઇટર ટેબલ
+Running orders: tap a table to switch, nothing is lost=चालू ऑर्डर: टेबल बदलने के लिए टैप करें, कुछ भी नहीं खोता|ચાલુ ઓર્ડર: ટેબલ બદલવા ટેપ કરો, કંઈ ખોવાતું નથી|चालू ऑर्डर: टेबल बदलण्यासाठी टॅप करा, काहीही हरवत नाही
+half=हाफ|હાફ
+full=फुल|ફુલ
+Set price=भाव डालें|ભાવ નાખો|भाव टाका
+No dishes match. Add dishes in the Menu tab.=कोई डिश नहीं मिली। मेन्यू टैब में डिश जोड़ें।|કોઈ વાનગી મળી નથી. મેનુ ટેબમાં વાનગી ઉમેરો.|एकही डिश सापडली नाही. मेन्यू टॅबमध्ये डिश जोडा.
+bill=बिल|બિલ
+bills=बिल|બિલ
+Close=बंद करें|બંધ કરો|बंद करा
+View bill=बिल देखें|બિલ જુઓ|बिल पहा
+Customer name=ग्राहक का नाम|ગ્રાહકનું નામ|ग्राहकाचे नाव
+WhatsApp number (optional)=व्हाट्सऐप नंबर (वैकल्पिक)|વોટ્સએપ નંબર (વૈકલ્પિક)|व्हॉट्सॲप नंबर (ऐच्छिक)
+WhatsApp number=व्हाट्सऐप नंबर|વોટ્સએપ નંબર|व्हॉट्सॲप नंबर
+whatsapp=व्हाट्सऐप|વોટ્સએપ|व्हॉट्सॲप
+Tap a dish to start the bill.=बिल शुरू करने के लिए डिश पर टैप करें।|બિલ શરૂ કરવા વાનગી પર ટેપ કરો.|बिल सुरू करण्यासाठी डिशवर टॅप करा.
+dine-in=डाइन-इन|ડાઇન-ઇન
+takeaway=टेकअवे|ટેકઅવે
+delivery=डिलीवरी|ડિલિવરી|डिलिव्हरी
+cash=नकद|રોકડ|रोख
+card=कार्ड|કાર્ડ
+due=बकाया|બાકી|बाकी
+Discount %=छूट %|ડિસ્કાઉન્ટ %|सवलत %
+discount=छूट|ડિસ્કાઉન્ટ|सवलत
+subtotal=उप-योग|પેટા-કુલ|उप-बेरीज
+total=कुल|કુલ|एकूण
+each=प्रति|દરેક|प्रत्येकी
+items=आइटम|આઇટમ
+item=आइटम|આઇટમ
+⇄ Table shift=⇄ टेबल शिफ्ट|⇄ ટેબલ શિફ્ટ
+Remove table=टेबल हटाएँ|ટેબલ કાઢો|टेबल काढा
+clear=साफ़ करें|સાફ કરો|साफ करा
+Save bill=बिल सेव करें|બિલ સાચવો|बिल जतन करा
+send=भेजें|મોકલો|पाठवा
+KOT sent ✓=KOT भेजा गया ✓|KOT મોકલાયું ✓|KOT पाठवला ✓
+Add at least one dish to the bill=बिल में कम से कम एक डिश जोड़ें|બિલમાં ઓછામાં ઓછી એક વાનગી ઉમેરો|बिलमध्ये किमान एक डिश जोडा
+Saved=सेव हुआ|સાચવ્યું|जतन केले
+categories=श्रेणियाँ|શ્રેણીઓ|श्रेणी
+Add dish=डिश जोड़ें|વાનગી ઉમેરો|डिश जोडा
+delete=हटाएँ|કાઢી નાખો|हटवा
+deleted=हटाए गए|કાઢી નાખ્યા|हटवले
+Delete selected dishes?=चुनी हुई डिश हटाएँ?|પસંદ કરેલી વાનગીઓ કાઢી નાખવી?|निवडलेल्या डिश हटवायच्या?
+Delete this photo?=यह फ़ोटो हटाएँ?|આ ફોટો કાઢી નાખવો?|हा फोटो हटवायचा?
+⚖ Veg / Non-Veg split=⚖ वेज / नॉन-वेज विभाजन|⚖ વેજ / નોન-વેજ વિભાજન
+Veg / Non-Veg split=वेज / नॉन-वेज विभाजन|વેજ / નોન-વેજ વિભાજન
+dish=डिश|વાનગી
+dishes=डिश|વાનગીઓ
+category=श्रेणी|શ્રેણી
+edit=बदलें|ફેરફાર|बदला
+open=खोलें|ખોલો|उघडा
+cancel=रद्द करें|રદ કરો|रद्द करा
+Edit dish=डिश बदलें|વાનગી બદલો|डिश बदला
+Add dish=डिश जोड़ें|વાનગી ઉમેરો|डिश जोडा
+Dish name=डिश का नाम|વાનગીનું નામ|डिशचे नाव
+Half price (optional)=हाफ भाव (वैकल्पिक)|હાફ ભાવ (વૈકલ્પિક)|हाफ भाव (ऐच्छिक)
+Full price=फुल भाव|ફુલ ભાવ
+Save dish=डिश सेव करें|વાનગી સાચવો|डिश जतन करा
+Save=सेव करें|સાચવો|जतन करा
+Back=वापस|પાછળ|मागे
+Rename=नाम बदलें|નામ બદલો|नाव बदला
+Rename category=श्रेणी का नाम बदलें|શ્રેણીનું નામ બદલો|श्रेणीचे नाव बदला
+New category=नई श्रेणी|નવી શ્રેણી|नवीन श्रेणी
+Category name=श्रेणी का नाम|શ્રેણીનું નામ|श्रेणीचे नाव
+＋ Create new category…=＋ नई श्रेणी बनाएँ…|＋ નવી શ્રેણી બનાવો…|＋ नवीन श्रेणी तयार करा…
+Next: add dish=आगे: डिश जोड़ें|આગળ: વાનગી ઉમેરો|पुढे: डिश जोडा
+Enter name, category and full price=नाम, श्रेणी और फुल भाव डालें|નામ, શ્રેણી અને ફુલ ભાવ નાખો|नाव, श्रेणी आणि फुल भाव टाका
+no.=क्रमांक|ક્રમાંક
+date=तारीख|તારીખ|तारीख
+customer=ग्राहक|ગ્રાહક
+status=स्थिति|સ્થિતિ|स्थिती
+paid=चुकाया|ચૂકવ્યું|भरले
+print=प्रिंट|પ્રિન્ટ
+Save image=इमेज सेव करें|ઇમેજ સાચવો|इमेज जतन करा
+Edit bill=बिल बदलें|બિલ બદલો|बिल बदला
+Mark paid=चुकाया चिह्नित करें|ચૂકવ્યું માર્ક કરો|भरले म्हणून चिन्हांकित करा
+mode=मोड|મોડ
+on=चालू|ચાલુ
+off=बंद|બંધ
+Payment due=भुगतान बाकी|ચુકવણી બાકી|पेमेंट बाकी
+payment=भुगतान|ચુકવણી|पेमेंट
+payments=भुगतान|ચુકવણી|पेमेंट
+No invoices yet. Create one from New bill.=अभी कोई इनवॉइस नहीं। नया बिल से बनाएँ।|હજી કોઈ ઇનવોઇસ નથી. નવું બિલમાંથી બનાવો.|अजून इनव्हॉइस नाही. नवीन बिलमधून तयार करा.
+Thank you! Good Food · Good Mood=धन्यवाद! अच्छा खाना · अच्छा मूड|આભાર! સારું ખાવાનું · સારો મૂડ|धन्यवाद! चांगले जेवण · चांगला मूड
+Delete bill?=बिल हटाएँ?|બિલ કાઢી નાખવું?|बिल हटवायचे?
+No, keep it=नहीं, रहने दें|ના, રહેવા દો|नको, राहू द्या
+Yes, delete=हाँ, हटाएँ|હા, કાઢી નાખો|हो, हटवा
+This bill will be permanently deleted and removed from reports.=यह बिल हमेशा के लिए हट जाएगा और रिपोर्ट से भी निकल जाएगा।|આ બિલ કાયમ માટે કાઢી નખાશે અને રિપોર્ટમાંથી પણ દૂર થશે.|हे बिल कायमचे हटवले जाईल आणि अहवालातूनही निघेल.
+Only the owner can edit or delete bills.=केवल मालिक ही बिल बदल या हटा सकता है।|ફક્ત માલિક જ બિલ બદલી કે કાઢી શકે છે.|फक्त मालक बिल बदलू किंवा हटवू शकतो.
+today's=आज की|આજની|आजची
+sales=बिक्री|વેચાણ|विक्री
+All-time sales=कुल बिक्री|કુલ વેચાણ|एकूण विक्री
+Payment split=भुगतान विभाजन|ચુકવણી વિભાજન|पेमेंट विभागणी
+Top sellers=सबसे ज़्यादा बिकने वाले|સૌથી વધુ વેચાતા|सर्वाधिक विकले जाणारे
+sold=बिके|વેચાયા|विकले
+No sales yet.=अभी कोई बिक्री नहीं।|હજી કોઈ વેચાણ નથી.|अजून विक्री नाही.
+name=नाम|નામ|नाव
+phone=फ़ोन|ફોન|फोन
+spent=खर्च|ખર્ચ|खर्च
+Customers appear here once you save a bill with a name.=नाम के साथ बिल सेव करने पर ग्राहक यहाँ दिखेंगे।|નામ સાથે બિલ સાચવશો ત્યારે ગ્રાહકો અહીં દેખાશે.|नावासह बिल जतन केल्यावर ग्राहक येथे दिसतील.
+walk-in=वॉक-इन|વોક-ઇન
+logo=लोगो|લોગો
+address=पता|સરનામું|पत्ता
+language=भाषा|ભાષા
+plan=प्लान|પ્લાન
+🔒 Restaurant name is locked=🔒 रेस्टोरेंट का नाम लॉक है|🔒 રેસ્ટોરન્ટનું નામ લોક છે|🔒 रेस्टॉरंटचे नाव लॉक आहे
+active=चालू|ચાલુ
+till=तक|સુધી|पर्यंत
+Pay monthly=मासिक भुगतान करें|માસિક ચુકવણી કરો|मासिक पेमेंट करा
+Pay yearly=वार्षिक भुगतान करें|વાર્ષિક ચુકવણી કરો|वार्षिक पेमेंट करा
+per month=प्रति माह|દર મહિને|दर महिना
+per year=प्रति वर्ष|દર વર્ષે|दर वर्ष
+Privacy Policy=गोपनीयता नीति|ગોપનીયતા નીતિ|गोपनीयता धोरण
+Terms & Conditions=नियम और शर्तें|નિયમો અને શરતો|अटी आणि शर्ती
+Saved ✓=सेव हो गया ✓|સાચવ્યું ✓|जतन झाले ✓
+Menu saved ✓=मेन्यू सेव हो गया ✓|મેનુ સાચવ્યું ✓|मेन्यू जतन झाला ✓
+Menu updated ✓=मेन्यू अपडेट हुआ ✓|મેનુ અપડેટ થયું ✓|मेन्यू अपडेट झाला ✓
+Select your menu photos (any number at once). Items are read by AI and added to your menu automatically.=अपने मेन्यू की फ़ोटो चुनें (एक साथ कितनी भी)। AI आइटम पढ़कर मेन्यू में अपने आप जोड़ देगा।|તમારા મેનુના ફોટા પસંદ કરો (એકસાથે ગમે તેટલા). AI આઇટમ વાંચીને મેનુમાં આપોઆપ ઉમેરશે.|तुमच्या मेन्यूचे फोटो निवडा (एकाच वेळी कितीही). AI आयटम वाचून मेन्यूमध्ये आपोआप जोडेल.
+No photos yet.=अभी कोई फ़ोटो नहीं।|હજી કોઈ ફોટો નથી.|अजून फोटो नाही.
+↻ Re-read menu=↻ मेन्यू दोबारा पढ़ें|↻ મેનુ ફરી વાંચો|↻ मेन्यू पुन्हा वाचा
+photo=फ़ोटो|ફોટો|फोटो
+Veg Starters=वेज स्टार्टर्स|વેજ સ્ટાર્ટર્સ
+veg=वेज|વેજ
+non=नॉन|નોન
+starters=स्टार्टर्स|સ્ટાર્ટર્સ
+starter=स्टार्टर|સ્ટાર્ટર
+soups=सूप|સૂપ
+soup=सूप|સૂપ
+rice=राइस|રાઇસ
+noodles=नूडल्स|નૂડલ્સ
+chinese=चाइनीज़|ચાઇનીઝ
+main=मेन|મેઇન
+course=कोर्स|કોર્સ
+tandoori=तंदूरी|તંદૂરી
+indian=इंडियन|ઇન્ડિયન
+special=स्पेशल|સ્પેશિયલ
+arabian=अरेबियन|અરેબિયન
+grill=ग्रिल|ગ્રિલ
+biryani=बिरयानी|બિરયાની
+roti=रोटी|રોટલી
+plain=सादा|સાદા
+fries=फ्राइज़|ફ્રાઇઝ
+papad=पापड़|પાપડ
+dessert=मिठाई|ડેઝર્ટ
+paneer=पनीर|પનીર
+chilly=चिली|ચિલી
+chilli=चिली|ચિલી
+manchurian=मंचूरियन|મંચુરિયન
+crispy=क्रिस्पी|ક્રિસ્પી
+spring=स्प्रिंग|સ્પ્રિંગ
+roll=रोल|રોલ
+baby=बेबी|બેબી
+corn=कॉर्न|કોર્ન
+mushroom=मशरूम|મશરૂમ
+honey=हनी|હની
+potato=पोटैटो|પોટેટો
+chicken=चिकन|ચિકન
+dry=ड्राई|ડ્રાય
+hot=हॉट|હોટ
+garlic=गार्लिक|ગાર્લિક
+wings=विंग्स|વિંગ્સ
+bbq=बीबीक्यू|બીબીક્યુ
+lollipop=लॉलीपॉप|લોલીપોપ
+schezwan=शेज़वान|શેઝવાન
+masala=मसाला|મસાલા
+apple=एप्पल|એપલ
+oyster=ऑयस्टर|ઓઇસ્ટર
+satay=सैटे|સાટે
+stick=स्टिक|સ્ટિક
+manchow=मंचाओ|મંચાઉ
+sour=सावर|સાવર
+cream=क्रीम|ક્રીમ
+of=ऑफ़|ઓફ
+tomato=टोमैटो|ટામેટા
+lemon=लेमन|લેમન
+coriander=कोरिएंडर|કોરિએન્ડર
+sweet=स्वीट|સ્વીટ
+lung=लुंग|લુંગ
+fung=फुंग|ફુંગ
+clear=क्लियर|ક્લિયર
+fried=फ्राइड|ફ્રાઇડ
+singapuri=सिंगापुरी|સિંગાપુરી
+triple=ट्रिपल|ટ્રિપલ
+hong=हांग|હોંગ
+kong=कांग|કોંગ
+combination=कॉम्बिनेशन|કોમ્બિનેશન
+egg=अंडा|ઈંડા
+thousand=थाउज़ेंड|થાઉઝન્ડ
+garden=गार्डन|ગાર્ડન
+crisp=क्रिस्प|ક્રિસ્પ
+american=अमेरिकन|અમેરિકન
+hakka=हक्का|હક્કા
+dragon=ड्रैगन|ડ્રેગન
+sauce=सॉस|સોસ
+black=ब्लैक|બ્લેક
+pepper=पेपर|પેપર
+gravy=ग्रेवी|ગ્રેવી
+tikka=टिक्का|ટિક્કા
+kabab=कबाब|કબાબ
+pcs=पीस|પીસ
+pahadi=पहाड़ी|પહાડી
+reshmi=रेशमी|રેશમી
+seekh=सीख|સીખ
+barra=बर्रा|બરા
+banjara=बंजारा|બંજારા
+malai=मलाई|મલાઈ
+platter=प्लैटर|પ્લેટર
+kaleji=कलेजी|કલેજી
+butter=बटर|બટર
+burjee=भुर्जी|ભુર્જી
+handi=हांडी|હાંડી
+lajawab=लाजवाब|લાજવાબ
+dal=दाल|દાળ
+tadka=तड़का|તડકા
+fry=फ्राई|ફ્રાય
+khecdi=खिचड़ी|ખીચડી
+kolhapuri=कोल्हापुरी|કોલ્હાપુરી
+mix=मिक्स|મિક્સ
+hyderabadi=हैदराबादी|હૈદરાબાદી
+hydrabadi=हैदराबादी|હૈદરાબાદી
+patyala=पटियाला|પટિયાલા
+murghmusallam=मुर्ग मुसल्लम|મુર્ગ મુસલ્લમ
+bhuna=भुना|ભુના
+angara=अंगारा|અંગારા
+tawa=तवा|તવા
+lababdar=लबाबदार|લબાબદાર
+chat=चट|ચટ
+pata=पटा|પટા
+toofani=तूफ़ानी|તૂફાની
+mutton=मटन|મટન
+kadai=कड़ाही|કડાઈ
+classic=क्लासिक|ક્લાસિક
+alfaham=अलफहम|અલફહમ
+peri=पेरी|પેરી
+sawaya=सवाया|સવાયા
+normal=नॉर्मल|નોર્મલ
+mandi=मंडी|મંડી
+kabsa=काबसा|કાબસા
+madbi=मदबी|મદબી
+hamoos=हम्मस|હમ્મસ
+matka=मटका|મટકા
+dum=दम|દમ
+tandoor=तंदूर|તંદૂર
+wheat=गेहूँ|ઘઉં
+naan=नान|નાન
+kulcha=कुलचा|કુલચા
+lachha=लच्छा|લચ્છા
+paratha=पराठा|પરાઠા
+cheese=चीज़|ચીઝ
+jeera=जीरा|જીરા
+steam=स्टीम|સ્ટીમ
+french=फ्रेंच|ફ્રેન્ચ
+salty=नमकीन|મીઠા
+roasted=भुना हुआ|શેકેલા
+caramel=कैरेमल|કેરામેલ
+pudding=पुडिंग|પુડિંગ
+sizzling=सिज़लिंग|સિઝલિંગ
+brownie=ब्राउनी|બ્રાઉની
+gulab=गुलाब|ગુલાબ
+jamun=जामुन|જાંબુ
+capichino=कैपुचीनो|કેપુચીનો
+dumpling=डम्पलिंग|ડમ્પલિંગ
+thukpa=थुक्पा|થુક્પા
+golden=गोल्डन|ગોલ્ડન
+sizzlers=सिज़लर्स|સિઝલર્સ
+kung=कुंग|કુંગ
+pao=पाओ|પાઓ
+thai=थाई|થાઈ
+curry=करी|કરી
+red=रेड|રેડ
+green=ग्रीन|ગ્રીન
+yellow=येलो|યેલો
+malaysia=मलेशिया|મલેશિયા
+packing=पैकिंग|પેકિંગ
+pasanda=पसंदा|પસંદા
+lazeez=लज़ीज़|લજીજ
+chopsey=चॉप्सी|ચોપ્સી
+burnt=बर्न्ट|બર્ન્ટ
+chef=शेफ|શેફ
+shoti=शोटी|શોટી
+murg=मुर्ग|મુર્ગ
+kabaabe=कबाबे|કબાબે
+pasta=पास्ता|પાસ્તા
+chowmein=चाऊमिन|ચાઉમીન
+&amp;=और|અને|आणि`;
+const LN={hi:{},gu:{},mr:{}};GL.split('\n').forEach(l=>{const i=l.indexOf('=');if(i<1)return;const k=l.slice(0,i),v=l.slice(i+1).split('|');LN.hi[k]=v[0];LN.gu[k]=v[1]||v[0];LN.mr[k]=v[2]||v[0]});
+function xs(s){if(!LN[LANG])return s;const t=String(s).trim();if(!t||!/[A-Za-z]/.test(t))return s;const L=LN[LANG],e=L[t]??L[t.toLowerCase()];if(e!=null)return s.replace(t,()=>e);return s.replace(/[A-Za-z]+(?:['’][a-z]+)?/g,w=>L[w.toLowerCase()]??w)}
+const mt=(i,q)=>{q=q.toLowerCase();return i.name.toLowerCase().includes(q)||xs(i.name).toLowerCase().includes(q)};
+const tr=s=>s,OT=new WeakMap();
+function xn(n){const p=n.parentElement;if(!p||p.closest('script,style,textarea,#hn,#sync,[data-nox]'))return;const v=n.nodeValue;let r=OT.get(n);if(!r||r[1]!==v)r=[v,null];const o=xs(r[0]);r[1]=o;OT.set(n,r);if(o!==v)n.nodeValue=o}
+function xa(e){for(const a of['placeholder','title','aria-label']){const v=e.getAttribute&&e.getAttribute(a);if(v==null)continue;const k='_o'+a;let r=e[k];if(!r||r[1]!==v)r=[v,null];const o=xs(r[0]);r[1]=o;e[k]=r;if(o!==v)e.setAttribute(a,o)}}
+function xw(root){if(root.nodeType===3)return xn(root);if(root.nodeType!==1)return;xa(root);const w=document.createTreeWalker(root,5);let n;while(n=w.nextNode())n.nodeType===3?xn(n):xa(n)}
+const MO=new MutationObserver(ms=>{MO.disconnect();try{ms.forEach(m=>m.type==='characterData'?xn(m.target):m.addedNodes.forEach(xw))}finally{MO.observe(document.body,{childList:true,subtree:true,characterData:true})}});
+MO.observe(document.body,{childList:true,subtree:true,characterData:true});
+$('#gs').onclick=()=>{if(PROFILE&&PROFILE.name&&!LOCKED()){tab='set';render();window.scrollTo(0,0)}};
+const UPI_ID=window.UPI_ID||'8888637898@ptyes',UPI_NAME=window.UPI_NAME||'Restaurant App';let MYPAY=[],PENDING=[];
+const isAdmin=()=>{const u=window.AUTH&&AUTH.currentUser;return !!(u&&window.ADMIN_EMAIL&&u.emailVerified&&(u.email||'').toLowerCase()===String(window.ADMIN_EMAIL).toLowerCase())};
+const LOCKED=()=>!(isAdmin()||(PROFILE&&PROFILE.plan&&PROFILE.plan.expiresAt>Date.now()));
+const langOpts=v=>LANGS.map(([c,n])=>`<option value="${c}" ${c===v?'selected':''}>${n}</option>`).join('');
+function mkLogo(n){const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');x.fillStyle='#0f3d33';x.beginPath();x.arc(64,64,64,0,7);x.fill();x.fillStyle='#e3c274';x.font='700 64px Georgia,serif';x.textAlign='center';x.textBaseline='middle';x.fillText((n||'?').trim().charAt(0).toUpperCase(),64,70);return c.toDataURL()}
+const loadPhoto=async f=>{try{return await createImageBitmap(f,{imageOrientation:'from-image'})}catch(e){}
+ const d=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(f)});
+ return await new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>rej(new Error('Could not open the photo'));im.src=d})};
+const compress=async(f,max,q,png)=>{const im=await loadPhoto(f),w0=im.width||im.naturalWidth,h0=im.height||im.naturalHeight;let m=max,qq=q,out='';
+ for(let i=0;i<6;i++){const s=Math.min(1,m/Math.max(w0,h0)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(w0*s));c.height=Math.max(1,Math.round(h0*s));const x=c.getContext('2d');if(!png){x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height)}x.drawImage(im,0,0,c.width,c.height);out=c.toDataURL(png?'image/png':'image/jpeg',qq);if(out.length<(png?300000:750000))break;m*=.8;qq=Math.max(.5,qq-.07)}
+ if(im.close)im.close();return out};
+function startProfile(u){unsubs.push(FS.doc('restaurants/'+u.uid).onSnapshot(sn=>{PROFILE=sn.exists?sn.data():{};applyProfile()},()=>toast('Could not load your profile. Check your connection')));
+ unsubs.push(FS.collection('payments').where('uid','==',u.uid).onSnapshot(sn=>{MYPAY=sn.docs.map(d=>d.data());if(tab==='set'||LOCKED())render()},()=>{}));
+ if(isAdmin())unsubs.push(FS.collection('payments').where('status','==','pending').onSnapshot(sn=>{PENDING=sn.docs.map(d=>d.data());if(tab==='set')render()},()=>{}));
+ unsubs.push(FS.collection('restaurants/'+u.uid+'/menuPhotos').orderBy('at','desc').onSnapshot(sn=>{PHOTOS=sn.docs.map(d=>d.data());if(tab==='photos')photosTab()},()=>{}))}
+function applyProfile(){const P=PROFILE;if(!P)return;if(!P.name){$('#login').style.display='none';$('#onb').style.display='block';onboard();return}
+ $('#onb').style.display='none';LANG=P.lang||'en';document.documentElement.lang=LANG;BIZ.name=P.name;BIZ.addr=P.addr||'';BIZ.phone=P.phone||'';
+ LOGO=P.logo||mkLogo(P.name);$('#hl').src=LOGO;$('#hn').textContent=P.name.toUpperCase();$('#hs').textContent=tr('OWNER APP · POS & KOT');document.title=P.name;
+ $('#so').textContent='Sign out';remind();render();xw(document.body)}
+function onboard(){let logo='';$('#onb').innerHTML=`<div class="card" style="max-width:420px;margin:6vh auto 0"><h3>Set up your restaurant</h3><p class="mut">Choose your language and enter your restaurant name.</p><label class="mut">Language</label><select id="ol">${langOpts('en')}</select><label class="mut" style="display:block;margin-top:10px">Restaurant name</label><input id="on" maxlength="40" placeholder="e.g. Sai Kripa Restaurant"><label class="mut" style="display:block;margin-top:10px">Logo (optional)</label><input id="of" type="file" accept="image/*"><div style="margin-top:12px;padding:10px;border:1px solid #c9a24a;border-radius:8px;background:#fff8e1;color:#5a4300;font-size:13px">⚠️ Please check carefully. Once you save, you cannot change your restaurant name or logo again.</div><label style="display:flex;gap:8px;margin:12px 0;align-items:flex-start"><input id="oc2" type="checkbox" style="width:auto;margin-top:3px"><span>I understand that this is the last time I can set the restaurant name and logo. After I save, I cannot change either of them.</span></label><button class="btn" id="os" style="width:100%">Continue</button><div id="oe" style="color:var(--red);margin-top:8px;min-height:18px"></div></div>`;
+ $('#of').onchange=async e=>{if(e.target.files[0])logo=await compress(e.target.files[0],256,.9,true)};
+ $('#os').onclick=async()=>{const n=$('#on').value.trim();if(n.length<2)return $('#oe').textContent='Enter restaurant name';if(!$('#oc2').checked)return $('#oe').textContent='Please tick the confirmation box';
+  try{await saveProfile({name:n,lang:$('#ol').value,logo,createdAt:Date.now(),email:((window.AUTH&&AUTH.currentUser)||{}).email||'',phone:((window.AUTH&&AUTH.currentUser)||{}).phoneNumber||''},true)}catch(e){$('#oe').textContent='Could not save. Check your connection'}}}
+function remind(){const r=$('#rem'),e=PROFILE&&PROFILE.plan&&PROFILE.plan.expiresAt;if(!e||e>8e15){r.style.display='none';return}const d=Math.ceil((e-Date.now())/864e5);
+ if(d>0&&d<=3){r.style.display='flex';r.innerHTML=`<span>⏰ Your plan ends in ${d} day${d>1?'s':''}. Renew to keep features unlocked.</span><button class="btn sm" id="rn">Renew</button>`;$('#rn').onclick=()=>{tab='set';render()};
+  try{const k='rem'+new Date().toDateString();if(window.Notification){if(Notification.permission==='granted'&&!localStorage[k]){new Notification(BIZ.name,{body:'Plan ends in '+d+' day(s). Renew now.'});localStorage[k]=1}else if(Notification.permission==='default')Notification.requestPermission()}}catch(x){}}else r.style.display='none'}
+setInterval(()=>{if(PROFILE&&PROFILE.name){if(LOCKED()!==lastLock)render();remind()}},60000);
+function photosTab(){$('#app').innerHTML=`<div class="card"><h3>${tr('Menu photos')}</h3><p class="mut">Select your menu photos (any number at once). Items are read by AI and added to your menu automatically.</p><input id="pf" type="file" accept="image/*" multiple></div><div class="card ph" style="margin-top:12px">${PHOTOS.length?PHOTOS.map(p=>`<div><img src="${p.data}" data-z="${p.id}" alt="Menu"><button class="btn sm" data-e="${p.id}" style="width:100%;margin-top:4px">↻ Re-read menu</button><button class="btn alt sm" data-d="${p.id}" style="width:100%;margin-top:4px">Delete</button></div>`).join(''):'<div class="empty" style="grid-column:1/-1">No photos yet.</div>'}</div>`;
+ $('#pf').onchange=e=>uploadAll([...e.target.files]);
+ $('#app').onclick=e=>{const z=e.target.dataset.z,d=e.target.dataset.d,ex=e.target.dataset.e;if(ex)extractMenu(ex);if(d)ask('Delete this photo?',0,()=>phDel(d));if(z){const p=PHOTOS.find(x=>x.id===z),w=$('#dlg');w.innerHTML=`<img src="${p.data}" style="width:100%" alt=""><button class="btn" style="width:100%;margin-top:8px" onclick="$('#dlg').close()">Close</button>`;w.showModal()}}}
+function settingsTab(){const P=PROFILE,exp=P.plan&&P.plan.expiresAt,lk=LOCKED();
+ $('#app').innerHTML=`
+<div class="card"><div style="text-align:center"><img src="${LOGO}" width="96" height="96" style="border-radius:50%" alt="Logo"><div class="mut" style="font-size:12px;margin-top:4px">🔒 Restaurant name and logo are locked and cannot be changed</div></div>
+<label class="mut" style="display:block;margin-top:10px">Address</label><input id="sa" value="${esc(P.addr||'')}"><label class="mut" style="display:block;margin-top:10px">Phone</label><input id="sp" value="${esc(P.phone||'')}"><label class="mut" style="display:block;margin-top:10px">Language</label><select id="sl">${langOpts(LANG)}</select><button class="btn" id="ss" style="margin-top:12px">Save</button></div>
+<div class="card" style="margin-top:12px"><h3>Plan</h3><p>${lk?(exp?'Expired on '+new Date(exp).toLocaleDateString('en-IN'):'No active plan'):'<span class="tag paid">Active</span> till '+(exp>8e15?'lifetime':new Date(exp).toLocaleDateString('en-IN'))}</p><div class="row" style="align-items:stretch"><div class="plan"><b>₹300</b>per month<br><button class="btn sm" data-p="monthly" style="margin-top:8px">Pay monthly</button></div><div class="plan"><b>₹3,500</b>per year<br><button class="btn sm" data-p="yearly" style="margin-top:8px">Pay yearly</button></div></div>${payStatus()}</div>${adminCard()}
+<div class="card" style="margin-top:12px"><div class="cl"><span>Privacy Policy</span><button class="btn alt sm" data-l="privacy">Open</button></div><div class="cl"><span>Terms &amp; Conditions</span><button class="btn alt sm" data-l="terms">Open</button></div><div class="cl"><span>${esc(P.email||P.phone||'')}</span><button class="btn alt sm" data-l="out">${tr('Sign out')}</button></div></div>`;
+  $('#ss').onclick=async()=>{const u={addr:$('#sa').value.trim(),phone:$('#sp').value.trim(),lang:$('#sl').value};try{await saveProfile(u);toast('Saved ✓')}catch(e){toast('Could not save')}};
+ $('#app').onclick=e=>{const p=e.target.dataset.p,l=e.target.dataset.l;if(p)payNow(p);const ap=e.target.dataset.ap,rj=e.target.dataset.rj;if(ap)approvePay(ap,true);if(rj)approvePay(rj,false);if(l==='out')$('#so').click();if(l==='privacy'||l==='terms')legal(l)}}
+function legal(k){const url=k==='privacy'?window.PRIVACY_URL:window.TERMS_URL;if(url)return window.open(url,'_blank');const w=$('#dlg');w.innerHTML=`<h3>${k==='privacy'?'Privacy Policy':'Terms &amp; Conditions'}</h3><p>${k==='privacy'?'We store your restaurant data (menu, bills, customers) securely in your private account and never sell it.':'The subscription is billed monthly or yearly. When a plan ends, features stay locked until the next payment.'}</p><button class="btn" style="width:100%" onclick="$('#dlg').close()">Close</button>`;w.showModal()}
+function payStatus(){const a=(MYPAY||[]).slice().sort((x,y)=>y.at-x.at).slice(0,3);if(!a.length)return'';return '<div style="margin-top:10px;font-size:13px;text-align:left">'+a.map(p=>'<div class="cl"><span>'+esc(PLANS[p.plan]?PLANS[p.plan].label:p.plan)+' ₹'+esc(p.amt)+' · UTR '+esc(p.utr)+'</span><span class="tag '+(p.status==='approved'?'paid':'')+'">'+(p.status==='approved'?'Approved':p.status==='rejected'?'Rejected':'Pending')+'</span></div>').join('')+'</div>'}
+function adminCard(){if(!isAdmin())return'';const a=(PENDING||[]).slice().sort((x,y)=>x.at-y.at);return '<div class="card" style="margin-top:12px"><h3>Payment requests (admin)</h3>'+(a.length?a.map(p=>'<div style="border-top:1px solid #ddd;padding:10px 0;font-size:13px"><b>'+esc(p.name)+'</b> · '+esc(p.email)+'<br>'+esc(PLANS[p.plan]?PLANS[p.plan].label:p.plan)+' · <b>₹'+esc(p.amt)+'</b> · UTR <b>'+esc(p.utr)+'</b><br><span class="mut">'+new Date(p.at).toLocaleString('en-IN')+'</span><div class="row" style="margin-top:8px"><button class="btn sm" data-ap="'+esc(p.utr)+'">Approve</button><button class="btn alt sm" data-rj="'+esc(p.utr)+'">Reject</button></div></div>').join(''):'<p class="mut">No pending payments.</p>')+'</div>'}
+async function approvePay(utr,ok){const p=(PENDING||[]).find(x=>x.utr===utr);if(!p||!PLANS[p.plan])return;if(!confirm((ok?'Approve':'Reject')+' ₹'+p.amt+' from '+p.name+'?\nCheck UTR '+utr+' in your UPI app first.'))return;
+ try{const b=FS.batch(),pr=FS.doc('restaurants/'+p.uid);if(ok){const sn=await pr.get(),cur=(sn.exists&&sn.data().plan&&sn.data().plan.expiresAt)||0;b.update(pr,{plan:{type:p.plan,expiresAt:Math.max(cur,Date.now())+PLANS[p.plan].days*864e5}})}
+  b.update(FS.doc('payments/'+utr),{status:ok?'approved':'rejected',by:AUTH.currentUser.email,decidedAt:Date.now()});await b.commit();toast(ok?'Plan activated ✓':'Rejected')}catch(e){toast('Could not update: '+(e.message||e))}}
+function payNow(type){const pl=PLANS[type];if(!pl)return;const old=$('#pm');if(old)old.remove();
+ const ref='RMS'+String(CUID||'').slice(0,6).toUpperCase()+(type==='yearly'?'Y':'M'),q='pa='+UPI_ID+'&pn='+encodeURIComponent(UPI_NAME)+'&am='+pl.amt+'.00&cu=INR&tn='+encodeURIComponent(pl.label+' plan '+ref);
+ const L={gp:'tez://upi/pay?'+q,pe:'phonepe://pay?'+q,pt:'paytmmp://pay?'+q,ot:'upi://pay?'+q};
+ const o=document.createElement('div');o.id='pm';o.style.cssText='position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.55);overflow:auto;padding:14px;box-sizing:border-box';
+ o.innerHTML='<div class="card" style="max-width:420px;margin:2vh auto;text-align:center"><h3 style="margin:0">Pay ₹'+pl.amt+' · '+esc(pl.label)+' plan</h3><p class="mut" style="margin:6px 0 12px">Step 1: pay the exact amount to this UPI ID</p><div style="background:#f3f3f3;border-radius:10px;padding:10px;font-weight:700;word-break:break-all">'+esc(UPI_ID)+' <button class="btn alt sm" id="pcp" type="button" style="margin-left:6px">Copy</button></div><div class="row" style="margin:12px 0;justify-content:center"><button class="btn" data-u="gp" type="button">Google Pay</button><button class="btn" data-u="pe" type="button">PhonePe</button><button class="btn" data-u="pt" type="button">Paytm</button><button class="btn alt" data-u="ot" type="button">Other UPI app</button></div><div id="pq" style="min-height:10px"></div><p class="mut" style="margin:8px 0">Step 2: after paying, enter the 12-digit UTR / Transaction ID from your UPI app</p><input id="putr" inputmode="numeric" maxlength="12" placeholder="12-digit UTR number" style="width:100%;box-sizing:border-box;text-align:center;letter-spacing:2px"><div id="perr" style="color:#c0392b;font-size:13px;min-height:18px;margin-top:6px"></div><button class="btn" id="psb" type="button" style="width:100%;margin-top:6px">I have paid ₹'+pl.amt+'</button><p class="mut" style="font-size:12px;margin:10px 0 0">Your plan turns ON once the payment is verified.</p><button class="btn alt sm" id="pcl" type="button" style="margin-top:10px">Cancel</button></div>';
+ document.body.appendChild(o);
+ o.onclick=e=>{const u=e.target.dataset&&e.target.dataset.u;if(u)location.href=L[u];if(e.target===o||e.target.id==='pcl')o.remove()};
+ $('#pcp').onclick=async()=>{try{await navigator.clipboard.writeText(UPI_ID);toast('UPI ID copied')}catch(e){toast(UPI_ID)}};
+ (async()=>{try{if(!window.qrcode)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js');const qr=qrcode(0,'M');qr.addData(L.ot);qr.make();$('#pq').innerHTML='<div style="font-size:12px;color:#777">or scan this QR from another phone</div>'+qr.createImgTag(4,6)}catch(e){}})();
+ $('#psb').onclick=async()=>{const utr=$('#putr').value.trim(),er=$('#perr');if(!/^\d{12}$/.test(utr))return er.textContent='Enter the 12-digit UTR number from your UPI app';er.textContent='';$('#psb').disabled=true;
+  try{await FS.doc('payments/'+utr).set({uid:CUID,name:(PROFILE&&PROFILE.name)||'',email:(PROFILE&&PROFILE.email)||'',plan:type,amt:pl.amt,utr,at:Date.now(),status:'pending'});o.remove();toast('Payment submitted ✓ Waiting for verification')}catch(e){$('#psb').disabled=false;er.textContent='Could not submit. This UTR may already be used, or check your connection'}}}
+
+async function saveProfile(o,create){await(create?FS.doc('restaurants/'+CUID).set(o):FS.doc('restaurants/'+CUID).update(o))}
+$('#so').onclick=()=>{window.AUTH&&AUTH.signOut()};
+async function phSave(p){await DB.doc('menuPhotos/'+p.id).set(p)}
+function phDel(id){DB.doc('menuPhotos/'+id).delete()}
+
+function menuSel(){const n=document.querySelectorAll('.sel:checked').length,b=$('#md');if(!b)return;b.style.display=n?'':'none';b.textContent='🗑 Delete ('+n+')'}
+function ask(h,n,cb){const d=$('#dlg');d.style.maxWidth='';d.innerHTML=`<h3>${h}</h3>${n?`<p><b>${n}</b> items</p>`:''}<div class="row"><button class="btn alt" id="ak_n">Cancel</button><button class="btn" id="ak_y" style="background:var(--red);color:#fff">Delete</button></div>`;if(!d.open)d.showModal();$('#ak_n').onclick=()=>d.close();$('#ak_y').onclick=()=>{d.close();cb()}}
+function delSel(){const ids=[...document.querySelectorAll('.sel:checked')].map(c=>+c.dataset.s);if(!ids.length)return;ask('Delete selected dishes?',ids.length,()=>{S.items=S.items.filter(i=>!ids.includes(i.id));saveMenu();render();toast(ids.length+' items deleted ✓')})}
+const AI_PROMPT='This is a photo (or one part of a photo) of a restaurant menu. List EVERY dish and drink you can read, without skipping any: all sections and all columns (starters, soups, rice, noodles, main course, tandoor, breads, desserts, drinks and so on). The image may cut off at its top or bottom edge: only list items whose name you can read fully. Use the section heading printed on the menu as "cat"; if the heading is not visible in this part, guess it from the neighbouring items. Keep dish names as printed. If one section holds both veg and non-veg dishes (like Rice, Noodles, Soups), name the category "Veg <section>" for the veg dishes and "Non-Veg <section>" for the non-veg dishes, for example "Veg Noodles" and "Non-Veg Noodles". Prices are numbers only. If an item has two prices (half/full, small/large), put the smaller in "half" and the larger in "full"; with one price use "full" and half null; if no price is visible use 0. "veg" is false if the dish has chicken, mutton, egg, fish, prawn or other meat, otherwise true. Return ONLY a JSON array, nothing else: [{"cat":"","name":"","veg":true,"half":null,"full":0}]';
+const parseItems=s=>{const a=s.indexOf('['),b=s.lastIndexOf(']');if(a<0||b<a)throw new Error('The AI returned no items');return JSON.parse(s.slice(a,b+1))};
+async function callAI(d){
+ if(!window.AI_ENDPOINT)throw new Error('AI is not configured (AI_ENDPOINT is missing)');
+ const r=await fetch(window.AI_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'.toString(),Authorization:'Bearer '+await AUTH.currentUser.getIdToken()},body:JSON.stringify({image:d})}),j=await r.json();if(!r.ok)throw new Error(j.error||r.status);return j.items}
+const srcImg=s=>typeof s==='string'?new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>rej(new Error('Could not open the photo'));im.src=s}):loadPhoto(s);
+async function readMenu(src){const im=await srcImg(src),w=im.width||im.naturalWidth,h=im.height||im.naturalHeight,tall=h>=w,L=tall?h:w,Sh=tall?w:h,parts=L>1100?(L/Sh>2.2?3:2):1,tiles=[];
+ for(let k=0;k<parts;k++){const ov=L*.06,a=Math.max(0,k*L/parts-ov),len=Math.min(L,(k+1)*L/parts+ov)-a,sx=tall?0:a,sy=tall?a:0,sw=tall?w:len,sh=tall?len:h,sc=Math.min(1,2000/Math.max(sw,sh)),c=document.createElement('canvas');c.width=Math.round(sw*sc);c.height=Math.round(sh*sc);const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,sx,sy,sw,sh,0,0,c.width,c.height);tiles.push(c.toDataURL('image/jpeg',.85))}
+ const all=await Promise.all(tiles.map(callAI)),seen=new Set(),out=[];all.flat().forEach(i=>{if(!i||!i.name)return;const k=String(i.name).toLowerCase().replace(/\s+/g,' ').trim()+'|'+(+i.full||0)+'|'+(i.veg===false?'n':'v');if(!seen.has(k)){seen.add(k);out.push(i)}});return out}
+function addItems(items){splitVeg(new Set());let n=0;const touched=new Set();items.forEach(i=>{const name=String(i.name||'').trim();if(!name)return;const raw=String(i.cat||'Menu').trim()||'Menu',cat=vegCat(raw,i.veg!==false),f=+i.full||+i.half||0,h=(+i.half&&+i.full)?+i.half:null;if(S.items.some(x=>x.name.toLowerCase()===name.toLowerCase()&&x.cat===cat))return;const it={id:S.nid++,cat,t:isNV(cat)?'n':isV(cat)?'v':(i.veg===false?'n':'v'),name};if(h)it.h=h;it.f=f;S.items.push(it);n++;if(pairable(baseCat(cat)))touched.add(baseCat(cat))});return n+splitVeg(touched)}
+const PAIR=/rice|noodle|soup|pasta|chowmein|chop ?suey/i,NOPAIR=/plain|jeera|steam/i,PROT=/chicken|mutton|egg|prawn|fish|keema|paneer|veg|mushroom|corn|potato|cheese|soya|baby/i;
+const baseCat=c=>String(c).replace(/^\s*(non[\s-]*veg(etarian)?|veg(etarian)?)\s*[-:]?\s*/i,'').trim()||String(c);
+const isNV=c=>/^\s*non[\s-]*veg/i.test(c),isV=c=>!isNV(c)&&/^\s*veg/i.test(c),pairable=c=>PAIR.test(c)&&!NOPAIR.test(c);
+function vegCat(cat,veg){const b=baseCat(cat);if(!pairable(b))return cat;return isNV(cat)?'Non-Veg '+b:isV(cat)?'Veg '+b:(veg?'Veg ':'Non-Veg ')+b}
+function splitVeg(only){let n=0;S.items.forEach(i=>{const c=vegCat(i.cat,i.t==='v');if(c!==i.cat){i.cat=c;i.t=isNV(c)?'n':'v';n++}});
+ const bases=new Set(S.items.filter(i=>pairable(baseCat(i.cat))).map(i=>baseCat(i.cat)));
+ bases.forEach(b=>{if(only&&!only.has(b))return;[['Veg '+b,'Non-Veg '+b,'n'],['Non-Veg '+b,'Veg '+b,'v']].forEach(([from,to,tt])=>{S.items.filter(i=>i.cat===from).forEach(i=>{if(PROT.test(i.name))return;if(S.items.some(x=>x.cat===to&&x.name.toLowerCase()===i.name.toLowerCase()))return;const it={id:S.nid++,cat:to,t:tt,name:i.name};if(i.h!=null)it.h=i.h;it.f=i.f;S.items.push(it);n++})})});return n}
+let BUSY=false;
+async function uploadAll(files){if(!files.length)return;if(BUSY)return toast('Please wait, another task is still running');BUSY=true;let tot=0;
+ for(let k=0;k<files.length;k++){const f=files[k],tag=(k+1)+'/'+files.length;
+  try{toast('Photo '+tag+' uploading…');const id='p'+Date.now()+Math.random().toString(36).slice(2,6);await phSave({id,data:await compress(f,1800,.8),at:Date.now()})}catch(x){toast('Upload failed: '+((x&&x.message)||'photo or connection issue'));continue}
+  try{toast('Photo '+tag+': reading the menu with AI… (this may take a moment)');const n=addItems(await readMenu(f));tot+=n;if(n)saveMenu();toast('Photo '+tag+': '+n+' items added ✓')}catch(x){toast('AI failed: '+((x&&x.message)||x));await new Promise(r=>setTimeout(r,3000))}}
+ BUSY=false;toast('Total '+tot+' items added to the menu ✓')}
+async function extractMenu(id){const p=PHOTOS.find(x=>x.id===id);if(!p||BUSY)return;BUSY=true;toast('Re-reading the menu…');try{const n=addItems(await readMenu(p.data));if(n)saveMenu();toast(n?n+' new items added ✓':'No new items found (all are already in the menu)')}catch(x){toast('AI failed: '+((x&&x.message)||x))}BUSY=false}
+
+function expired(){const d=$('#dlg');if(d.open)d.close();$('#nav').innerHTML='';document.body.classList.remove('bt');$('#rem').style.display='none';
+ const e=PROFILE.plan&&PROFILE.plan.expiresAt,ds=e?new Date(e).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}):'';
+ $('#app').innerHTML=`<div class="card" style="max-width:520px;margin:6vh auto 0;text-align:center"><div style="font-size:42px">🔒</div><h3 style="margin:6px 0">${e?'Your plan has expired':'Choose a plan to get started'}</h3><p class="mut">${e?'Your subscription ended on '+ds+'. Renew now to unlock all features again. Your data is safe and will be available as soon as you renew.':'Subscribe to unlock billing, KOT, menu management, reports and more.'}</p><div class="row" style="align-items:stretch;margin:16px 0"><div class="plan"><b>₹300</b>per month<br><button class="btn" data-p="monthly" style="margin-top:8px;width:100%">${e?'Renew':'Subscribe'} monthly</button></div><div class="plan"><b>₹3,500</b>per year<br><button class="btn" data-p="yearly" style="margin-top:8px;width:100%">${e?'Renew':'Subscribe'} yearly</button></div></div>${payStatus()}<button class="btn alt sm" data-l="out" style="margin-top:12px">Sign out</button></div>`;
+ $('#app').onclick=ev=>{const p=ev.target.dataset.p;if(p)payNow(p);if(ev.target.dataset.l==='out')$('#so').click()}}
+
+
+(function(){const W=()=>document.querySelector('#login .wrap2'),L=$('#login');
+function fit(){const w=W();if(!w||L.style.display==='none')return;w.style.zoom=1;w.style.minHeight='0';const h=w.offsetHeight,a=innerHeight,z=Math.max(.6,Math.min(1,a/h));w.style.zoom=z;w.style.minHeight=(a/z)+'px';const bl=document.querySelector('#login .blob');if(bl)bl.style.zoom=z}
+const f=()=>setTimeout(fit,0);addEventListener('resize',fit);L.addEventListener('click',f);L.addEventListener('input',f);new MutationObserver(f).observe(L,{attributes:true,attributeFilter:['style']});[200,800,2000].forEach(t=>setTimeout(fit,t));
+const ig=document.querySelector('#login .dev a');if(ig)ig.onclick=e=>{const u='_.9.9.9.0._',web=ig.href,ua=navigator.userAgent;if(/Android/i.test(ua)){e.preventDefault();location.href='intent://instagram.com/_u/'+u+'/#Intent;package=com.instagram.android;scheme=https;S.browser_fallback_url='+encodeURIComponent(web)+';end'}else if(/iPhone|iPad|iPod/i.test(ua)){e.preventDefault();const t=Date.now();location.href='instagram://user?username='+u;setTimeout(()=>{if(!document.hidden&&Date.now()-t<2500)location.href=web},1200)}};})();
+initCloud();
+if(!window.AndroidBridge&&'serviceWorker' in navigator&&location.protocol.indexOf('http')===0)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
