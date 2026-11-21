@@ -157,7 +157,7 @@ function pullMenu(manual){if(!DB)return;DB.doc('store/menu').get().then(sn=>{if(
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&WAITER)pullMenu()});window.addEventListener('online',()=>{if(WAITER)pullMenu()});
 const saveInv=v=>{save();if(DB)DB.doc('invoices/'+v.no).set(v).catch(()=>toast('Bill could not sync'))};
 const SDK=['https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js','https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js','https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js'];
-const loadScript=u=>new Promise((res,rej)=>{const e=document.createElement('script');e.src=u;e.onload=res;e.onerror=rej;document.head.appendChild(e)});
+const loadScript=u=>new Promise((res,rej)=>{const e=document.createElement('script');const t=setTimeout(()=>rej(new Error('timeout')),20000);e.src=u;e.onload=()=>{clearTimeout(t);res()};e.onerror=()=>{clearTimeout(t);rej(new Error('load'))};document.head.appendChild(e)});
 let tblSeen=false;let unsubs=[],WAITER=false,WEMAIL='',WORD=[],NEWO=[],menuSeen=false;
 const authMsg=c=>/invalid|wrong|not-found|credential/.test(c)?'Sign-in failed, please try again':/network/.test(c)?'No internet connection':/too-many/.test(c)?'Too many tries, wait a minute':'Could not sign in';
 async function initCloud(){
@@ -170,7 +170,7 @@ $('#login').style.display='block';$('#ll').src=mkLogo('R');$('#lerr').textConten
 try{
 for(const u of SDK)await loadScript(u);
 firebase.initializeApp(cfg);const auth=firebase.auth(),fs=firebase.firestore();window.FS=fs;window.AUTH=auth;
-try{await fs.enablePersistence({synchronizeTabs:true})}catch(e){}
+try{await Promise.race([fs.enablePersistence({synchronizeTabs:true}),new Promise(r=>setTimeout(r,2500))])}catch(e){}
 $('#lerr').textContent='';
 let CONF=null,RV=null;
 $('#gb').onclick=async()=>{err('');const gp=new firebase.auth.GoogleAuthProvider();try{await auth.signInWithPopup(gp)}catch(e){if(/popup/.test(e.code||''))auth.signInWithRedirect(gp);else err(authMsg(e.code||''))}};
