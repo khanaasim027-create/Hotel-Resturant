@@ -273,11 +273,11 @@ S.invoices.unshift(v);saveInv(v);closeT(false);toast('Saved '+v.no);showInv(v.no
 }finally{saving=false}}
 function menu(){
 const L=S.items.filter(i=>(cat==='All'||i.cat===cat)&&mt(i,q));
-$('#app').innerHTML=`<div class="card">${CAN?'':'<div style="background:var(--chip);border:1px solid var(--red);border-radius:8px;padding:10px;margin-bottom:10px;font-size:14px"><b>Only the owner can edit the menu.</b><br>Please sign in with the owner account.</div>'}<div class="row"><input id="q" placeholder="Search dishes" aria-label="Search dishes" value="${esc(q)}"><button class="btn alt fit" id="mc">Categories</button><button class="btn alt fit" id="md" style="display:none">🗑 Delete (0)</button><button class="btn fit" id="ai">Add dish</button></div><div style="margin-top:8px"><button class="btn sm" id="bk">📷 Bulk add (photo / paste)</button> <button class="btn alt sm" id="vs">⚖ Veg / Non-Veg split</button></div><div class="chips" id="chips"></div><div class="wrap"><table id="mt"></table></div></div>`;
+$('#app').innerHTML=`<div class="card">${CAN?'':'<div style="background:var(--chip);border:1px solid var(--red);border-radius:8px;padding:10px;margin-bottom:10px;font-size:14px"><b>Only the owner can edit the menu.</b><br>Please sign in with the owner account.</div>'}<div class="row"><input id="q" placeholder="Search dishes" aria-label="Search dishes" value="${esc(q)}"><button class="btn alt fit" id="mc">Categories</button><button class="btn alt fit" id="md" style="display:none">🗑 Delete (0)</button><button class="btn fit" id="ai">Add dish</button></div><div style="margin-top:8px"><button class="btn alt sm" id="vs">⚖ Veg / Non-Veg split</button></div><div class="chips" id="chips"></div><div class="wrap"><table id="mt"></table></div></div>`;
 chips();const draw=()=>{const L=S.items.filter(i=>(cat==='All'||i.cat===cat)&&mt(i,q));
 $('#mt').innerHTML='<tr><th><input type="checkbox" id="sa" style="width:auto" aria-label="Select all"></th><th>Dish</th><th>Category</th><th class="n">Half</th><th class="n">Full</th><th></th></tr>'+L.map(i=>`<tr><td><input type="checkbox" class="sel" data-s="${i.id}" style="width:auto"></td><td><span class="dot ${i.t}"></span> ${esc(i.name)}</td><td class="mut">${esc(i.cat)}</td><td class="n">${i.h!=null?inr(i.h):'–'}</td><td class="n">${i.f?inr(i.f):'<span style="color:var(--red)">Set price</span>'}</td><td class="n">${CAN?`<button class="btn alt sm" data-e="${i.id}">Edit</button>`:''}</td></tr>`).join('');menuSel()};draw();
 $('#q').oninput=e=>{q=e.target.value;draw()};$('#chips').onclick=e=>{if(e.target.dataset.c){cat=e.target.dataset.c;chips();draw()}};
-$('#ai').onclick=()=>editItem();if(!CAN)$('#ai').style.display='none';$('#mc').onclick=catMgr;if(!CAN)$('#mc').style.display='none';$('#bk').onclick=()=>{tab='photos';render()};if(!CAN)$('#bk').style.display='none';$('#mt').onclick=e=>{const b=e.target.closest('[data-e]');if(b)editItem(+b.dataset.e)};$('#mt').onchange=e=>{if(e.target.id==='sa')document.querySelectorAll('.sel').forEach(c=>c.checked=e.target.checked);menuSel()};$('#md').onclick=delSel;$('#vs').onclick=()=>{const all=new Set(S.items.map(i=>baseCat(i.cat)));const n=splitVeg(all);saveMenu();render();toast(n?n+' items updated ✓':'Everything is already set up')}}
+$('#ai').onclick=()=>editItem();if(!CAN)$('#ai').style.display='none';$('#mc').onclick=catMgr;if(!CAN)$('#mc').style.display='none';$('#mt').onclick=e=>{const b=e.target.closest('[data-e]');if(b)editItem(+b.dataset.e)};$('#mt').onchange=e=>{if(e.target.id==='sa')document.querySelectorAll('.sel').forEach(c=>c.checked=e.target.checked);menuSel()};$('#md').onclick=delSel;$('#vs').onclick=()=>{const all=new Set(S.items.map(i=>baseCat(i.cat)));const n=splitVeg(all);saveMenu();render();toast(n?n+' items updated ✓':'Everything is already set up')}}
 function editItem(id,pre){
 const it=S.items.find(i=>i.id===id)||{name:'',cat:cat==='All'?cats()[0]:cat,t:'v',h:null,f:''};const d=$('#dlg');
 d.innerHTML=`<h3>${id?'Edit dish':'Add dish'}</h3><p><input id="f1" placeholder="Dish name" value="${esc(it.name)}"></p><p><select id="f5s" aria-label="Category">${cats().map(c=>`<option value="${esc(c)}" ${!pre&&c===it.cat?'selected':''}>${esc(c)}</option>`).join('')}<option value="__new" ${pre?'selected':''}>＋ Create new category…</option></select></p><p><input id="f5" placeholder="New category name" value="${esc(pre||'')}" style="${pre?'':'display:none'}"></p>
@@ -1133,7 +1133,7 @@ function bkParse(text,ocr){
  const mk=(c,n,h,f,fl)=>{n=String(n||'').replace(/\s+/g,' ').trim();
   for(let g;(g=/\s+(?:Rs\.?|[TtZz₹%~$])\s?(\d{2,4})\s*$/.exec(n));){n=n.slice(0,g.index);const v=+g[1];if(f==null)f=v;else if(h==null&&v<f)h=v}
   if(h!=null&&f!=null&&f>=1000&&f>3*h&&/^[1-9]\d{2}$/.test(String(f).slice(1))&&+String(f).slice(1)>h)f=+String(f).slice(1);
-  n=n.replace(/[\s:\-–—=.…,]+$/,'').replace(/^[\s\-–—•▪●*]+/,'');if(!n)return;c=bkTitle(String(c||'').trim());if(c)cat=c;c=cat||'Menu';
+  n=bkName(n).replace(/[\s:\-–—=.…,]+$/,'').replace(/^[\s\-–—•▪●*]+/,'');if(!n)return;c=bkTitle(String(c||'').trim());if(c)cat=c;c=cat||'Menu';
   if(f==null&&h!=null){f=h;h=null}if(h!=null&&f!=null&&h>f){const t=h;h=f;f=t}if(h!=null&&h<=0)h=null;
   out.push({cat:c,name:n,h:h,f:f||0,t:typeOf(c,n,bkFlag(fl))})};
  if(d){
@@ -1205,19 +1205,30 @@ function bkVision(px,W,H){
  return{img:out,Hm}}
 
 // ===== Menu layout: words with boxes -> rows {cat,name,h,f,t} =====
+const BK_FOOD=/starter|soup|rice|noodle|main|course|tandoor|bread|roti|naan|dessert|drink|beverage|sizzler|chinese|gravy|biryani|pizza|burger|sandwich|salad|snack|paratha|thali|combo|breakfast|shake|juice|mocktail|pasta|momo|roll|kebab|curry|dal\b|paneer|chicken|mutton|egg|fish|seafood|veg|special|fast food|south|indian|continental|punjabi|chaat|sweet|kids|platter|appetizer|wok|dim sum|fries|maggi|chowmein|manchurian|tikka|sabzi|raita|papad|tea|coffee|lassi/i;
+function bkName(n){
+ const SY=/[^\p{L}\p{N}&'’().,\-\/+]/u;
+ let t=String(n||'').split(/\s+/).filter(Boolean).map(o=>({c:o.replace(/[^\p{L}\p{N}&'’().,\-\/+]/gu,''),s:SY.test(o)})).filter(x=>x.c);
+ const bad=(x,end)=>x.s&&x.c.length<=2||(end&&/^[A-Za-z]{1,2}$/.test(x.c)&&!/^(of|in|on|to|or|&)$/i.test(x.c))||(!end&&x.s&&/^[a-z]$/i.test(x.c));
+ while(t.length>1&&bad(t[t.length-1],true))t.pop();
+ while(t.length>1&&bad(t[0],false))t.shift();
+ return t.map(x=>x.c).join(' ')}
 function bkLayout(words){
- const W0=[];words.forEach(w=>{const t=String(w.t).trim();if(!t)return;const m=/^([^\dA-Za-z]?\d{2,4})[\/|\\!]+([^\dA-Za-z]?\d{2,4})$/.exec(t),push=(t,x0,x1)=>W0.push({t,x0,y0:w.y0,x1,y1:w.y1,cx:(x0+x1)/2,cy:(w.y0+w.y1)/2,h:w.y1-w.y0});
+ const W0=[];words.forEach(w=>{const t=String(w.t).trim();if(!t)return;const m=/^([^\dA-Za-z]?\d{2,4})[\/|\\!]+([^\dA-Za-z]?\d{2,4})$/.exec(t),push=(t,x0,x1,fx)=>W0.push({t,x0,y0:w.y0,x1,y1:w.y1,cx:(x0+x1)/2,cy:(w.y0+w.y1)/2,h:w.y1-w.y0,fx});
+  const m5=/^(\d{5,6})$/.exec(t);
+  if(!m&&m5){const L=t.length===5?2:3,a=t.slice(0,L),b=t.slice(L);if(+a<+b&&+a>=10){const mid=w.x0+(w.x1-w.x0)*L/t.length;push(a,w.x0,mid,1);push(b,mid,w.x1,1);return}}
   if(m){const L=m[1].length,R=m[2].length,mid=w.x0+(w.x1-w.x0)*L/(L+R+1);push(m[1],w.x0,mid);push(m[2],mid+(w.x1-w.x0)/(L+R+1),w.x1)}else push(t,w.x0,w.x1)});
  if(W0.length<4)return[];
  const hh=W0.filter(w=>/[A-Za-z]{3,}/.test(w.t)).map(w=>w.h).sort((a,b)=>a-b),Hm=hh.length?hh[hh.length>>1]:30;
  const core=t=>t.replace(/^[^\dA-Za-z]+|[^\dA-Za-z]+$/g,'');
+ W0.forEach(w=>{if(core(w.t)!=='65')return;const R=W0.filter(q=>q!==w&&Math.abs(q.cy-w.cy)<.55*Hm),left=R.filter(q=>q.x1<=w.x0+2&&/[A-Za-z]{2,}/.test(q.t)).sort((a,b)=>b.x1-a.x1)[0],right=R.some(q=>q.x0>w.x1&&/^\D?\d{2,4}\D?$/.test(q.t));if(left&&w.x0-left.x1<1.0*Hm&&right)w.nm=true});
  const GN=/^(?:Rs\.?|[TtZzRrXxEeYy%~₹$€£¥])\s?(\d{2,4})$/;
  const isNum=t=>(/^\d{2,4}$/.test(core(t))&&!/[A-Za-z]/.test(t))||GN.test(core(t));
  const isGlyph=t=>/^(?:Rs\.?|[TtZzRrXxEeYy%~₹$€£¥])$/.test(t);
  const isDash=t=>/^[-–—−_~=]{1,4}$/.test(t),isSep=t=>/^[|\/\\!]+$/.test(t);
  const isHalf=t=>/^h[a-z]lf$/i.test(core(t)),isFull=t=>/^fu[l1i]{1,2}$/i.test(core(t));
  // rupee glyph is often read as 7 / 2 / % / ~ in front of the digits
- const nums=W0.filter(w=>isNum(w.t));
+ const nums=W0.filter(w=>(!w.nm&&isNum(w.t)));
  const rup=nums.filter(w=>GN.test(core(w.t))||/^[7%~₹]\d{2,3}$/.test(w.t)||/^[%~₹]/.test(w.t)).length>=2;
  const plain=nums.map(w=>{const m=/(\d{2,4})$/.exec(core(w.t));return m?+m[1]:0}).filter(v=>v>=10&&v<1000).sort((a,b)=>a-b),med=plain.length?plain[plain.length>>1]:0;
  // rupee sign read as a digit (₹300 -> 3300): drop that extra first digit
@@ -1233,16 +1244,20 @@ function bkLayout(words){
  S.forEach(w=>{const r=rows[rows.length-1];if(r&&Math.abs(w.cy-r.cy)<.55*Hm){r.w.push(w);r.cy=r.w.reduce((s,q)=>s+q.cy,0)/r.w.length}else rows.push({cy:w.cy,w:[w]})});
  const anchors=[],recs=[],heads=[];
  rows.forEach(r=>{r.w.sort((a,b)=>a.x0-b.x0);
-  const hasPrice=r.w.some(w=>isNum(w.t)&&onCol(w.cx));
+  const hasPrice=r.w.some(w=>(!w.nm&&isNum(w.t))&&(w.fx||onCol(w.cx)));
   const tk=[];
   r.w.forEach(w=>{ if(!hasPrice&&(isHalf(w.t)||isFull(w.t))){anchors.push({k:isHalf(w.t)?'h':'f',cx:w.cx,cy:w.cy});return}
-   if(isNum(w.t)&&onCol(w.cx))tk.push({k:'n',w,v:val(w.t)});
+   if((!w.nm&&isNum(w.t))&&(w.fx||onCol(w.cx)))tk.push({k:'n',w,v:val(w.t)});
    else if(isDash(w.t)&&!fb&&onCol(w.cx))tk.push({k:'d',w});
    else if(isSep(w.t))tk.push({k:'s',w});
    else tk.push({k:'t',w})});
   // separators only count when touching prices
   tk.forEach((q,i)=>{if(q.k==='t'&&isGlyph(q.w.t)){const n=tk[i+1];if(n&&n.k==='n'&&n.w.x0-q.w.x1<1.2*Hm)q.k='x'}});
   tk.forEach((q,i)=>{if(q.k==='s'){const a=tk[i-1],b=tk[i+1];if(!((a&&(a.k==='n'||a.k==='d'))||(b&&(b.k==='n'||b.k==='d'))))q.k='x'}});
+  for(let i=tk.length-1;i>=0;i--){if(tk[i].k!=='n')continue;let j=i-1;while(j>=0&&tk[j].k==='x')j--;
+   if(j<0||tk[j].k!=='t'||!/^\d{2,4}$/.test(core(tk[j].w.t))||/[A-Za-z]/.test(tk[j].w.t))continue;
+   const v=+core(tk[j].w.t),pv=tk[j-1],gap=pv?tk[j].w.x0-pv.w.x1:1e9;
+   if(v<tk[i].v&&(v>=100||gap>2.2*Hm)){tk[j].k='n';tk[j].v=v}}
   let cur=null;const flush=()=>{if(cur&&(cur.name.length||cur.pr.length))recs.push(cur);cur=null};
   const junk=w=>/^[^A-Za-z0-9&(]+$/.test(w.t)||(w.t.length<=3&&/^[a-z]+$/.test(w.t)&&!/^(of|in|on|to|or|is|an|at|as|and|the|for)$/.test(w.t));
   tk.forEach((q,i)=>{if(q.k!=='t'||!junk(q.w))return;const p=tk[i-1],n=tk[i+1];if(/^[-–—]$/.test(q.w.t)&&p&&n&&p.k==='t'&&n.k==='t'&&/[A-Za-z]/.test(p.w.t+n.w.t))return;q.k='x'});
@@ -1260,21 +1275,23 @@ function bkLayout(words){
    if(L.length<4)return;if(up>=.75||ah>=1.3*Hm)heads.push({txt,x0:g[0].x0,x1:g[g.length-1].x1,y:r.y,big:ah>=1.3*Hm})});
   r.isHead=true});
  heads.sort((a,b)=>a.y-b.y);
+ // restaurant name / banner at the top is not a category
+ while(heads.length>1&&!BK_FOOD.test(heads[0].txt)&&!/^(non[\s-]*veg|veg)/i.test(heads[0].txt))heads.shift();
  const ovl=(a0,a1,b0,b1)=>Math.max(0,Math.min(a1,b1)-Math.max(a0,b0));
- const headFor=(x0,x1,y)=>{let best=null;for(const h of heads){if(h.y>=y-.3*Hm)break;const o=ovl(x0,x1,h.x0,h.x1);if(o<.2*Math.min(h.x1-h.x0,x1-x0)&&!(h.x0<=x0&&h.x1>=x1))continue;if(!best||h.y>best.y)best=h}return best};
+ const headFor=(x0,x1,y)=>{let best=null;for(const h of heads){if(h.y>=y-.3*Hm)break;const o=ovl(x0,x1,h.x0,h.x1);if(o<.2*Math.min(h.x1-h.x0,x1-x0)&&!(h.x0<=x0&&h.x1>=x1))continue;if(!best||h.y>best.y)best=h}if(!best){for(const h of heads){if(h.y>=y-.3*Hm)break;if(BK_FOOD.test(h.txt))best=h}}return best};
  const catOf=(x0,x1,y)=>{const h=headFor(x0,x1,y);if(!h)return'Menu';let t=h.txt;
-  if(/^(non[\s-]*veg(etarian)?|veg(etarian)?)$/i.test(t)){const p=heads.filter(q=>q.y<h.y&&q.big&&!/^(non[\s-]*veg|veg)/i.test(q.txt)).pop();if(p)t=t+' '+p.txt}
+  if(/^(non[\s-]*veg(etarian)?|veg(etarian)?)$/i.test(t)){const p=heads.filter(q=>q.y<h.y&&(q.big||BK_FOOD.test(q.txt))&&!/^(non[\s-]*veg|veg)/i.test(q.txt)).pop();if(p)t=t+' '+p.txt}
   return t};
  const anchorFor=(w,x0,x1)=>{let best=null;for(const a of anchors){if(a.cy>=w.cy)continue;if(Math.abs(a.cx-w.cx)>1.3*Hm)continue;
    if(heads.some(h=>h.y>a.cy+.2*Hm&&h.y<w.cy-.2*Hm&&ovl(x0,x1,h.x0,h.x1)>0))continue;
    if(!best||a.cy>best.cy)best=a}return best};
  const out=[];
  recs.filter(r=>r.pr.length&&r.name.length).forEach(r=>{
-  const raw=nameOf(r.name);let name=raw.replace(/^[^A-Za-z0-9(]+/,'').replace(/[^A-Za-z0-9)]+$/,'').replace(/\s+/g,' ');
-  if(letters(name).length<3)return;
+  const raw=nameOf(r.name);let name=bkName(raw).replace(/^[^A-Za-z0-9(]+/,'').replace(/[^A-Za-z0-9)]+$/,'').replace(/\s+/g,' ');
+  name=bkName(name);if(letters(name).length<3)return;
   let h=null,f=null;const nn=r.pr.filter(p=>p.k==='n');if(!nn.length)return;
   const ax=nn.map(p=>anchorFor(p.w,r.x0,r.x1));
-  if(ax.every(Boolean)){nn.forEach((p,i)=>{if(ax[i].k==='h')h=p.v;else f=p.v})}
+  if(ax.every(Boolean)&&(nn.length<2||new Set(ax.map(a=>a.k)).size===nn.length)){nn.forEach((p,i)=>{if(ax[i].k==='h')h=p.v;else f=p.v})}
   else if(nn.length===1)f=nn[0].v;else{h=nn[0].v;f=nn[nn.length-1].v}
   if(f==null&&h!=null){f=h;h=null}
   if(h&&f>=1000&&f>3*h&&/^[1-9]\d{3}$/.test(String(f))&&/^[1-9]\d{2}$/.test(String(f).slice(1))&&+String(f).slice(1)>h)f=+String(f).slice(1);
