@@ -230,7 +230,7 @@ function newT(){const d=$('#dlg');d.innerHTML='<h3>New table</h3><p><input id="t
 function tables(){const el=$('#tbl');if(!el)return;if(WAITER)return tablesW(el);
  const ks=['Counter',...Object.keys(OPEN).filter(k=>k!=='Counter').sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}))];
  el.innerHTML='<div class="mut" style="font-size:12px;margin-bottom:6px">Running orders: tap a table to switch, nothing is lost</div><div class="chips" style="margin:0;padding:0;position:static">'+ks.map(k=>{const o=OPEN[k];const n=o?o.cart.reduce((a,l)=>a+l.qty,0):0;return `<button class="chip ${k===cur?'on':''}" data-t="${esc(k)}">${k==='Counter'?'Counter':'Table '+esc(k)}${n?' · '+n:''}</button>`}).join('')+'<button class="chip" data-new="1" style="border:1px dashed var(--mut);background:none">+ New table</button>'+'</div>'}
-const tabs={bill:'New bill',kot:'KOTs',menu:'Menu',photos:'Menu photos',inv:'Invoices',cust:'Customers',rep:'Reports',set:'Settings'};
+const tabs={bill:'New bill',kot:'KOTs',menu:'Menu',photos:'Add menu',inv:'Invoices',cust:'Customers',rep:'Reports',set:'Settings'};
 function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display='none',2200)}
 const calc=(L,d)=>{const sub=L.reduce((s,l)=>s+l.price*l.qty,0);const dv=sub*Math.min(Math.max(+d||0,0),100)/100;return{sub,dv,total:sub-dv}};
 function render(){if(!PROFILE||!PROFILE.name)return;lastLock=LOCKED();if(lastLock){expired();return}if(WAITER&&tab!=='bill'&&tab!=='sent')tab='bill';document.body.classList.toggle("bt",tab==="bill");$('#nav').innerHTML=Object.entries(LOCKED()?{}:tabs).filter(([k])=>k!=='set').map(([k,v])=>`<button class="${k===tab?'on':''}" data-t="${k}">${tr(v)}</button>`).join('')+(WAITER?'':`<button class="bell ${NEWO.length?'ring':''}" id="bell" aria-label="Notifications"><span class="bi">🔔</span><span class="bn">${NEWO.length||''}</span></button>`);({bill,kot:kots,menu,inv,cust:custs,rep,sent,photos:photosTab,set:settingsTab})[tab]()}
@@ -277,7 +277,7 @@ $('#app').innerHTML=`<div class="card">${CAN?'':'<div style="background:var(--ch
 chips();const draw=()=>{const L=S.items.filter(i=>(cat==='All'||i.cat===cat)&&mt(i,q));
 $('#mt').innerHTML='<tr><th><input type="checkbox" id="sa" style="width:auto" aria-label="Select all"></th><th>Dish</th><th>Category</th><th class="n">Half</th><th class="n">Full</th><th></th></tr>'+L.map(i=>`<tr><td><input type="checkbox" class="sel" data-s="${i.id}" style="width:auto"></td><td><span class="dot ${i.t}"></span> ${esc(i.name)}</td><td class="mut">${esc(i.cat)}</td><td class="n">${i.h!=null?inr(i.h):'–'}</td><td class="n">${i.f?inr(i.f):'<span style="color:var(--red)">Set price</span>'}</td><td class="n">${CAN?`<button class="btn alt sm" data-e="${i.id}">Edit</button>`:''}</td></tr>`).join('');menuSel()};draw();
 $('#q').oninput=e=>{q=e.target.value;draw()};$('#chips').onclick=e=>{if(e.target.dataset.c){cat=e.target.dataset.c;chips();draw()}};
-$('#ai').onclick=()=>editItem();if(!CAN)$('#ai').style.display='none';$('#mc').onclick=catMgr;if(!CAN)$('#mc').style.display='none';$('#bk').onclick=bulkDlg;if(!CAN)$('#bk').style.display='none';$('#mt').onclick=e=>{const b=e.target.closest('[data-e]');if(b)editItem(+b.dataset.e)};$('#mt').onchange=e=>{if(e.target.id==='sa')document.querySelectorAll('.sel').forEach(c=>c.checked=e.target.checked);menuSel()};$('#md').onclick=delSel;$('#vs').onclick=()=>{const all=new Set(S.items.map(i=>baseCat(i.cat)));const n=splitVeg(all);saveMenu();render();toast(n?n+' items updated ✓':'Everything is already set up')}}
+$('#ai').onclick=()=>editItem();if(!CAN)$('#ai').style.display='none';$('#mc').onclick=catMgr;if(!CAN)$('#mc').style.display='none';$('#bk').onclick=()=>{tab='photos';render()};if(!CAN)$('#bk').style.display='none';$('#mt').onclick=e=>{const b=e.target.closest('[data-e]');if(b)editItem(+b.dataset.e)};$('#mt').onchange=e=>{if(e.target.id==='sa')document.querySelectorAll('.sel').forEach(c=>c.checked=e.target.checked);menuSel()};$('#md').onclick=delSel;$('#vs').onclick=()=>{const all=new Set(S.items.map(i=>baseCat(i.cat)));const n=splitVeg(all);saveMenu();render();toast(n?n+' items updated ✓':'Everything is already set up')}}
 function editItem(id,pre){
 const it=S.items.find(i=>i.id===id)||{name:'',cat:cat==='All'?cats()[0]:cat,t:'v',h:null,f:''};const d=$('#dlg');
 d.innerHTML=`<h3>${id?'Edit dish':'Add dish'}</h3><p><input id="f1" placeholder="Dish name" value="${esc(it.name)}"></p><p><select id="f5s" aria-label="Category">${cats().map(c=>`<option value="${esc(c)}" ${!pre&&c===it.cat?'selected':''}>${esc(c)}</option>`).join('')}<option value="__new" ${pre?'selected':''}>＋ Create new category…</option></select></p><p><input id="f5" placeholder="New category name" value="${esc(pre||'')}" style="${pre?'':'display:none'}"></p>
@@ -944,7 +944,7 @@ function startProfile(u){unsubs.push(FS.doc('restaurants/'+u.uid).onSnapshot(sn=
  if(!isAdmin()){try{['gemKey','gemKey2','gemKeys'].forEach(k=>localStorage.removeItem(k))}catch(e){}}
  unsubs.push(FS.doc('config/ai').onSnapshot(sn=>{AIK=sn.exists?(sn.data()||{}):{}},()=>{}));
  unsubs.push(FS.doc('config/app').onSnapshot(sn=>{const u=sn.exists?((sn.data()||{}).updateUrl||''):'';const ch=u!==UPD_CFG;UPD_CFG=u;if(u&&ch)setTimeout(()=>checkUpdate(true),800)},()=>{}));
- unsubs.push(FS.collection('restaurants/'+u.uid+'/menuPhotos').orderBy('at','desc').onSnapshot(sn=>{PHOTOS=sn.docs.map(d=>d.data());if(tab==='photos')photosTab()},()=>{}))}
+ unsubs.push(FS.collection('restaurants/'+u.uid+'/menuPhotos').orderBy('at','desc').onSnapshot(sn=>{PHOTOS=sn.docs.map(d=>d.data());},()=>{}))}
 function applyProfile(){const P=PROFILE;if(!P)return;if(!P.name){$('#login').style.display='none';$('#onb').style.display='block';onboard();return}
  $('#onb').style.display='none';LANG=P.lang||'en';document.documentElement.lang=LANG;BIZ.name=P.name;BIZ.addr=P.addr||'';BIZ.phone=P.phone||'';
  LOGO=P.logo||mkLogo(P.name);$('#hl').src=LOGO;$('#hn').textContent=P.name.toUpperCase();$('#hs').textContent=tr('OWNER APP · POS & KOT')+(()=>{try{return ' · '+APPV}catch(e){return ''}})();document.title=P.name;
@@ -985,9 +985,7 @@ function askUpd(){if(!isAdmin())return;const d=$('#dlg');d.style.maxWidth='';
  $('#uu_y').onclick=async()=>{const u=normUrl($('#uu').value),m=$('#uum');if(u&&!/^https:\/\//.test(u)){m.textContent='Link must start with https://';return}
   if(u){try{const r=await fetch(u+(u.includes('?')?'&':'?')+'t='+Date.now(),{cache:'no-store'});const t=r.ok?await r.text():'';if(!r.ok||t.indexOf('const APPV')<0){m.textContent='This link does not open the app file. Check the link.';return}}catch(e){m.textContent='Could not open this link. Check the link and internet.';return}}
   try{await FS.doc('config/app').set({updateUrl:u,at:Date.now()},{merge:true});toast(u?'Update link saved ✓ All apps will now update from it':'Update link removed');d.close()}catch(e){m.textContent='Could not save. Add the Firebase rule for config (see the guide).'}}}
-function photosTab(){$('#app').innerHTML=`<div class="card"><h3>${tr('Menu photos')}</h3><p class="mut"><b>Please upload 1 photo at a time.</b> Pick one menu photo, wait until its dishes are added, then add the next photo. Dishes are read by AI and added to your menu automatically.</p><input id="pf" type="file" accept="image/*"></div><div class="card ph" style="margin-top:12px">${PHOTOS.length?PHOTOS.map(p=>`<div><img src="${p.data}" data-z="${p.id}" alt="Menu"><button class="btn sm" data-e="${p.id}" style="width:100%;margin-top:4px">↻ Re-read menu</button><button class="btn alt sm" data-d="${p.id}" style="width:100%;margin-top:4px">Delete</button></div>`).join(''):'<div class="empty" style="grid-column:1/-1">No photos yet.</div>'}</div>`;
- $('#pf').onchange=e=>{const f=[...e.target.files].slice(0,1);e.target.value='';uploadAll(f)};
- $('#app').onclick=e=>{const z=e.target.dataset.z,d=e.target.dataset.d,ex=e.target.dataset.e;if(ex)extractMenu(ex);if(d){const cnt=S.items.filter(x=>x.src===d).length;ask(cnt?'Delete this photo and its '+cnt+' dishes from the menu?':'Delete this photo?',0,()=>{if(cnt){S.items=S.items.filter(x=>x.src!==d);saveMenu()}phDel(d);toast(cnt?'Photo and '+cnt+' dishes deleted ✓':'Photo deleted ✓')})}if(z){const p=PHOTOS.find(x=>x.id===z),w=$('#dlg');w.innerHTML=`<img src="${p.data}" style="width:100%" alt=""><button class="btn" style="width:100%;margin-top:8px" onclick="$('#dlg').close()">Close</button>`;w.showModal()}}}
+function photosTab(){$('#app').innerHTML='<div class="card" id="bkroot"></div>';bulkDlg($('#bkroot'))}
 function planLine(P){const e=P.plan&&P.plan.expiresAt;if(!e)return isAdmin()?'<span class="tag paid">Active</span> <b>Admin</b>':'No active plan';if(e>8e15)return '<span class="tag paid">Active</span> <b>Lifetime</b>';
  const d=Math.max(1,Math.ceil((e-Date.now())/864e5)),t=P.plan.type||(d>62?'yearly':'monthly'),per=t==='yearly'?'1 Year':'1 Month';
  return '<span class="tag paid">Active</span> <b>'+per+'</b> · <b>'+d+'</b> <span>'+(d===1?'day left':'days left')+'</span><br><small class="mut">'+new Date(e).toLocaleDateString('en-IN')+'</small>'}
@@ -1132,7 +1130,10 @@ function bkParse(text,ocr){
  if(!ocr){if(cnt(l=>l.includes('\t'))>=half)d='\t';else if(cnt(l=>l.includes('|'))>=half)d='|';else if(cnt(l=>(l.match(/,/g)||[]).length>=2||/^[^\d,]+,\s*[₹\d.]+\s*$/.test(l))>=half)d=','}
  const out=[];let cat='';
  const typeOf=(c,n,fl)=>fl||(isNV(c)?'n':isV(c)?'v':(bkNVre.test(n)?'n':'v'));
- const mk=(c,n,h,f,fl)=>{n=String(n||'').replace(/\s+/g,' ').trim().replace(/[\s:\-–—=.…,]+$/,'').replace(/^[\s\-–—•▪●*]+/,'');if(!n)return;c=bkTitle(String(c||'').trim());if(c)cat=c;c=cat||'Menu';
+ const mk=(c,n,h,f,fl)=>{n=String(n||'').replace(/\s+/g,' ').trim();
+  for(let g;(g=/\s+(?:Rs\.?|[TtZz₹%~$])\s?(\d{2,4})\s*$/.exec(n));){n=n.slice(0,g.index);const v=+g[1];if(f==null)f=v;else if(h==null&&v<f)h=v}
+  if(h!=null&&f!=null&&f>=1000&&f>3*h&&/^[1-9]\d{2}$/.test(String(f).slice(1))&&+String(f).slice(1)>h)f=+String(f).slice(1);
+  n=n.replace(/[\s:\-–—=.…,]+$/,'').replace(/^[\s\-–—•▪●*]+/,'');if(!n)return;c=bkTitle(String(c||'').trim());if(c)cat=c;c=cat||'Menu';
   if(f==null&&h!=null){f=h;h=null}if(h!=null&&f!=null&&h>f){const t=h;h=f;f=t}if(h!=null&&h<=0)h=null;
   out.push({cat:c,name:n,h:h,f:f||0,t:typeOf(c,n,bkFlag(fl))})};
  if(d){
@@ -1210,13 +1211,19 @@ function bkLayout(words){
  if(W0.length<4)return[];
  const hh=W0.filter(w=>/[A-Za-z]{3,}/.test(w.t)).map(w=>w.h).sort((a,b)=>a-b),Hm=hh.length?hh[hh.length>>1]:30;
  const core=t=>t.replace(/^[^\dA-Za-z]+|[^\dA-Za-z]+$/g,'');
- const isNum=t=>/^\d{2,4}$/.test(core(t))&&!/[A-Za-z]/.test(t);
+ const GN=/^(?:Rs\.?|[TtZzRrXxEeYy%~₹$€£¥])\s?(\d{2,4})$/;
+ const isNum=t=>(/^\d{2,4}$/.test(core(t))&&!/[A-Za-z]/.test(t))||GN.test(core(t));
+ const isGlyph=t=>/^(?:Rs\.?|[TtZzRrXxEeYy%~₹$€£¥])$/.test(t);
  const isDash=t=>/^[-–—−_~=]{1,4}$/.test(t),isSep=t=>/^[|\/\\!]+$/.test(t);
  const isHalf=t=>/^h[a-z]lf$/i.test(core(t)),isFull=t=>/^fu[l1i]{1,2}$/i.test(core(t));
  // rupee glyph is often read as 7 / 2 / % / ~ in front of the digits
  const nums=W0.filter(w=>isNum(w.t));
- const rup=nums.filter(w=>/^[7%~₹]\d{2,3}$/.test(w.t)||/^[%~₹]/.test(w.t)).length>=3;
- const val=t=>{let c=core(t);if(rup&&/^\d{4}$/.test(c)&&/^[2-9]/.test(c))c=c.slice(1);return +c};
+ const rup=nums.filter(w=>GN.test(core(w.t))||/^[7%~₹]\d{2,3}$/.test(w.t)||/^[%~₹]/.test(w.t)).length>=2;
+ const plain=nums.map(w=>{const m=/(\d{2,4})$/.exec(core(w.t));return m?+m[1]:0}).filter(v=>v>=10&&v<1000).sort((a,b)=>a-b),med=plain.length?plain[plain.length>>1]:0;
+ // rupee sign read as a digit (₹300 -> 3300): drop that extra first digit
+ const val=t=>{let c=core(t);const g=GN.exec(c);if(g)c=g[1];const n=+c;
+  if(/^\d{4}$/.test(c)){const r=c.slice(1);if(/^[1-9]\d{2}$/.test(r)&&((rup&&/^[2-9]/.test(c))||(med&&n>4*med)))return +r}
+  return n};
  // price columns: x-centres of numbers that line up under each other
  const cl=[];[...nums].sort((a,b)=>a.cx-b.cx).forEach(w=>{const c=cl[cl.length-1];if(c&&w.cx-c.sum/c.n<1.0*Hm){c.sum+=w.cx;c.n++}else cl.push({sum:w.cx,n:1})});
  const pc=cl.filter(c=>c.n>=3).map(c=>c.sum/c.n),fb=pc.length===0;
@@ -1234,6 +1241,7 @@ function bkLayout(words){
    else if(isSep(w.t))tk.push({k:'s',w});
    else tk.push({k:'t',w})});
   // separators only count when touching prices
+  tk.forEach((q,i)=>{if(q.k==='t'&&isGlyph(q.w.t)){const n=tk[i+1];if(n&&n.k==='n'&&n.w.x0-q.w.x1<1.2*Hm)q.k='x'}});
   tk.forEach((q,i)=>{if(q.k==='s'){const a=tk[i-1],b=tk[i+1];if(!((a&&(a.k==='n'||a.k==='d'))||(b&&(b.k==='n'||b.k==='d'))))q.k='x'}});
   let cur=null;const flush=()=>{if(cur&&(cur.name.length||cur.pr.length))recs.push(cur);cur=null};
   const junk=w=>/^[^A-Za-z0-9&(]+$/.test(w.t)||(w.t.length<=3&&/^[a-z]+$/.test(w.t)&&!/^(of|in|on|to|or|is|an|at|as|and|the|for)$/.test(w.t));
@@ -1247,7 +1255,7 @@ function bkLayout(words){
  // headings = unpriced rows that look like headings (split side-by-side headings at big gaps)
  recs.filter(r=>!r.pr.length&&r.name.length).forEach(r=>{
   const gr=[];r.name.forEach(w=>{const g=gr[gr.length-1];if(g&&w.x0-g[g.length-1].x1<2.5*Hm)g.push(w);else gr.push([w])});
-  gr.forEach(g=>{const ws=g.filter(w=>/[A-Za-z]{2,}/.test(w.t));if(!ws.length)return;
+  gr.forEach(g=>{let ws=g.filter(w=>/[A-Za-z]{2,}/.test(w.t));while(ws.length>2&&/^[A-Za-z]{1,2}$/.test(core(ws[ws.length-1].t))&&!/^(OF|IN|ON|TO|OR|AT|&)$/.test(core(ws[ws.length-1].t)))ws=ws.slice(0,-1);if(!ws.length)return;
    const txt=nameOf(ws).replace(/[^A-Za-z&\- ]/g,' ').replace(/\s+/g,' ').trim(),L=letters(txt),up=L.filter(c=>c===c.toUpperCase()).length/(L.length||1),ah=ws.reduce((s,w)=>s+w.h,0)/ws.length;
    if(L.length<4)return;if(up>=.75||ah>=1.3*Hm)heads.push({txt,x0:g[0].x0,x1:g[g.length-1].x1,y:r.y,big:ah>=1.3*Hm})});
   r.isHead=true});
@@ -1269,6 +1277,7 @@ function bkLayout(words){
   if(ax.every(Boolean)){nn.forEach((p,i)=>{if(ax[i].k==='h')h=p.v;else f=p.v})}
   else if(nn.length===1)f=nn[0].v;else{h=nn[0].v;f=nn[nn.length-1].v}
   if(f==null&&h!=null){f=h;h=null}
+  if(h&&f>=1000&&f>3*h&&/^[1-9]\d{3}$/.test(String(f))&&/^[1-9]\d{2}$/.test(String(f).slice(1))&&+String(f).slice(1)>h)f=+String(f).slice(1);
   const cat=bkTitle(catOf(r.x0,r.x1,r.y)).replace(/\bNon Veg\b/i,'Non-Veg');
   out.push({cat,name,h,f:f||0,y:r.y,x:r.x0,junk:/^[^A-Za-z0-9]/.test(raw)})});
  // repair names that lost their first word (ornament touching the letters)
@@ -1302,8 +1311,8 @@ async function bkOcr(file){
  const rows=bkLayout(bkWords(d));
  if(rows.length>=3)return{text:bkPipe(rows),ocr:false,n:rows.length};
  return{text:d.text||'',ocr:true,n:0}}
-function bulkDlg(){const d=$('#dlg');d.style.maxWidth='760px';let rows=[];
- d.innerHTML=`<h3>📋 Bulk add dishes</h3><p class="mut" style="font-size:13px;margin:4px 0 8px">Menu ki photo daalo. App khud columns, category (Veg / Non-Veg heading), dish ka naam aur Half-Full price pakad ke bhar dega. Neeche preview me ek baar check karke Import dabao.</p>
+function bulkDlg(root){const inl=!!root,d=root||$('#dlg');if(!inl)d.style.maxWidth='760px';let rows=[];
+ d.innerHTML=`<h3>📷 Menu photo se dishes add karo</h3><p class="mut" style="font-size:13px;margin:4px 0 8px">Menu ki photo daalo. App khud columns, category (Veg / Non-Veg heading), dish ka naam aur Half-Full price pakad ke bhar dega. Neeche preview me ek baar check karke Import dabao.</p>
 <button class="btn" id="bk_ph" style="width:100%;padding:16px;font-size:17px">📷 Menu ki photo select karo</button>
 <div id="bk_pg" style="font-size:14px;min-height:20px;margin-bottom:6px"></div>
 <input type="file" id="bk_pf" accept="image/*" multiple style="display:none">
@@ -1337,9 +1346,9 @@ function bulkDlg(){const d=$('#dlg');d.style.maxWidth='760px';let rows=[];
  $('#bk_f').onclick=()=>$('#bk_ff').click();
  $('#bk_ff').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const r=new FileReader();r.onload=()=>{$('#bk_t').value=String(r.result||'');$('#bk_t').oninput()};r.readAsText(f)};
  $('#bk_e').onclick=async()=>{const b=new Blob(['\uFEFFCategory,Dish Name,Half Price,Full Price,Veg/Non-Veg\nStarters,Paneer Tikka,,220,V\nStarters,Chicken 65,,240,N\nVeg Rice,Fried Rice,120,220,V\nNon-Veg Rice,Chicken Fried Rice,150,260,N\n'],{type:'text/csv'});try{if(!(await saveFile('menu-sample.csv',b)))toast('Saving is not available here')}catch(x){toast('Could not save the file')}};
- $('#bk_c').onclick=()=>d.close();
- $('#bk_i').onclick=()=>{const ok=rows.filter(r=>String(r.name).trim());if(!ok.length)return toast('Pehle menu paste karo');const[a,u]=bkImport(ok,$('#bk_u').checked);saveMenu();d.close();render();toast(a+' dishes added'+(u?', '+u+' updated':'')+' ✓')};
- d.addEventListener('close',()=>{d.style.maxWidth=''},{once:true});if(!d.open)d.showModal()}
+ $('#bk_c').onclick=()=>{if(inl){rows=[];$('#bk_t').value='';$('#bk_pg').textContent='';draw()}else d.close()};
+ $('#bk_i').onclick=()=>{const ok=rows.filter(r=>String(r.name).trim());if(!ok.length)return toast('Pehle menu paste karo');const[a,u]=bkImport(ok,$('#bk_u').checked);saveMenu();if(inl)tab='menu';else d.close();render();toast(a+' dishes added'+(u?', '+u+' updated':'')+' ✓')};
+ if(!inl){d.addEventListener('close',()=>{d.style.maxWidth=''},{once:true});if(!d.open)d.showModal()}}
 
 let BUSY=false,AIK={};
 async function uploadAll(files){if(!files.length)return;if(BUSY)return toast('Please wait, another task is still running');BUSY=true;let tot=0;
