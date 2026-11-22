@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>Restaurant POS</title>
+<title>City Diner POS</title><script>try{document.documentElement.dataset.theme=localStorage.getItem("cd.theme")||"dark"}catch(e){document.documentElement.dataset.theme="dark"}</script>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0c2a23">
+<meta name="theme-color" content="#16161c">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="mobile-web-app-capable" content="yes">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap">
 <style>
 :root{--bg:#eff3f1;--card:#fff;--ink:#10241f;--mut:#62776f;--line:#dbe3df;--pri:#0f3d33;--pri-ink:#fff;--gold:#a87a1f;--red:#c0392b;--ok:#1f8a5b;--chip:#e4ebe7;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -19,9 +19,9 @@ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:en
 html,body{overscroll-behavior:none}body{overflow-x:hidden;margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 Inter,system-ui,sans-serif}
 h1,h2,h3{font-family:Cinzel,Georgia,serif;margin:0}
 header{background:#0c2a23;color:#f3e9cf;padding:10px 16px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;border-bottom:2px solid #c9a24a}
-header h1{font-size:20px;letter-spacing:1.5px;color:#e3c274}header small{display:block;font:500 11px Inter;color:#9fb8b0;letter-spacing:.5px}
-nav{display:flex;gap:2px;overflow-x:auto;max-width:100%;order:3;width:100%}.lg{width:46px;height:46px;border-radius:50%;flex:none}.sy{order:2;margin-left:auto;font:600 11px Inter;color:#9fb8b0}@media(min-width:861px){nav{order:1;width:auto}}
-nav button{background:none;border:0;color:#cfe0da;padding:8px 14px;border-radius:8px;font:600 13px Inter;cursor:pointer;white-space:nowrap}
+header h1{font-size:20px;letter-spacing:1.5px;color:#e3c274}header small{display:block;font:500 11px "Plus Jakarta Sans",Inter,system-ui,-apple-system,Roboto,Arial,sans-serif;color:#9fb8b0;letter-spacing:.5px}
+nav{display:flex;gap:2px;overflow-x:auto;max-width:100%;order:3;width:100%}.lg{width:46px;height:46px;border-radius:50%;flex:none}.sy{order:2;margin-left:auto;font:600 11px "Plus Jakarta Sans",Inter,system-ui,-apple-system,Roboto,Arial,sans-serif;color:#9fb8b0}@media(min-width:861px){nav{order:1;width:auto}}
+nav button{background:none;border:0;color:#cfe0da;padding:8px 14px;border-radius:8px;font:600 13px "Plus Jakarta Sans",Inter,system-ui,-apple-system,Roboto,Arial,sans-serif;cursor:pointer;white-space:nowrap}
 nav button.on{background:#c9a24a;color:#1a1405}
 main{max-width:1200px;margin:0 auto;padding:14px}
 .grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:14px;align-items:start}.grid>*{min-width:0}@media(max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}}
@@ -30,18 +30,18 @@ main{max-width:1200px;margin:0 auto;padding:14px}
 input,select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
 input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
 .row{display:flex;gap:8px;align-items:center}.row>*{flex:1}.row>.fit{flex:none}
-.btn{background:var(--pri);color:var(--pri-ink);border:0;border-radius:8px;padding:10px 14px;font:600 14px Inter;cursor:pointer}
+.btn{background:var(--pri);color:var(--pri-ink);border:0;border-radius:8px;padding:10px 14px;font:600 14px "Plus Jakarta Sans",Inter,system-ui,-apple-system,Roboto,Arial,sans-serif;cursor:pointer}
 .btn.alt{background:none;color:var(--ink);border:1px solid var(--line)}.btn.sm{padding:5px 10px;font-size:13px}
 .chips{display:flex;gap:6px;overflow-x:auto;padding:10px 0;scrollbar-width:thin}
-.chip{flex:none;background:var(--chip);color:var(--ink);border:0;border-radius:99px;padding:6px 12px;font:500 13px Inter;cursor:pointer}
+.chip{flex:none;background:var(--chip);color:var(--ink);border:0;border-radius:99px;padding:6px 12px;font:500 13px "Plus Jakarta Sans",Inter,system-ui,-apple-system,Roboto,Arial,sans-serif;cursor:pointer}
 .chip.on{background:var(--pri);color:var(--pri-ink)}
 #list{max-height:68vh;overflow:auto}
 .ch{font:700 13px Cinzel,serif;color:var(--gold);padding:12px 2px 4px;border-bottom:1px solid var(--line);letter-spacing:.5px}
 .li{display:flex;align-items:center;gap:10px;padding:8px 2px;border-bottom:1px solid var(--line)}
 .li .nm{flex:1;min-width:0;overflow-wrap:anywhere}.dot{width:12px;height:12px;border:1.5px solid;border-radius:3px;display:inline-grid;place-items:center;flex:none}
 .dot::after{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}.dot.v{color:#1f8a5b}.dot.n{color:#c0392b}
-.pb{background:none;border:1px solid var(--line);border-radius:8px;padding:7px 10px;color:var(--ink);font:600 13px Inter;cursor:pointer;min-width:66px}
-.pb:hover{border-color:var(--gold);background:var(--chip)}.pb small{display:block;color:var(--mut);font:500 10px Inter}
+.pb{background:none;border:1px solid var(--line);border-radius:8px;padding:7px 10px;color:var(--ink);font:600 13px "Plus Jakarta Sans",Inter,system-ui,-apple-system,Roboto,Arial,sans-serif;cursor:pointer;min-width:66px}
+.pb:hover{border-color:var(--gold);background:var(--chip)}.pb small{display:block;color:var(--mut);font:500 10px "Plus Jakarta Sans",Inter,system-ui,-apple-system,Roboto,Arial,sans-serif}
 table{width:100%;border-collapse:collapse}th,td{padding:8px 6px;text-align:left;border-bottom:1px solid var(--line)}th{color:var(--mut);font-weight:500;font-size:12px}
 td.n,th.n{text-align:right}.wrap{overflow-x:auto}
 .tot{display:flex;justify-content:space-between;padding:3px 0}.tot.big{font:700 20px Cinzel,serif;border-top:2px solid var(--ink);margin-top:6px;padding-top:8px}
@@ -73,17 +73,66 @@ input,select{font-size:16px}
 .ob{pointer-events:auto;background:var(--card);color:var(--ink);border:2px solid var(--gold);border-radius:12px;padding:10px 12px;margin:0 auto 8px;max-width:560px;box-shadow:0 6px 20px rgba(0,0,0,.3);animation:obin .25s ease-out}
 @keyframes obin{from{transform:translateY(-30px);opacity:0}to{transform:none;opacity:1}}
 @media print{header,main,#bar,#toast,.noprint{display:none!important}body{background:#fff;color:#000}dialog{border:0;position:static;max-width:none;width:100%;max-height:none}}
-#rem{display:none;justify-content:space-between;align-items:center;gap:8px;padding:8px 16px;background:#c9a24a;color:#1a1405;font:600 13px Inter}
+#rem{display:none;justify-content:space-between;align-items:center;gap:8px;padding:8px 16px;background:#c9a24a;color:#1a1405;font:600 13px "Plus Jakarta Sans",Inter,system-ui,-apple-system,Roboto,Arial,sans-serif}
 .ph{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}.ph img{width:100%;height:150px;object-fit:cover;border-radius:8px;cursor:zoom-in}
 .plan{flex:1;border:2px solid var(--line);border-radius:12px;padding:12px;text-align:center}.plan b{display:block;font:700 22px Cinzel,serif}
 </style>
-<meta name="app-build" content="202611222200">
-<meta name="app-notes" content="Fixed the update message that kept repeating|App version is now shown in the header and in Settings|AI keys are managed only by the admin and shared with all clients|The app switches to the next AI key by itself when a limit is reached">
+<meta name="app-build" content="202611232300">
+<meta name="app-notes" content="Fixed adding dish photos: the photo now saves and shows on the dish right away|After adding, a message shows how many photos were added with a small picture of each|Settings has Dish photos: add many at once, backup and restore">
 <style>#gs{position:relative;z-index:5;touch-action:manipulation;-webkit-tap-highlight-color:transparent}</style>
 <script src="firebase-config.js"></script>
+<style id="cd-skin">
+:root[data-theme="dark"]{color-scheme:dark;--bg:#14141a;--side:#1b1b23;--card:#21212b;--ink:#f3f3f6;--mut:#8d8d9b;--line:#31313d;--pri:#f25c54;--pri-ink:#fff;--gold:#f25c54;--red:#ff6f66;--ok:#3ecf8e;--chip:#2a2a35}
+:root[data-theme="light"]{color-scheme:light;--bg:#f2f2f6;--side:#fff;--card:#fff;--ink:#1b1b22;--mut:#7b7b89;--line:#e7e7ee;--pri:#f25c54;--pri-ink:#fff;--gold:#e0463e;--red:#d83a31;--ok:#18a56b;--chip:#f1f1f5}
+body{font-family:"Plus Jakarta Sans",Inter,system-ui,sans-serif}h1,h2,h3{font-family:inherit;font-weight:700}
+header{position:fixed;left:0;top:0;bottom:0;width:96px;flex-direction:column;flex-wrap:nowrap;align-items:center;gap:6px;padding:14px 6px;background:var(--side);border:0;color:var(--ink);overflow-y:auto;z-index:20}
+header h1{font:700 11px/1.2 "Plus Jakarta Sans",Inter,system-ui,-apple-system,Roboto,Arial,sans-serif;letter-spacing:0;color:var(--ink);text-align:center;margin-top:4px}header small{display:none}header>div{text-align:center}
+.lg{width:46px;height:46px}.sy{order:5;margin:0;font:600 9px "Plus Jakarta Sans",Inter,system-ui,-apple-system,Roboto,Arial,sans-serif;color:var(--mut);text-align:center}
+nav{order:1;flex-direction:column;width:100%;gap:6px;overflow:visible;margin-top:10px}
+nav button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:11px 2px;border-radius:14px;color:var(--mut);font:600 11px "Plus Jakarta Sans",Inter,system-ui,-apple-system,Roboto,Arial,sans-serif;white-space:normal}
+nav button::before{font-size:21px;line-height:1}nav button.on{background:var(--pri);color:#fff}
+nav button[data-t=bill]::before{content:"🏠"}nav button[data-t=kot]::before{content:"🧾"}nav button[data-t=menu]::before{content:"📋"}nav button[data-t=photos]::before{content:"➕"}nav button[data-t=inv]::before{content:"🕘"}nav button[data-t=cust]::before{content:"👥"}nav button[data-t=rep]::before{content:"📊"}
+#th,#gs{order:3;background:var(--chip)!important;border:0!important;color:var(--ink)!important;border-radius:12px!important;width:42px;height:42px;font-size:19px;cursor:pointer;flex:none;display:flex;align-items:center;justify-content:center;padding:0}
+#th{margin-top:auto}#so,#vo{order:4!important;border-color:var(--line)!important;color:var(--mut)!important}
+main{margin:0 0 0 96px;max-width:none;padding:16px}#rem{margin-left:96px}
+.card{background:var(--card);border:0;border-radius:18px;padding:16px}
+.grid{gap:16px}.sticky{top:16px}@media(min-width:861px){.grid{grid-template-columns:minmax(0,1fr) 380px}}
+input,select{background:var(--chip);border:1px solid transparent;border-radius:12px;padding:11px 14px}
+.btn{border-radius:12px}.btn.alt{border-color:var(--line)}
+.mtop{display:flex;align-items:center;gap:12px;margin-bottom:4px}.mtop>div{flex:1;min-width:0}.mtop h2{font-size:22px}.mtop input{flex:1.2;min-width:0}
+.chips{gap:10px;padding:10px 0 12px}
+.chip{display:flex;align-items:center;gap:8px;border-radius:14px;padding:10px 16px;background:var(--chip);font:600 14px "Plus Jakarta Sans",Inter,system-ui,-apple-system,Roboto,Arial,sans-serif;border:2px solid transparent}
+.chip span{font-size:20px}.chip.on{background:var(--chip);color:var(--ink);border-color:var(--pri)}
+#list.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;align-content:start;max-height:calc(100vh - 230px)}
+.dgrid .ch{grid-column:1/-1;color:var(--ink);font:700 15px "Plus Jakarta Sans",Inter,system-ui,-apple-system,Roboto,Arial,sans-serif;border:0;padding:8px 2px 0}
+.dc{position:relative;background:var(--chip);border-radius:16px;padding:8px;display:flex;flex-direction:column;gap:6px}
+.dimg{aspect-ratio:4/3;border-radius:11px;overflow:hidden;position:relative;cursor:pointer;background:var(--bg)}
+.dimg img,.th img{width:100%;height:100%;object-fit:cover;display:block}
+.ph0{display:grid;place-items:center;width:100%;height:100%;font-size:44px;background:linear-gradient(135deg,#3b292b,#231b1d)}.ph0.v{background:linear-gradient(135deg,#1f3a2c,#15241b)}
+:root[data-theme=light] .ph0{background:linear-gradient(135deg,#ffe4e1,#ffd2cd)}:root[data-theme=light] .ph0.v{background:linear-gradient(135deg,#dcf5e6,#c8ecd8)}
+.dimg .dot{position:absolute;left:7px;top:7px;background:#fff;width:15px;height:15px}
+.phrec{display:flex;gap:8px;overflow-x:auto;margin-top:8px}.phrec>div{width:64px;flex:none;text-align:center}.phrec small{display:block;font-size:10px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.cam{position:absolute;right:13px;top:13px;width:28px;height:28px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;font-size:13px;cursor:pointer;display:grid;place-items:center;padding:0}
+.dn{font:600 13px/1.25 "Plus Jakarta Sans",Inter,system-ui,-apple-system,Roboto,Arial,sans-serif;min-height:32px;padding:0 2px}.dp{display:flex;gap:6px}
+.dp .pb{flex:1;min-width:0;background:var(--card);border-color:transparent;color:var(--pri);font-weight:700;border-radius:10px;padding:6px 4px}.dp .pb small{color:var(--mut)}
+.th{width:46px;height:46px;border-radius:11px;overflow:hidden;flex:none;display:block}.th .ph0{font-size:22px}
+.cl{background:var(--chip);border:0;border-radius:14px;padding:10px;margin-bottom:8px}
+.tot.big{font:700 18px "Plus Jakarta Sans",Inter,system-ui,-apple-system,Roboto,Arial,sans-serif;border-top:1px dashed var(--mut)}
+#sv{flex:2;padding:14px;background:var(--pri);color:#fff}
+dialog{border:0;border-radius:18px}#toast{background:var(--pri);color:#fff}
+@media(min-width:861px){#bcard{max-height:calc(100vh - 32px);overflow:auto}}
+@media(max-width:860px){
+header{top:auto;bottom:0;right:0;width:auto;flex-direction:row;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));gap:6px;border-top:1px solid var(--line)}
+header>img.lg,header>div,.sy,.lgp{display:none}
+nav{flex-direction:row;overflow-x:auto;flex:1;margin:0;width:auto}nav button{flex:none;min-width:60px;padding:6px}
+#th{margin-top:0}main{margin-left:0;padding:10px 10px 150px}#rem{margin-left:0}
+.bt #bar{bottom:calc(68px + env(safe-area-inset-bottom,0px))}
+#list.dgrid{grid-template-columns:repeat(2,minmax(0,1fr));max-height:none}.mtop{flex-wrap:wrap}.mtop input{flex-basis:100%;order:3}
+}
+</style>
 </head>
 <body>
-<header><img class="lg" id="hl" alt="Logo"><div><h1 id="hn"></h1><small id="hs"></small></div><span class="sy" id="sync"></span><button id="so" style="display:none;order:2;background:none;border:1px solid #3a5b52;color:#cfe0da;border-radius:8px;padding:5px 10px;font:600 12px Inter,sans-serif;cursor:pointer">Sign out</button><button id="vo" style="display:none;order:2;background:none;border:1px solid #3a5b52;color:#cfe0da;border-radius:8px;padding:5px 10px;font:600 12px Inter,sans-serif;cursor:pointer">🔊 Voice ON</button><button id="gs" type="button" title="Settings" aria-label="Settings" style="background:none;border:1px solid #3a5b52;color:#e3c274;border-radius:10px;width:42px;height:42px;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;order:2"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button><nav id="nav"></nav></header><div id="rem"></div>
+<header><img class="lg" id="hl" alt="Logo"><div><h1 id="hn"></h1><small id="hs"></small></div><span class="sy" id="sync"></span><button id="so" style="display:none;order:2;background:none;border:1px solid #3a5b52;color:#cfe0da;border-radius:8px;padding:5px 10px;font:600 12px Inter,sans-serif;cursor:pointer">Sign out</button><button id="vo" style="display:none;order:2;background:none;border:1px solid #3a5b52;color:#cfe0da;border-radius:8px;padding:5px 10px;font:600 12px Inter,sans-serif;cursor:pointer">🔊 Voice ON</button><button id="gs" type="button" title="Settings" aria-label="Settings" style="background:none;border:1px solid #3a5b52;color:#e3c274;border-radius:10px;width:42px;height:42px;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;order:2"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button><button id="th" type="button" aria-label="Day or night theme" title="Day / Night"></button><nav id="nav"></nav></header><div id="rem"></div>
 <main id="app"></main>
 <dialog id="dlg"></dialog>
 <style>
@@ -110,12 +159,45 @@ input,select{font-size:16px}
 #login .dev{text-align:center;color:#9a9a9a;font-size:13px;margin:10px 0 0}#login .dev b{color:#111}#login .dev a{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:6px;color:#111;font-weight:700;font-size:14px;text-decoration:none}#login .dev a svg{color:#d6249f}
 </style><div id="login" style="display:none;position:fixed;inset:0;z-index:60;overflow:auto"><div class="blob"></div><div class="wrap2"><img id="ll" alt="" style="display:none"><h2 id="lt">Login</h2><label for="em">Email</label><div class="fld"><input id="em" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" style="letter-spacing:0"></div><label for="pw">Password</label><div class="fld"><input id="pw" type="password" autocomplete="current-password" placeholder="••••••••"><button class="eye" id="eye" type="button" aria-label="Show password" onclick="var p=document.getElementById('pw'),p2=document.getElementById('pw2'),h=p.type==='password';p.type=p2.type=h?'text':'password';document.getElementById('slash').style.display=h?'none':''"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#777" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path id="slash" d="M3 3l18 18"/></svg></button></div><div id="pw2w" class="fld" style="display:none"><label for="pw2">Confirm password</label><input id="pw2" type="password" autocomplete="new-password" placeholder="••••••••"></div><button class="fg" id="fg" type="button">Forgot password?</button><button class="lb" id="lb" type="button">Login</button><div class="or">Or</div><button class="gb2" id="gb" type="button" aria-label="Continue with Google"><svg width="26" height="26" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/><path fill="#FBBC05" d="M10.5 28.7a14.5 14.5 0 0 1 0-9.4l-7.9-6.1a24 24 0 0 0 0 21.6l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.9 2.3-8.4 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg></button><div class="gl">Continue with Google</div><div class="lerr2" id="lerr"></div><div class="bt2"><span id="tgt">Don't have an account?</span><button id="tg" type="button">Sign up</button></div><div class="dev">Developed by <b>Aasim</b><a href="https://www.instagram.com/_.9.9.9.0._?jplx=NTVlMzEzbDlocGlw" target="_blank" rel="noopener noreferrer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>Follow on Instagram</a></div></div></div>
 <div id="onb" style="display:none;position:fixed;inset:0;z-index:61;background:var(--bg);overflow:auto;padding:24px 16px"></div>
-<div id="bar"></div>
+<div id="bar"></div><input type="file" id="phf1" class="phin" data-k="one" accept="image/*" style="position:absolute;left:-9999px;opacity:0">
 <div id="toast" role="status"></div><div id="nob" style="display:none"></div>
+<script type="application/json" id="photo-pack">{}</script>
 <script type="text/plain" id="app-main">
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const inr=n=>'₹'+(+n||0).toLocaleString('en-IN',{maximumFractionDigits:2});
+
+const CI=c=>/soup/i.test(c)?'🍲':/arabian/i.test(c)?'🍖':/starter|tandoor/i.test(c)?'🍗':/noodle/i.test(c)?'🍜':/rice|biryani/i.test(c)?'🍚':/roti|naan/i.test(c)?'🫓':/fries|papad/i.test(c)?'🍟':/dessert/i.test(c)?'🍮':/main/i.test(c)?'🥘':'🍽️';
+let PH={};
+const phDB=()=>new Promise((res,rej)=>{const r=indexedDB.open('cd-photos',1);r.onupgradeneeded=()=>r.result.createObjectStore('p');r.onsuccess=()=>res(r.result);r.onerror=()=>rej()});
+async function phLoad(){try{const d=await phDB(),t=d.transaction('p').objectStore('p');const ks=await new Promise(r=>{const q=t.getAllKeys();q.onsuccess=()=>r(q.result)}),vs=await new Promise(r=>{const q=t.getAll();q.onsuccess=()=>r(q.result)});ks.forEach((k,i)=>PH[k]=vs[i])}catch(e){}}
+async function phSet(id,u){try{const d=await phDB(),t=d.transaction('p','readwrite').objectStore('p');u?t.put(u,id):t.delete(id)}catch(e){}if(u)PH[id]=u;else delete PH[id]}
+const _pk=[];
+function pickFile(accept,multi,cb){const i=document.createElement('input');i.type='file';i.accept=accept;i.multiple=!!multi;i.style.cssText='position:fixed;left:-9999px;top:0;opacity:0;width:1px;height:1px';(document.querySelector('dialog[open]')||document.body).appendChild(i);_pk.push(i);i.addEventListener('change',()=>{const f=[...i.files];setTimeout(()=>{i.remove();const k=_pk.indexOf(i);if(k>=0)_pk.splice(k,1)},60000);if(f.length)cb(f)});i.click()}
+const phDraw=(o,w,h,m)=>{const s=Math.min(1,m/Math.max(w,h)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(w*s));c.height=Math.max(1,Math.round(h*s));c.getContext('2d').drawImage(o,0,0,c.width,c.height);return c.toDataURL('image/jpeg',.8)};
+const phShrink=f=>new Promise(res=>{const r=new FileReader();r.onerror=()=>res(null);r.onload=()=>{const im=new Image();im.onload=()=>{try{res(phDraw(im,im.naturalWidth||im.width,im.naturalHeight||im.height,480))}catch(e){res(null)}};im.onerror=()=>{createImageBitmap(f).then(b=>res(phDraw(b,b.width,b.height,480))).catch(()=>res(null))};im.src=r.result};r.readAsDataURL(f)});
+function pickPh(id){pickFile('image/*',false,async fs=>{toast('Adding photo…');const u=await phShrink(fs[0]);if(!u)return toast('This photo format is not supported. Choose a JPG or PNG photo');await phSet(id,u);toast('Photo saved ✓');refreshPh()})}
+const art=i=>PH[i.id]?`<img src="${PH[i.id]}" alt="">`:`<span class="ph0 ${i.t}">${CI(i.cat)}</span>`;
+const thumb=l=>{const it=S.items.find(x=>x.id===parseInt(l.k));return it?`<span class="th">${art(it)}</span>`:''};
+function refreshPh(){if(typeof tab!=='undefined'&&tab==='bill'&&$('#list')){list();cartUI()}if($('#phl'))phList()}
+function phDlg(){const d=$('#dlg');d.style.maxWidth='560px';d.innerHTML='<div class="row"><h3>Dish photos</h3><button class="btn alt sm fit" id="phx">Close</button></div><div id="phmsg" style="margin:8px 0"></div><div class="row" style="margin:10px 0 0"><button class="btn alt sm" id="phex">Backup photos</button><label class="btn alt sm" style="text-align:center">Restore photos<input type="file" class="phin" data-k="restore" accept=".json,application/json" style="position:absolute;left:-9999px;opacity:0"></label></div><input type="file" class="phin" data-k="one" id="phfd" accept="image/*" style="position:absolute;left:-9999px;opacity:0"><input id="phq" placeholder="Search dish" style="margin:10px 0"><div id="phl" style="max-height:60vh;overflow:auto"></div>';$('#phx').onclick=()=>d.close();$('#phex').onclick=phBackup;$('#phq').oninput=phList;phList();d.showModal()}
+function phList(){const q=($('#phq')||{}).value||'';$('#phl').innerHTML=S.items.filter(i=>mt(i,q)).map(i=>`<div class="cl"><span class="th">${art(i)}</span><span style="flex:1;min-width:0">${esc(i.name)}<br><small class="mut">${esc(i.cat)}</small></span><label class="btn alt sm" for="phfd" data-ph="${i.id}">${PH[i.id]?'Change':'Add photo'}</label>${PH[i.id]?`<button class="btn alt sm" data-pd="${i.id}">Remove</button>`:''}</div>`).join('')||'<div class="empty">No dish found</div>'}
+document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('[data-ph],[data-pd]');if(a){e.stopPropagation();a.dataset.pd?phSet(+a.dataset.pd,null).then(refreshPh):(phT=+a.dataset.ph);return}if(e.target.closest&&e.target.closest('#th')){const n=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=n;try{localStorage.setItem('cd.theme',n)}catch(_){}themeBtn()}},true);
+function themeBtn(){const b=document.getElementById('th');if(b)b.textContent=document.documentElement.dataset.theme==='dark'?'☀️':'🌙'}
+let phT=0;
+const nz=t=>String(t).toLowerCase().replace(/\.[a-z0-9]+$/,'').replace(/&/g,'and').replace(/[^a-z0-9]+/g,'');
+function phMsg(t,ids,miss){toast(t);const n=document.getElementById('phn');if(n)n.textContent=Object.keys(PH).length;const e=document.querySelector('dialog[open] #phmsg')||document.getElementById('phmsg');if(!e)return;e.innerHTML='<b>'+esc(t)+'</b>'+((miss&&miss.length)?'<div class="mut" style="font-size:12px;margin-top:4px">Not matched (rename like the dish name): '+miss.slice(0,8).map(x=>esc(x)).join(', ')+(miss.length>8?' …':'')+'</div>':'')+((ids&&ids.length)?'<div class="phrec">'+ids.slice(0,16).map(id=>{const it=S.items.find(x=>x.id===id);return it?'<div><span class="th">'+art(it)+'</span><small>'+esc(it.name)+'</small></div>':''}).join('')+'</div>':'')}
+async function phBulk(files){let ok=0;const miss=[],ids=[],L=S.items.map(i=>({i,k:nz(i.name)}));
+for(const f of files){const k=nz(f.name);if(!k)continue;let m=L.filter(x=>x.k===k);if(!m.length){const c=L.filter(x=>x.k.length>3&&(k.includes(x.k)||x.k.includes(k)));if(c.length){const best=Math.max(...c.map(x=>x.k.length));m=c.filter(x=>x.k.length===best)}}
+if(!m.length){miss.push(f.name);continue}const u=await phShrink(f);if(!u){miss.push(f.name);continue}for(const x of m){await phSet(x.i.id,u);ids.push(x.i.id)}ok++}
+refreshPh();phMsg('✅ '+ok+' photo'+(ok===1?'':'s')+' added · total '+Object.keys(PH).length+' of '+S.items.length+' dishes',ids,miss)}
+async function phOne(f){if(!phT)return phMsg('Tap the 📷 on a dish first');toast('Adding photo…');const u=await phShrink(f);if(!u)return phMsg('⚠️ This photo could not be read. Choose a JPG or PNG photo.');const id=phT;await phSet(id,u);refreshPh();const it=S.items.find(x=>x.id===id);phMsg('✅ 1 photo added'+(it?' to '+it.name:''),[id])}
+async function phJson(f){try{const o=JSON.parse(await f.text()),ids=[];for(const k in o){await phSet(+k,o[k]);ids.push(+k)}refreshPh();phMsg('✅ '+ids.length+' photos restored · total '+Object.keys(PH).length+' of '+S.items.length+' dishes',ids)}catch(e){phMsg('⚠️ Could not read this backup file')}}
+const phBackup=()=>saveFile('city-diner-photos.json',new Blob([JSON.stringify(PH)],{type:'application/json'}));
+document.addEventListener('change',e=>{const t=e.target;if(!t.classList||!t.classList.contains('phin'))return;const fs=[...t.files];t.value='';if(!fs.length)return;const k=t.dataset.k;toast('Adding '+fs.length+' file'+(fs.length>1?'s':'')+'…');if(k==='bulk')phBulk(fs);else if(k==='restore')phJson(fs[0]);else phOne(fs[0])},true);
+function phSetup(){const b=id=>document.getElementById(id);if(!b('plist'))return;b('plist').onclick=phDlg;b('pbk').onclick=phBackup}
+async function phPack(){try{const e=document.getElementById('photo-pack'),t=e?e.textContent.trim():'';if(!t||t==='{}')return;const sig='p'+t.length;if(localStorage.getItem('cd.packv')===sig)return;const o=JSON.parse(t);for(const k in o){if(!PH[k])await phSet(+k,o[k])}localStorage.setItem('cd.packv',sig)}catch(e){}}
+themeBtn();phLoad().then(phPack).then(()=>{try{refreshPh()}catch(e){}});
 const FORCE_ROLE='owner';let KEY='rms.guest';
 // category, veg(v)/non-veg(n), "Name:full" or "Name:half/full" or "Name:/full"
 const MENU=[
@@ -232,30 +314,30 @@ function tables(){const el=$('#tbl');if(!el)return;if(WAITER)return tablesW(el);
  el.innerHTML='<div class="mut" style="font-size:12px;margin-bottom:6px">Running orders: tap a table to switch, nothing is lost</div><div class="chips" style="margin:0;padding:0;position:static">'+ks.map(k=>{const o=OPEN[k];const n=o?o.cart.reduce((a,l)=>a+l.qty,0):0;return `<button class="chip ${k===cur?'on':''}" data-t="${esc(k)}">${k==='Counter'?'Counter':'Table '+esc(k)}${n?' · '+n:''}</button>`}).join('')+'<button class="chip" data-new="1" style="border:1px dashed var(--mut);background:none">+ New table</button>'+'</div>'}
 const tabs={bill:'New bill',kot:'KOTs',menu:'Menu',photos:'Add menu',inv:'Invoices',cust:'Customers',rep:'Reports',set:'Settings'};
 function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display='none',2200)}
-const calc=(L,d)=>{const sub=L.reduce((s,l)=>s+l.price*l.qty,0);const dv=sub*Math.min(Math.max(+d||0,0),100)/100;return{sub,dv,total:sub-dv}};
+const calc=(L,d,r)=>{const sub=L.reduce((s,l)=>s+l.price*l.qty,0);const dv=r?Math.min(Math.max(+d||0,0),sub):sub*Math.min(Math.max(+d||0,0),100)/100;return{sub,dv,total:sub-dv}};
 function render(){if(!PROFILE||!PROFILE.name)return;lastLock=LOCKED();if(lastLock){expired();return}if(WAITER&&tab!=='bill'&&tab!=='sent')tab='bill';document.body.classList.toggle("bt",tab==="bill");$('#nav').innerHTML=Object.entries(LOCKED()?{}:tabs).filter(([k])=>k!=='set').map(([k,v])=>`<button class="${k===tab?'on':''}" data-t="${k}">${tr(v)}</button>`).join('')+(WAITER?'':`<button class="bell ${NEWO.length?'ring':''}" id="bell" aria-label="Notifications"><span class="bi">🔔</span><span class="bn">${NEWO.length||''}</span></button>`);({bill,kot:kots,menu,inv,cust:custs,rep,sent,photos:photosTab,set:settingsTab})[tab]()}
 $('#nav').onclick=e=>{const t=e.target.dataset.t;if(t){tab=t;render()}};
 function bill(){
 const custF=`<div class="row" style="margin:10px 0"><input id="cn" placeholder="${WAITER?'Customer name (optional)':'Customer name'}" value="${esc(cust.name)}"></div><input id="cp" placeholder="WhatsApp number (optional)" inputmode="tel" value="${esc(cust.phone)}">`;
-$('#app').innerHTML=`<div class="card" id="tbl" style="margin-bottom:12px"></div><div class="grid"><div class="card"><input id="q" placeholder="Search dishes" aria-label="Search dishes" value="${esc(q)}"><div class="chips" id="chips"></div><div id="list"></div></div>
+$('#app').innerHTML=`<div class="card" id="tbl" style="margin-bottom:12px"></div><div class="grid"><div class="card"><div class="mtop"><div><h2>${esc((PROFILE&&PROFILE.name)||'City Diner')}</h2><small class="mut">${new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}</small></div><input id="q" placeholder="Search menu here..." aria-label="Search dishes" value="${esc(q)}"><button class="btn alt fit" id="phb" title="Dish photos" aria-label="Dish photos">📷</button></div><div class="chips" id="chips"></div><div id="list" class="dgrid"></div></div>
 <div class="card sticky" id="bcard"><div class="row"><h3>${WAITER?'Order · Table '+esc(cur==='Counter'?'?':cur):'Bill · '+esc(cur)}</h3><button class="btn alt sm fit x" id="bx">Close</button></div>${WAITER?'':custF}<div id="cart"></div>${WAITER?'<div class="mut" style="font-size:12px;margin:14px 0 2px">Customer details (optional) · shown on the bill</div>'+custF+'<div id="wact"></div>':''}</div></div>`;
-$('#q').oninput=e=>{q=e.target.value;list()};$('#cn').oninput=e=>{cust.name=e.target.value;park()};$('#cp').oninput=e=>{cust.phone=e.target.value;park()};$('#tbl').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.new)newT();else if(b.dataset.rf)pullMenu(true);else if(b.dataset.wt)tablesDlg();else if(b.dataset.t)switchT(b.dataset.t)};
-$('#chips').onclick=e=>{if(e.target.dataset.c){cat=e.target.dataset.c;chips();list()}};
+$('#q').oninput=e=>{q=e.target.value;list()};$('#phb').onclick=phDlg;$('#cn').oninput=e=>{cust.name=e.target.value;park()};$('#cp').oninput=e=>{cust.phone=e.target.value;park()};$('#tbl').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.new)newT();else if(b.dataset.rf)pullMenu(true);else if(b.dataset.wt)tablesDlg();else if(b.dataset.t)switchT(b.dataset.t)};
+$('#chips').onclick=e=>{const b=e.target.closest('[data-c]');if(b){cat=b.dataset.c;chips();list()}};
 $('#list').onclick=e=>{const b=e.target.closest('[data-a]');if(!b)return;const[id,sz]=b.dataset.a.split(':');add(+id,sz)};
 $('#bx').onclick=()=>$('#bcard').classList.remove('open');chips();list();cartUI()}
-function chips(){$('#chips').innerHTML=['All',...cats()].map(c=>`<button class="chip ${c===cat?'on':''}" data-c="${esc(c)}">${esc(c)}</button>`).join('')}
+function chips(){$('#chips').innerHTML=['All',...cats()].map(c=>`<button class="chip ${c===cat?'on':''}" data-c="${esc(c)}"><span>${c==='All'?'🍽️':CI(c)}</span>${esc(c)}</button>`).join('')}
 function list(){
 const L=S.items.filter(i=>(cat==='All'||i.cat===cat)&&mt(i,q));let h='',last='';
 L.forEach(i=>{if(i.cat!==last){h+=`<div class="ch">${esc(i.cat)}</div>`;last=i.cat}
-const two=i.h!=null;h+=`<div class="li"><span class="dot ${i.t}"></span><span class="nm">${esc(i.name)}</span>${two?`<button class="pb" data-a="${i.id}:H"><small>Half</small>${inr(i.h)}</button>`:''}<button class="pb" data-a="${i.id}:F">${two?'<small>Full</small>':''}${i.f?inr(i.f):'Set price'}</button></div>`});
+const two=i.h!=null;h+=`<div class="dc"><div class="dimg" data-a="${i.id}:F">${art(i)}<span class="dot ${i.t}"></span></div><label class="cam" data-ph="${i.id}" for="phf1" aria-label="Add photo">📷</label><div class="dn">${esc(i.name)}</div><div class="dp">${two?`<button class="pb" data-a="${i.id}:H"><small>Half</small>${inr(i.h)}</button>`:''}<button class="pb" data-a="${i.id}:F">${two?'<small>Full</small>':''}${i.f?inr(i.f):'Set price'}</button></div></div>`});
 $('#list').innerHTML=h||'<div class="empty">No dishes match. Add dishes in the Menu tab.</div>'}
 function add(id,sz){if(WAITER&&cur==='Counter')return toast('Select a table number first');const it=S.items.find(i=>i.id===id);if(!it)return;const price=sz==='H'?it.h:it.f;if(!price)return toast('Set a price for this dish in the Menu tab');
 const k=id+sz;const l=cart.find(x=>x.k===k);l?l.qty++:cart.push({k,name:it.name,size:it.h!=null?(sz==='H'?'Half':'Full'):'',price,qty:1});cartUI()}
 function cartUI(){
 if(WAITER)return cartUIW();
-const c=calc(cart,disc);park();tables();{const n=cart.reduce((a,l)=>a+l.qty,0);$('#bar').innerHTML=`<div style="flex:1"><b>${cur==='Counter'?'Counter':'Table '+esc(cur)} · ${n} item${n===1?'':'s'}</b><br><span class="mut">${inr(c.total)}</span></div><button class="btn" id="vb">View bill</button>`;$('#vb').onclick=()=>$('#bcard').classList.add('open')}
-$('#cart').innerHTML=(cart.length?cart.map((l,i)=>`<div class="cl"><div>${esc(l.name)}${l.size?` <span class="tag">${l.size}</span>`:''}${l.sent?` <span class="tag paid">KOT ${l.sent}</span>`:''}<br><small class="mut">${inr(l.price)} each</small>${l.note?`<br><small>✎ ${esc(l.note)}</small>`:''}</div><div style="white-space:nowrap"><button class="btn alt sm" data-m="${i}" aria-label="Decrease">−</button> ${l.qty} <button class="btn alt sm" data-p="${i}" aria-label="Increase">+</button> <button class="btn alt sm" data-nt="${i}" aria-label="Kitchen note">✎</button></div><b>${inr(l.price*l.qty)}</b></div>`).join(''):'<div class="empty">Tap a dish to start the bill.</div>')+
-`<div class="row" style="margin:10px 0"><select id="ot" aria-label="Order type">${['Dine-in','Takeaway','Delivery'].map(m=>`<option value="${m}" ${m===otype?'selected':''}>${m}</option>`).join('')}</select></div><div class="row" style="margin:10px 0"><label class="fit mut">Discount %</label><input id="ds" type="number" min="0" max="100" value="${disc||''}"><select id="md" aria-label="Payment mode">${['Cash','UPI','Card','Due'].map(m=>`<option value="${m}" ${m===mode?'selected':''}>${m}</option>`).join('')}</select></div>
+const c=calc(cart,disc,1);park();tables();{const n=cart.reduce((a,l)=>a+l.qty,0);$('#bar').innerHTML=`<div style="flex:1"><b>${cur==='Counter'?'Counter':'Table '+esc(cur)} · ${n} item${n===1?'':'s'}</b><br><span class="mut">${inr(c.total)}</span></div><button class="btn" id="vb">View bill</button>`;$('#vb').onclick=()=>$('#bcard').classList.add('open')}
+$('#cart').innerHTML=(cart.length?cart.map((l,i)=>`<div class="cl">${thumb(l)}<div style="flex:1;min-width:0">${esc(l.name)}${l.size?` <span class="tag">${l.size}</span>`:''}${l.sent?` <span class="tag paid">KOT ${l.sent}</span>`:''}<br><small class="mut">${inr(l.price)} each</small>${l.note?`<br><small>✎ ${esc(l.note)}</small>`:''}</div><div style="white-space:nowrap"><button class="btn alt sm" data-m="${i}" aria-label="Decrease">−</button> ${l.qty} <button class="btn alt sm" data-p="${i}" aria-label="Increase">+</button> <button class="btn alt sm" data-nt="${i}" aria-label="Kitchen note">✎</button></div><b>${inr(l.price*l.qty)}</b></div>`).join(''):'<div class="empty">Tap a dish to start the bill.</div>')+
+`<div class="row" style="margin:10px 0"><select id="ot" aria-label="Order type">${['Dine-in','Takeaway','Delivery'].map(m=>`<option value="${m}" ${m===otype?'selected':''}>${m}</option>`).join('')}</select></div><div class="row" style="margin:10px 0"><label class="fit mut">Discount ₹</label><input id="ds" type="number" min="0" inputmode="decimal" value="${disc||''}"><select id="md" aria-label="Payment mode">${['Cash','UPI','Card','Due'].map(m=>`<option value="${m}" ${m===mode?'selected':''}>${m}</option>`).join('')}</select></div>
 <div class="tot"><span>Subtotal</span><span>${inr(c.sub)}</span></div>${c.dv?`<div class="tot"><span>Discount</span><span>−${inr(c.dv)}</span></div>`:''}<div class="tot big"><span>Total</span><span>${inr(c.total)}</span></div>
 ${cur!=='Counter'?'<div style="margin-top:10px"><button class="btn alt sm" id="shf">⇄ Table shift</button></div>':''}<div class="row" style="margin-top:12px"><button class="btn alt" id="clr">${cart.length||cur==='Counter'?'Clear':'Remove table'}</button><button class="btn alt" id="kt">${kotLabel()}</button><button class="btn" id="sv">Save bill</button></div>`;
 $('#ds').onchange=e=>{disc=+e.target.value||0;cartUI()};$('#md').onchange=e=>{mode=e.target.value;park()};
@@ -266,9 +348,9 @@ let saving=false;
 async function saveBill(){
 if(saving)return;if(!cart.length)return toast('Add at least one dish to the bill');
 saving=true;try{
-const c=calc(cart,disc);let n=nextNo();
+const c=calc(cart,disc,1);let n=nextNo();
 if(DB){try{while((await DB.doc('invoices/'+pad(n)).get()).exists)n++}catch(e){}}
-const v={no:pad(n),date:new Date().toISOString(),cust:cust.name.trim()||'Walk-in',phone:cust.phone.trim(),table:cur==='Counter'?'':cur,lines:cart.map(l=>{const o={...l};delete o.sent;return o}),otype,disc,mode,sub:c.sub,total:c.total,paid:mode!=='Due'};
+const v={no:pad(n),date:new Date().toISOString(),cust:cust.name.trim()||'Walk-in',phone:cust.phone.trim(),table:cur==='Counter'?'':cur,lines:cart.map(l=>{const o={...l};delete o.sent;return o}),otype,disc,dt:'r',mode,sub:c.sub,total:c.total,paid:mode!=='Due'};
 S.invoices.unshift(v);saveInv(v);closeT(false);toast('Saved '+v.no);showInv(v.no)
 }finally{saving=false}}
 function menu(){
@@ -293,7 +375,7 @@ function showInv(no){
 const v=S.invoices.find(x=>x.no===no);if(!v)return;const d=$('#dlg');d.style.maxWidth='';
 d.innerHTML=`<div style="text-align:center"><img src="${LOGO}" alt="" width="64" height="64" style="border-radius:50%"><h3>${BIZ.name}</h3><div class="mut" style="font-size:12px">${BIZ.addr}<br>Phone: ${BIZ.phone}</div></div><div class="mut" style="margin:8px 0">${v.no} · ${new Date(v.date).toLocaleString('en-IN')}<br>${esc(v.cust)}${v.table?' · Table '+esc(v.table):''}${v.phone?' · '+esc(v.phone):''}</div>
 <table>${v.lines.map(l=>`<tr><td>${esc(l.name)}${l.size?' ('+l.size+')':''} × ${l.qty}</td><td class="n">${inr(l.price*l.qty)}</td></tr>`).join('')}</table>
-<div class="tot"><span>Subtotal</span><span>${inr(v.sub)}</span></div>${v.disc?`<div class="tot"><span>Discount ${v.disc}%</span><span>−${inr(v.sub-v.total)}</span></div>`:''}<div class="tot big"><span>Total</span><span>${inr(v.total)}</span></div>
+<div class="tot"><span>Subtotal</span><span>${inr(v.sub)}</span></div>${v.disc?`<div class="tot"><span>Discount${v.dt?'':' '+v.disc+'%'}</span><span>−${inr(v.sub-v.total)}</span></div>`:''}<div class="tot big"><span>Total</span><span>${inr(v.total)}</span></div>
 <p><span class="tag ${v.paid?'paid':'due'}">${v.paid?'Paid · '+v.mode:'Payment due'}</span></p><p class="mut" style="text-align:center">Thank you! Good Food · Good Mood</p>
 <div class="row noprint" style="flex-wrap:wrap">${v.paid?'':'<button class="btn" id="mp">Mark paid</button>'}<button class="btn alt" id="pr">Print</button><button class="btn alt" id="im">Save image</button><button class="btn" id="wa">WhatsApp</button>${CAN?'<button class="btn alt" id="eb">Edit bill</button><button class="btn alt" id="db" style="color:var(--red)">Delete</button>':''}<button class="btn alt" id="cl">Close</button></div>`;
 if(!d.open)d.showModal();$('#cl').onclick=()=>{d.close();render()};$('#pr').onclick=()=>doPrint(v);$('#im').onclick=()=>doImg(v);$('#wa').onclick=()=>askWa(v);if(CAN){$('#eb').onclick=()=>editInv(no);$('#db').onclick=()=>delInv(no)}
@@ -306,19 +388,19 @@ $('#dn').onclick=()=>{d.close();render()};
 $('#dy').onclick=()=>{S.invoices=S.invoices.filter(x=>x.no!==no);save();if(DB)DB.doc('invoices/'+no).delete().catch(()=>toast('Delete could not sync'));d.close();render();toast('Deleted '+no)}}
 function editInv(no){const v0=S.invoices.find(x=>x.no===no);if(!v0||!CAN)return;const d=$('#dlg');d.style.maxWidth='620px';
 const modes=['Cash','UPI','Card','Due'];if(v0.mode&&!modes.includes(v0.mode))modes.push(v0.mode);
-const E={disc:+v0.disc||0,mode:v0.mode||'Cash',lines:clone(v0.lines)};
+const E={dt:v0.dt,disc:+v0.disc||0,mode:v0.mode||'Cash',lines:clone(v0.lines)};
 const items=S.items.map(i=>({label:i.name+' · '+i.cat,i}));
 d.innerHTML=`<h3>Edit bill · ${esc(v0.no)}</h3>
 <div class="row" style="margin:10px 0"><input id="e_n" placeholder="Customer name" value="${esc(v0.cust||'')}"><input id="e_t" placeholder="Table" value="${esc(v0.table||'')}" style="max-width:120px"></div>
 <p><input id="e_p" placeholder="WhatsApp number" inputmode="tel" value="${esc(v0.phone||'')}"></p>
 <div class="mut" style="font-size:12px;margin-top:6px">You can change quantity and price here</div><div id="e_l"></div>
 <div class="row" style="margin:10px 0"><input id="e_a" list="e_dl" placeholder="Add a dish: type its name" autocomplete="off"><select id="e_s" style="display:none;max-width:90px" aria-label="Size"><option value="F">Full</option><option value="H">Half</option></select><button class="btn alt sm fit" id="e_add">＋ Add</button></div><datalist id="e_dl">${items.map(x=>`<option value="${esc(x.label)}">`).join('')}</datalist>
-<div class="row" style="margin:10px 0"><label class="fit mut">Discount %</label><input id="e_d" type="number" min="0" max="100" value="${E.disc||''}"><select id="e_m" aria-label="Payment mode">${modes.map(m=>`<option value="${esc(m)}" ${m===E.mode?'selected':''}>${esc(m)}</option>`).join('')}</select></div>
+<div class="row" style="margin:10px 0"><label class="fit mut">Discount ${E.dt?'₹':'%'}</label><input id="e_d" type="number" min="0" value="${E.disc||''}"><select id="e_m" aria-label="Payment mode">${modes.map(m=>`<option value="${esc(m)}" ${m===E.mode?'selected':''}>${esc(m)}</option>`).join('')}</select></div>
 <div id="e_tot"></div>
 <div class="row" style="margin-top:12px"><button class="btn alt" id="e_c">Cancel</button><button class="btn" id="e_save">Save changes</button></div>`;
 if(!d.open)d.showModal();
 const find=()=>{const x=items.find(y=>y.label===$('#e_a').value.trim());return x&&x.i};
-const drawTot=()=>{const c=calc(E.lines.filter(l=>l.qty>0),E.disc);$('#e_tot').innerHTML=`<div class="tot"><span>Subtotal</span><span>${inr(c.sub)}</span></div>${c.dv?`<div class="tot"><span>Discount</span><span>−${inr(c.dv)}</span></div>`:''}<div class="tot big"><span>Total</span><span>${inr(c.total)}</span></div>`};
+const drawTot=()=>{const c=calc(E.lines.filter(l=>l.qty>0),E.disc,E.dt);$('#e_tot').innerHTML=`<div class="tot"><span>Subtotal</span><span>${inr(c.sub)}</span></div>${c.dv?`<div class="tot"><span>Discount</span><span>−${inr(c.dv)}</span></div>`:''}<div class="tot big"><span>Total</span><span>${inr(c.total)}</span></div>`};
 const drawLines=()=>{$('#e_l').innerHTML=E.lines.length?E.lines.map((l,i)=>`<div class="cl" style="flex-wrap:wrap"><div style="flex:1 1 140px;min-width:0">${esc(l.name)}${l.size?` <span class="tag">${esc(l.size)}</span>`:''}</div><input type="number" min="0" step="1" value="${l.qty}" data-q="${i}" style="width:64px" aria-label="Quantity"><input type="number" min="0" step="any" value="${l.price}" data-r="${i}" style="width:84px" aria-label="Price each"><b data-lt="${i}" style="min-width:64px;text-align:right">${inr(l.price*l.qty)}</b><button class="btn alt sm" data-x="${i}" aria-label="Remove">✕</button></div>`).join(''):'<div class="empty">No dishes yet. Add one below.</div>';drawTot()};
 drawLines();
 $('#e_l').oninput=e=>{const t=e.target,isQ=t.dataset.q!==undefined,i=+(isQ?t.dataset.q:t.dataset.r);if(isNaN(i)||!E.lines[i])return;
@@ -329,12 +411,12 @@ $('#e_a').oninput=()=>{const it=find();$('#e_s').style.display=it&&it.h!=null?''
 $('#e_add').onclick=()=>{const it=find();if(!it)return toast('Select a dish from the list');const sz=it.h!=null?$('#e_s').value:'F',price=sz==='H'?it.h:it.f;if(!price)return toast('Set the price for this dish in the Menu');
  const k=it.id+sz,l=E.lines.find(x=>x.k===k&&x.price===price);l?l.qty++:E.lines.push({k,name:it.name,size:it.h!=null?(sz==='H'?'Half':'Full'):'',price,qty:1});
  $('#e_a').value='';$('#e_s').style.display='none';drawLines()};
-$('#e_d').oninput=e=>{E.disc=Math.min(100,Math.max(0,+e.target.value||0));drawTot()};
+$('#e_d').oninput=e=>{E.disc=Math.max(0,E.dt?(+e.target.value||0):Math.min(100,+e.target.value||0));drawTot()};
 $('#e_m').onchange=e=>{E.mode=e.target.value};
 $('#e_c').onclick=()=>showInv(no);
 $('#e_save').onclick=()=>{const L=E.lines.filter(l=>l.qty>0);
  if(!L.length)return toast('Keep at least one dish. To remove the bill, use Delete');
- const v=S.invoices.find(x=>x.no===no);if(!v)return;const c=calc(L,E.disc);
+ const v=S.invoices.find(x=>x.no===no);if(!v)return;const c=calc(L,E.disc,E.dt);
  Object.assign(v,{cust:$('#e_n').value.trim()||'Walk-in',phone:$('#e_p').value.trim(),table:$('#e_t').value.trim(),lines:L,disc:E.disc,mode:E.mode,sub:c.sub,total:c.total,paid:E.mode!=='Due'});
  saveInv(v);toast('Bill updated');showInv(no)}}
 function catMgr(){const d=$('#dlg');d.style.maxWidth='';
@@ -521,8 +603,8 @@ info=[['Bill',v.no],['Date',new Date(v.date).toLocaleString('en-IN',{dateStyle:'
 if(v.cust)info.push(['Name',v.cust]);if(v.table)info.push(['Table',v.table]);if(v.otype&&v.otype!=='Dine-in')info.push(['Type',v.otype]);
 const inf=[];info.forEach(r=>{const w=wrap(r[1],W-8);inf.push(pad(r[0],6)+': '+(w[0]||''));for(let j=1;j<w.length;j++)inf.push(' '.repeat(8)+w[j])});
 const rows=[];v.lines.forEach(l=>{wrap(l.name,W).forEach(t=>rows.push(t));rows.push('  '+pad(l.size||'-',6)+lp(String(l.qty),3)+lp(fm(l.price*l.qty),W-11))});
-const sub=v.lines.reduce((a,l)=>a+l.price*l.qty,0),dv=sub*Math.min(Math.max(+v.disc||0,0),100)/100,total=sub-dv;
-const tot=[lr('Subtotal',inr(sub))];if(dv>0)tot.push(lr('Discount '+v.disc+'%','-'+inr(dv)));tot.push(dash,lr('TOTAL',inr(total)));
+const sub=v.lines.reduce((a,l)=>a+l.price*l.qty,0),dv=v.dt?Math.min(Math.max(+v.disc||0,0),sub):sub*Math.min(Math.max(+v.disc||0,0),100)/100,total=sub-dv;
+const tot=[lr('Subtotal',inr(sub))];if(dv>0)tot.push(lr('Discount'+(v.dt?'':' '+v.disc+'%'),'-'+inr(dv)));tot.push(dash,lr('TOTAL',inr(total)));
 const B='```',big=t=>[...t].map(c=>c>='A'&&c<='Z'?String.fromCodePoint(0x1D5D4+c.charCodeAt(0)-65):c).join(''),nw=BIZ.name.toUpperCase().split(' '),n2=nw.pop(),n1=nw.join(' '),bar='━━━━━━━━━━━━━━━━';
 return `🍽️ *${BIZ.name.toUpperCase()}*\n📍 ${BIZ.addr}\n📞 ${BIZ.phone}\n\n🧾 *BILL ${v.no}*\n${B}\n${inf.join('\n')}\n${B}\n${B}\nItem\n  ${pad('Size',6)}${lp('Qty',3)}${lp('Amount',W-11)}\n${dash}\n${rows.join('\n')}\n${dash}\n${tot.join('\n')}\n${B}\n${v.paid?'✅ *Paid · '+v.mode+'*':'⏳ *Payment due*'}\n\n🙏 Thank you! Visit again\n`};
 const loadImg=src=>new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=src});
@@ -542,7 +624,7 @@ const fm=n=>(+n||0).toLocaleString('en-IN',{maximumFractionDigits:2}),QX=352,RX=
 F('700',18);x.fillStyle='#111';y+=18;x.textAlign='left';x.fillText('Item',P,y);x.textAlign='center';x.fillText('Qty',QX,y);x.textAlign='right';x.fillText('Rate',RX,y);x.fillText('Amt',AX,y);y+=4;dash();
 v.lines.forEach(l=>{const nm=l.name+(l.size?' ('+l.size+')':'');F('600',21);const ls=wrap(nm,QX-P-34);
  ls.forEach((t,i)=>{y+=21;x.textAlign='left';x.fillStyle='#111';x.fillText(t,P,y);if(i===0){x.textAlign='center';x.fillText(String(l.qty),QX,y);x.textAlign='right';x.fillText(fm(l.price),RX,y);x.fillText(fm(l.price*l.qty),AX,y)}y+=7});y+=9});
-dash();lr('Subtotal',inr(v.sub),21);if(v.disc)lr('Discount '+v.disc+'%','−'+inr(v.sub-v.total),21);
+dash();lr('Subtotal',inr(v.sub),21);if(v.disc)lr('Discount'+(v.dt?'':' '+v.disc+'%'),'−'+inr(v.sub-v.total),21);
 y+=6;lr('TOTAL',inr(v.total),30,'700');y+=8;
 ctr(v.paid?'Paid · '+v.mode:'PAYMENT DUE',20,'700');dash();ctr('Thank you! Visit again',20);ctr('Good Food · Good Mood',17);
 const o=document.createElement('canvas');o.width=W*S;o.height=Math.ceil((y+24)*S);const g=o.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,W*S,o.height);g.drawImage(c,0,0);return o}
@@ -592,12 +674,17 @@ const p=(v.phone||'').replace(/\D/g,'');window.open('https://wa.me/'+(p.length==
 function custs(){
 const m={};S.invoices.forEach(v=>{const k=v.cust+'|'+v.phone;const c=m[k]=m[k]||{name:v.cust,phone:v.phone,n:0,t:0,due:0};c.n++;c.t+=v.total;if(!v.paid)c.due+=v.total});const L=Object.values(m).sort((a,b)=>b.t-a.t);
 $('#app').innerHTML=`<div class="card"><h3 style="margin-bottom:10px">Customers</h3>${L.length?`<div class="wrap"><table><tr><th>Name</th><th>Phone</th><th class="n">Bills</th><th class="n">Spent</th><th class="n">Due</th></tr>${L.map(c=>`<tr><td>${esc(c.name)}</td><td>${esc(c.phone)||'–'}</td><td class="n">${c.n}</td><td class="n">${inr(c.t)}</td><td class="n" style="${c.due?'color:var(--red);font-weight:600':''}">${inr(c.due)}</td></tr>`).join('')}</table></div>`:'<div class="empty">Customers appear here once you save a bill with a name.</div>'}</div>`}
-function rep(){
-const td=new Date().toDateString(),T=S.invoices.filter(v=>new Date(v.date).toDateString()===td);const sum=(a,f)=>a.reduce((s,v)=>s+f(v),0);
-const pm={};S.invoices.forEach(v=>{const k=v.paid?v.mode:'Due';pm[k]=(pm[k]||0)+v.total});
-const top={};S.invoices.forEach(v=>v.lines.forEach(l=>{const k=l.name+(l.size?' ('+l.size+')':'');top[k]=(top[k]||0)+l.qty}));const tp=Object.entries(top).sort((a,b)=>b[1]-a[1]).slice(0,8);
-$('#app').innerHTML=`<div class="stats"><div class="card stat"><b>${inr(sum(T,v=>v.total))}</b><span>Today's sales (${T.length} bills)</span></div><div class="card stat"><b>${inr(sum(S.invoices,v=>v.total))}</b><span>All-time sales</span></div><div class="card stat"><b>${S.invoices.length}</b><span>Total bills</span></div><div class="card stat"><b>${inr(sum(S.invoices.filter(v=>!v.paid),v=>v.total))}</b><span>Payments due</span></div></div>
-<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))"><div class="card"><h3>Payment split</h3>${Object.keys(pm).length?Object.entries(pm).map(([k,v])=>`<div class="tot"><span>${k}</span><span>${inr(v)}</span></div>`).join(''):'<div class="empty">No sales yet.</div>'}</div><div class="card"><h3>Top sellers</h3>${tp.length?tp.map(([k,v])=>`<div class="tot"><span>${esc(k)}</span><span>${v} sold</span></div>`).join(''):'<div class="empty">No sales yet.</div>'}</div></div>`}
+let RD=new Date().toLocaleDateString('en-CA'),RMo=new Date().getMonth(),RY=new Date().getFullYear();
+function rep(){const ld=v=>new Date(v.date).toLocaleDateString('en-CA'),sum=a=>a.reduce((x,v)=>x+v.total,0);
+const Dd=S.invoices.filter(v=>ld(v)===RD),M=S.invoices.filter(v=>{const d=new Date(v.date);return d.getMonth()===RMo&&d.getFullYear()===RY});
+const mn=['January','February','March','April','May','June','July','August','September','October','November','December'],cy=new Date().getFullYear();let y0=cy-4;S.invoices.forEach(v=>{y0=Math.min(y0,new Date(v.date).getFullYear())});const ys=[];for(let y=y0;y<=cy;y++)ys.push(y);
+const pm={},top={},days={};M.forEach(v=>{const k=v.paid?v.mode:'Due';pm[k]=(pm[k]||0)+v.total;days[ld(v)]=(days[ld(v)]||0)+v.total;v.lines.forEach(l=>{const k2=l.name+(l.size?' ('+l.size+')':'');top[k2]=(top[k2]||0)+l.qty})});
+const tp=Object.entries(top).sort((a,b)=>b[1]-a[1]).slice(0,8),dl=Object.entries(days).sort((a,b)=>b[0].localeCompare(a[0]));
+const dn=new Date(RD+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}),isT=RD===new Date().toLocaleDateString('en-CA');
+$('#app').innerHTML=`<div class="card" style="margin-bottom:12px"><div class="row" style="flex-wrap:wrap"><label class="fit mut">Day</label><input id="rd" type="date" value="${RD}"><select id="rmo" aria-label="Month">${mn.map((m,i)=>`<option value="${i}" ${i===RMo?'selected':''}>${m}</option>`).join('')}</select><select id="ry" aria-label="Year">${ys.map(y=>`<option ${y===RY?'selected':''}>${y}</option>`).join('')}</select><button class="btn alt fit" id="rt">Today</button></div></div>
+<div class="stats"><div class="card stat"><b>${inr(sum(Dd))}</b><span>${isT?'Today':dn} sale (${Dd.length} bills)</span></div><div class="card stat"><b>${inr(sum(M))}</b><span>${mn[RMo]} ${RY} sale (${M.length} bills)</span></div><div class="card stat"><b>${inr(M.length?sum(M)/M.length:0)}</b><span>Average bill this month</span></div><div class="card stat"><b>${inr(sum(M.filter(v=>!v.paid)))}</b><span>Due this month</span></div></div>
+<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))"><div class="card"><h3>Payment split</h3>${Object.keys(pm).length?Object.entries(pm).map(([k,v])=>`<div class="tot"><span>${k}</span><span>${inr(v)}</span></div>`).join(''):'<div class="empty">No sales in this month.</div>'}</div><div class="card"><h3>Top sellers</h3>${tp.length?tp.map(([k,v])=>`<div class="tot"><span>${esc(k)}</span><span>${v} sold</span></div>`).join(''):'<div class="empty">No sales in this month.</div>'}</div><div class="card"><h3>Day by day</h3>${dl.length?dl.map(([k,v])=>`<div class="tot"><span>${new Date(k+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short'})}</span><span>${inr(v)}</span></div>`).join(''):'<div class="empty">No sales in this month.</div>'}</div></div>`;
+$('#rd').onchange=e=>{if(!e.target.value)return;RD=e.target.value;const p=RD.split('-');RY=+p[0];RMo=+p[1]-1;rep()};$('#rmo').onchange=e=>{RMo=+e.target.value;rep()};$('#ry').onchange=e=>{RY=+e.target.value;rep()};$('#rt').onclick=()=>{const n=new Date();RD=n.toLocaleDateString('en-CA');RMo=n.getMonth();RY=n.getFullYear();rep()}}
 $('#dlg').addEventListener('close',()=>{$('#dlg').style.maxWidth=''});
 
 // ===== Multi-restaurant layer: profile, plans, language, photos, settings =====
@@ -993,9 +1080,10 @@ function settingsTab(){const P=PROFILE,exp=P.plan&&P.plan.expiresAt,lk=LOCKED();
  $('#app').innerHTML=`
 <div class="card"><div style="text-align:center"><img src="${LOGO}" width="96" height="96" style="border-radius:50%" alt="Logo"><div class="mut" style="font-size:12px;margin-top:4px">🔒 Restaurant name and logo are locked and cannot be changed</div></div>
 <label class="mut" style="display:block;margin-top:10px">Address</label><input id="sa" value="${esc(P.addr||'')}"><label class="mut" style="display:block;margin-top:10px">Phone</label><input id="sp" value="${esc(P.phone||'')}"><label class="mut" style="display:block;margin-top:10px">Language</label><select id="sl">${langOpts(LANG)}</select><button class="btn" id="ss" style="margin-top:12px">Save</button></div>
+<div class="card" style="margin-top:12px"><h3>Dish photos</h3><p class="mut" style="margin:6px 0 10px">Photos saved: <b id="phn">${Object.keys(PH).length}</b> of ${S.items.length} dishes. Name each photo file like the dish (for example Chicken 65.jpg) and add many at once. They match the dishes by themselves and stay saved on this device.</p><div class="row" style="flex-wrap:wrap"><label class="btn" style="text-align:center">⬆️ Add photos in bulk<input type="file" class="phin" data-k="bulk" multiple accept="image/*" style="position:absolute;left:-9999px;opacity:0"></label><button class="btn alt" id="plist">Photo list</button></div><div class="row" style="flex-wrap:wrap;margin-top:8px"><button class="btn alt" id="pbk">Backup all photos</button><label class="btn alt" style="text-align:center">Restore photos<input type="file" class="phin" data-k="restore" accept=".json,application/json" style="position:absolute;left:-9999px;opacity:0"></label></div><div id="phmsg" style="margin-top:12px"></div></div>
 <div class="card" style="margin-top:12px"><h3>Plan</h3><p>${lk?(exp?'Expired on '+new Date(exp).toLocaleDateString('en-IN'):'No active plan'):''+planLine(P)}</p><div class="row" style="align-items:stretch"><div class="plan"><b>₹300</b>per month<br><button class="btn sm" data-p="monthly" style="margin-top:8px">Pay monthly</button></div><div class="plan"><b>₹3,500</b>per year<br><button class="btn sm" data-p="yearly" style="margin-top:8px">Pay yearly</button></div></div>${payStatus()}</div>${adminCard()}
 <div class="card" style="margin-top:12px"><div class="cl"><span>Privacy Policy</span><button class="btn alt sm" data-l="privacy">Open</button></div><div class="cl"><span>Terms &amp; Conditions</span><button class="btn alt sm" data-l="terms">Open</button></div><div class="cl"><span>${esc(P.email||P.phone||'')}</span><button class="btn alt sm" data-l="out">${tr('Sign out')}</button></div></div><div class="mut" id="ver" style="text-align:center;font-size:12px;margin:14px 0">Version ${APPV}</div>`;
-  $('#ss').onclick=async()=>{const u={addr:$('#sa').value.trim(),phone:$('#sp').value.trim(),lang:$('#sl').value};try{await saveProfile(u);toast('Saved ✓')}catch(e){toast('Could not save')}};
+  phSetup();$('#ss').onclick=async()=>{const u={addr:$('#sa').value.trim(),phone:$('#sp').value.trim(),lang:$('#sl').value};try{await saveProfile(u);toast('Saved ✓')}catch(e){toast('Could not save')}};
  $('#app').onclick=e=>{const p=e.target.dataset.p,l=e.target.dataset.l,a=e.target.dataset.a;if(e.target.id==='ver')verTap();if(a==='keys')askKeys();if(a==='test')aiTest();if(a==='upd')askUpd();if(p)payNow(p);const ap=e.target.dataset.ap,rj=e.target.dataset.rj;if(ap)approvePay(ap,true);if(rj)approvePay(rj,false);if(l==='out')$('#so').click();if(l==='privacy'||l==='terms')legal(l)}}
 let VT=0;function verTap(){if(++VT<5)return;VT=0;const u=window.AUTH&&AUTH.currentUser,d=$('#dlg');d.style.maxWidth='';d.innerHTML='<h3>App info</h3><pre style="white-space:pre-wrap;word-break:break-word;font-size:12px">Version: '+APPV+'\nSigned in: '+esc(u?(u.email||u.phoneNumber||''):'-')+'\nEmail verified: '+(u?u.emailVerified:'-')+'\nADMIN_EMAIL set: '+(window.ADMIN_EMAIL?'yes':'NO')+'\nAdmin: '+(isAdmin()?'yes':'no')+'\nUpdate link: '+esc(updUrl()||'-')+'\nAI keys saved: '+aiKeys().length+'</pre><button class="btn" style="width:100%" onclick="$(\'#dlg\').close()">Close</button>';if(!d.open)d.showModal()}
 function legal(k){const url=k==='privacy'?window.PRIVACY_URL:window.TERMS_URL;if(url)return window.open(url,'_blank');const w=$('#dlg');w.innerHTML=`<h3>${k==='privacy'?'Privacy Policy':'Terms &amp; Conditions'}</h3><p>${k==='privacy'?'We store your restaurant data (menu, bills, customers) securely in your private account and never sell it.':'The subscription is billed monthly or yearly. When a plan ends, features stay locked until the next payment.'}</p><button class="btn" style="width:100%" onclick="$('#dlg').close()">Close</button>`;w.showModal()}
