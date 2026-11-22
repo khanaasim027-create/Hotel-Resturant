@@ -147,7 +147,7 @@ const clone=o=>JSON.parse(JSON.stringify(o));
 const pad=n=>'INV-'+String(n).padStart(4,'0');
 const nextNo=()=>Math.max(0,...S.invoices.map(v=>+String(v.no).replace(/\D/g,'')||0))+1;
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
-const setSync=t=>{const e=$('#sync');if(e)e.textContent=t+' · v13'};
+const setSync=t=>{const e=$('#sync');if(e)e.textContent=t+' · v16'};
 const saveMenu=()=>{save();lastMenu=JSON.stringify(S.items);
 if(!DB){toast('⚠ Not signed in to the cloud: the menu is saved on this device only');return}
 let done=false;setTimeout(()=>{if(!done)toast('Slow connection: the menu will sync as soon as you are back online')},4000);
@@ -957,6 +957,21 @@ async function aiTest(){if(!window.AI_ENDPOINT){let k=GEM_KEY;if(!k)try{k=localS
  const T=[['VERTEX key-in-url 2.5-flash','https://aiplatform.googleapis.com/v1/publishers/google/models/gemini-2.5-flash:generateContent?key='+K,ct,bv],['VERTEX header 2.5-flash','https://aiplatform.googleapis.com/v1/publishers/google/models/gemini-2.5-flash:generateContent',H,bv],['VERTEX key-in-url 2.0-flash','https://aiplatform.googleapis.com/v1/publishers/google/models/gemini-2.0-flash:generateContent?key='+K,ct,bv],['GEMINI header 2.5-flash','https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',H,bg],['GEMINI bearer 2.5-flash','https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',{...ct,Authorization:'Bearer '+key},bg]];
  for(const [n,u,h,b] of T){try{const r=await fetch(u,{method:'POST',headers:h,body:b});out.push((r.ok?'✅ ':'❌ ')+n+' → '+r.status+' '+(await r.text()).replace(/\s+/g,' ').slice(0,150))}catch(e){out.push('❌ '+n+' → network/CORS error: '+e.message)}
   const el=$('#atr');if(el)el.textContent=out.join('\n\n')}}
+function askKeys(){const d=$('#dlg');d.style.maxWidth='';let a='',b='';try{a=localStorage.getItem('gemKey')||'';b=localStorage.getItem('gemKey2')||''}catch(e){}
+ d.innerHTML='<h3>AI keys</h3><p class="mut" style="font-size:13px">Key 1 is used first. If its free limit is over, the app switches to Key 2 by itself. Groq keys start with gsk_ and OpenRouter keys with sk-or-. Leave a box empty to keep the saved key.</p><p class="mut" style="font-size:12px">Key 1 '+(a?'saved ✓ ('+a.slice(0,6)+'…)':'not set')+'</p><p><input id="ak1" placeholder="Key 1 (Groq: gsk_...)" autocomplete="off" style="width:100%;box-sizing:border-box"></p><p class="mut" style="font-size:12px">Key 2 '+(b?'saved ✓ ('+b.slice(0,6)+'…)':'not set')+'</p><p><input id="ak2" placeholder="Key 2 (OpenRouter: sk-or-...)" autocomplete="off" style="width:100%;box-sizing:border-box"></p><div class="row"><button class="btn alt" id="ak_n">Close</button><button class="btn" id="ak_y">Save</button></div>';if(!d.open)d.showModal();
+ $('#ak_n').onclick=()=>d.close();$('#ak_y').onclick=()=>{const x=$('#ak1').value.trim(),y=$('#ak2').value.trim();try{if(x)localStorage.setItem('gemKey',x);if(y)localStorage.setItem('gemKey2',y)}catch(e){}d.close();toast('AI keys saved ✓')}}
+let _tess=null;
+async function ocrWorker(){if(_tess)return _tess;
+ if(!window.Tesseract)await new Promise((res,rej)=>{const e=document.createElement('script');e.src='https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';e.onload=res;e.onerror=()=>rej(new Error('Could not load the reader. Check your internet'));document.head.appendChild(e)});
+ _tess=await Tesseract.createWorker('eng',1,{logger:m=>{if(m.status==='recognizing text'){try{toast('Reading photo… '+Math.round(m.progress*100)+'%')}catch(e){}}}});return _tess}
+async function ocrPrep(f){const im=await srcImg(f),w0=im.width||im.naturalWidth,h0=im.height||im.naturalHeight,sc=Math.min(2,2400/Math.max(w0,h0)),c=document.createElement('canvas');c.width=Math.round(w0*sc);c.height=Math.round(h0*sc);const x=c.getContext('2d');x.drawImage(im,0,0,c.width,c.height);
+ const id=x.getImageData(0,0,c.width,c.height),p=id.data,n=p.length/4,hist=new Uint32Array(256);let sum=0;
+ for(let i=0;i<p.length;i+=4){const g=(p[i]*299+p[i+1]*587+p[i+2]*114)/1000|0;p[i]=g;hist[g]++;sum+=g}
+ const inv=sum/n<120;let lo=0,hi=255,acc=0;for(let v=0;v<256;v++){acc+=hist[v];if(acc>n*.02){lo=v;break}}acc=0;for(let v=255;v>=0;v--){acc+=hist[v];if(acc>n*.02){hi=v;break}}
+ const rng=Math.max(40,hi-lo);
+ for(let i=0;i<p.length;i+=4){let g=(p[i]-lo)*255/rng;g=g<0?0:g>255?255:g;if(inv)g=255-g;p[i]=p[i+1]=p[i+2]=g;p[i+3]=255}
+ x.putImageData(id,0,0);return c}
+function ocrClean(t){return String(t).split(/\r?\n/).map(l=>l.replace(/[_~=]+/g,' ').replace(/\.{2,}|[·•]+/g,' ').replace(/\s+/g,' ').trim()).filter(l=>(l.match(/[A-Za-z]/g)||[]).length>=3).join('\n')}
 function parseMenuText(t){const out=[];let cat='Menu';const NV=/chicken|mutton|egg|fish|prawn|keema|lollipop|oyster|satay|crab|lamb|beef|pork|meat/i;
  t.split(/\r?\n/).forEach(raw=>{let l=raw.replace(/^[\s\-*•·#>]+/,'').replace(/\s+/g,' ').trim();if(!l)return;
   const m=/^(.*?[A-Za-z\u0900-\u097F\u0A80-\u0AFF].*?)[\s.:\-–—|_]*(?:₹|Rs\.?\s*)?(\d{1,5})(?:\s*[\/|,]\s*(?:₹|Rs\.?\s*)?(\d{1,5}))?\s*$/.exec(l);
@@ -964,9 +979,13 @@ function parseMenuText(t){const out=[];let cat='Menu';const NV=/chicken|mutton|e
   const name=m[1].replace(/[\s.:\-–—|_]+$/,'').trim();if(!name)return;const a=+m[2],b=m[3]?+m[3]:0;
   const veg=/non[\s-]*veg/i.test(cat)?false:(/^\s*veg/i.test(cat)?!NV.test(name):!NV.test(name));
   out.push({cat,name,veg,half:b?Math.min(a,b):null,full:b?Math.max(a,b):a})});return out}
-function photosTab(){$('#app').innerHTML=`<div class="card"><h3>${tr('Menu photos')}</h3><p class="mut">Select your menu photos (any number at once). Items are read by AI and added to your menu automatically.</p><input id="pf" type="file" accept="image/*" multiple></div><div class="card" style="margin-top:12px"><h3>Add menu from text (no AI)</h3><p class="mut" style="font-size:13px">Paste your dishes: one dish per line as name and price. For half and full write 70/130. A line without a price becomes a category.</p><textarea id="mtx" rows="8" placeholder="Starters&#10;Paneer Chilly 250&#10;Chicken Chilli Dry 160/300&#10;Veg Soups&#10;Manchow Soup 70/130" style="width:100%;box-sizing:border-box"></textarea><button class="btn" id="mtb" type="button" style="margin-top:8px;width:100%">Add to menu</button></div><button class="btn alt sm" id="att" type="button" style="margin-top:12px;width:100%">Test AI connection</button><div class="card ph" style="margin-top:12px">${PHOTOS.length?PHOTOS.map(p=>`<div><img src="${p.data}" data-z="${p.id}" alt="Menu"><button class="btn sm" data-e="${p.id}" style="width:100%;margin-top:4px">↻ Re-read menu</button><button class="btn alt sm" data-d="${p.id}" style="width:100%;margin-top:4px">Delete</button></div>`).join(''):'<div class="empty" style="grid-column:1/-1">No photos yet.</div>'}</div>`;
+function photosTab(){$('#app').innerHTML=`<div class="card"><h3>${tr('Menu photos')}</h3><p class="mut">Select your menu photos (any number at once). Items are read by AI and added to your menu automatically.</p><input id="pf" type="file" accept="image/*" multiple></div><div class="card" style="margin-top:12px"><h3>Add menu from text (no AI)</h3><p class="mut" style="font-size:13px">Paste your dishes: one dish per line as name and price. For half and full write 70/130. A line without a price becomes a category.</p><p style="margin:10px 0 6px"><b>Read menu photos without AI</b><br><span class="mut" style="font-size:12px">Free, works on this phone. The text appears in the box below. Check it, fix mistakes, then press Add to menu.</span><br><input id="ocrf" type="file" accept="image/*" multiple style="width:100%;margin-top:6px"></p><textarea id="mtx" rows="12" placeholder="Starters&#10;Paneer Chilly 250&#10;Chicken Chilli Dry 160/300&#10;Veg Soups&#10;Manchow Soup 70/130" style="width:100%;box-sizing:border-box"></textarea><button class="btn" id="mtb" type="button" style="margin-top:8px;width:100%">Add to menu</button></div><button class="btn alt sm" id="att" type="button" style="margin-top:12px;width:100%">Test AI connection</button><button class="btn alt sm" id="atk" type="button" style="margin-top:8px;width:100%">AI keys</button><div class="card ph" style="margin-top:12px">${PHOTOS.length?PHOTOS.map(p=>`<div><img src="${p.data}" data-z="${p.id}" alt="Menu"><button class="btn sm" data-e="${p.id}" style="width:100%;margin-top:4px">↻ Re-read menu</button><button class="btn alt sm" data-d="${p.id}" style="width:100%;margin-top:4px">Delete</button></div>`).join(''):'<div class="empty" style="grid-column:1/-1">No photos yet.</div>'}</div>`;
  $('#pf').onchange=e=>uploadAll([...e.target.files]);
- $('#att').onclick=aiTest;
+ $('#ocrf').onchange=async e=>{const fs=[...e.target.files];e.target.value='';if(!fs.length)return;let w;
+  try{toast('Loading the reader (the first time takes about a minute)…');w=await ocrWorker()}catch(x){return toast((x&&x.message)||'Could not start the reader')}
+  for(let k=0;k<fs.length;k++){try{toast('Photo '+(k+1)+'/'+fs.length+': reading…');const c=await ocrPrep(fs[k]),r=await w.recognize(c),t=ocrClean(r.data.text||'');if(t){const ta=$('#mtx');ta.value=(ta.value?ta.value+'\\n':'')+t}}catch(x){toast('Photo '+(k+1)+' failed: '+((x&&x.message)||'could not read'))}}
+  toast('Done. Check the text below, fix any mistakes, then press Add to menu');try{$('#mtx').scrollIntoView({block:'center'})}catch(x){}};
+ $('#att').onclick=aiTest;$('#atk').onclick=askKeys;
  $('#mtb').onclick=()=>{if(!CAN)return toast('Only the owner can edit the menu');const it=parseMenuText($('#mtx').value);if(!it.length)return toast('No dishes found. Write each dish as: name price');const n=addItems(it);if(n)saveMenu();$('#mtx').value='';toast(n?n+' items added to the menu ✓':'No new items (all already in the menu)')};
  $('#app').onclick=e=>{const z=e.target.dataset.z,d=e.target.dataset.d,ex=e.target.dataset.e;if(ex)extractMenu(ex);if(d)ask('Delete this photo?',0,()=>phDel(d));if(z){const p=PHOTOS.find(x=>x.id===z),w=$('#dlg');w.innerHTML=`<img src="${p.data}" style="width:100%" alt=""><button class="btn" style="width:100%;margin-top:8px" onclick="$('#dlg').close()">Close</button>`;w.showModal()}}}
 function planLine(P){const e=P.plan&&P.plan.expiresAt;if(e>8e15)return '<span class="tag paid">Active</span> <b>Lifetime</b>';
@@ -1009,7 +1028,7 @@ function delSel(){const ids=[...document.querySelectorAll('.sel:checked')].map(c
 const AI_PROMPT='This is a photo (or one part of a photo) of a restaurant menu. List EVERY dish and drink you can read, without skipping any: all sections and all columns (starters, soups, rice, noodles, main course, tandoor, breads, desserts, drinks and so on). The image may cut off at its top or bottom edge: only list items whose name you can read fully. Use the section heading printed on the menu as "cat"; if the heading is not visible in this part, guess it from the neighbouring items. Keep dish names as printed. If one section holds both veg and non-veg dishes (like Rice, Noodles, Soups), name the category "Veg <section>" for the veg dishes and "Non-Veg <section>" for the non-veg dishes, for example "Veg Noodles" and "Non-Veg Noodles". Prices are numbers only. If an item has two prices (half/full, small/large), put the smaller in "half" and the larger in "full"; with one price use "full" and half null; if no price is visible use 0. "veg" is false if the dish has chicken, mutton, egg, fish, prawn or other meat, otherwise true. Return ONLY a JSON array, nothing else: [{"cat":"","name":"","veg":true,"half":null,"full":0}]';
 const parseItems=s=>{const a=s.indexOf('['),b=s.lastIndexOf(']');if(a<0||b<a)throw new Error('The AI returned no items');return JSON.parse(s.slice(a,b+1))};
 function askKey(){return new Promise(res=>{const d=$('#dlg');d.style.maxWidth='';d.innerHTML='<h3>AI key (free)</h3><p class="mut" style="font-size:13px">Open console.groq.com/keys, sign in, tap Create API Key and paste it here. It starts with gsk_ and is saved only on this phone.</p><p><input id="gk" placeholder="gsk_..." autocomplete="off" style="width:100%;box-sizing:border-box"></p><div class="row"><button class="btn alt" id="gk_n">Cancel</button><button class="btn" id="gk_y">Save</button></div>';if(!d.open)d.showModal();$('#gk_n').onclick=()=>{d.close();res('')};$('#gk_y').onclick=()=>{const v=$('#gk').value.trim();d.close();res(v)}})}
-async function callOAI(kind,key,d){
+async function callOAI(kind,key,d,fast){
  const base=kind==='groq'?'https://api.groq.com/openai/v1':'https://openrouter.ai/api/v1',H={'Content-Type':'application/json',Authorization:'Bearer '+key};
  const bad=()=>{try{localStorage.removeItem('gemKey')}catch(e){}return new Error('AI key is wrong or expired. Tap again and enter a new key.')};
  const VIS=/vision|vl\b|vl-|scout|maverick|pixtral|llava|gemma-3|gemma3|mistral-small|mistral-medium|gpt-4o|gpt-4\.1|gpt-5|gemini|llama-4|llama4|qwen.*vl|ministral|kimi/i,SKIP=/whisper|tts|guard|safeguard|embed|orpheus|playai|moderation|transcri|rerank/i;
@@ -1018,21 +1037,29 @@ async function callOAI(kind,key,d){
   if(kind==='groq'){const all=L.map(x=>x.id).filter(i=>!SKIP.test(i));ids=[...all.filter(i=>VIS.test(i)),...all.filter(i=>!VIS.test(i))]}
   else ids=L.filter(x=>/:free$/.test(x.id)&&(((x.architecture||{}).input_modalities)||[]).includes('image')).map(x=>x.id)}catch(e){if(e&&/wrong or expired/.test(e.message))throw e}
  if(!ids.length)ids=kind==='groq'?['meta-llama/llama-4-scout-17b-16e-instruct']:['google/gemma-3-27b-it:free','meta-llama/llama-3.2-11b-vision-instruct:free'];
- const errs=[];
- for(const id of ids.slice(0,8)){
-  let r,j;try{r=await fetch(base+'/chat/completions',{method:'POST',headers:H,body:JSON.stringify({model:id,temperature:0,max_tokens:6000,messages:[{role:'user',content:[{type:'text',text:AI_PROMPT},{type:'image_url',image_url:{url:d}}]}]})})}catch(e){throw new Error('No internet, or the AI site is blocked')}
-  try{j=await r.json()}catch(e){j={}}
-  if(r.ok){const t=(((j.choices||[])[0]||{}).message||{}).content||'';try{return parseItems(t)}catch(e){errs.push(id+': unreadable reply');continue}}
-  const msg=String((j.error&&(j.error.message||j.error))||('error '+r.status));
-  if(r.status===401)throw bad();
-  if(r.status===429)throw new Error('Free limit reached. Wait a minute and try again');
-  errs.push(id.split('/').pop()+': '+msg.slice(0,60))}
+ const errs=[],sleep=ms=>new Promise(r=>setTimeout(r,ms)),waitOf=m=>{const x=/try again in\s*((?:\d+(?:\.\d+)?\s*[hms]\s*)+)/i.exec(m||'');if(!x)return 0;let t=0;x[1].replace(/(\d+(?:\.\d+)?)\s*([hms])/gi,(_,n,u)=>{t+=parseFloat(n)*({h:3600,m:60,s:1})[u.toLowerCase()]});return t};
+ for(let pass=0;pass<4;pass++){
+  let minWait=0,hit429=false;
+  for(const id of ids.slice(0,6)){
+   let r,j;try{r=await fetch(base+'/chat/completions',{method:'POST',headers:H,body:JSON.stringify({model:id,temperature:0,max_tokens:4000,messages:[{role:'user',content:[{type:'text',text:AI_PROMPT},{type:'image_url',image_url:{url:d}}]}]})})}catch(e){throw new Error('No internet, or the AI site is blocked')}
+   try{j=await r.json()}catch(e){j={}}
+   if(r.ok){const t=(((j.choices||[])[0]||{}).message||{}).content||'';try{return parseItems(t)}catch(e){errs.push(id+': unreadable reply');continue}}
+   const msg=String((j.error&&(j.error.message||j.error))||('error '+r.status));
+   if(r.status===401)throw bad();
+   if(r.status===429){hit429=true;const w=waitOf(msg)||(+r.headers.get('retry-after')||0)||20;minWait=minWait?Math.min(minWait,w):w;continue}
+   errs.push(id.split('/').pop()+': '+msg.slice(0,60))}
+  if(!hit429)break;
+  if(fast)throw new Error('Free AI limit reached. Switching key');
+  if(minWait>90){const m=Math.ceil(minWait/60);throw new Error('Free AI limit is used up. Try again in about '+(m>=120?Math.ceil(m/60)+' hours':m+' minutes')+'.')}
+  if(pass===3)throw new Error('Free AI limit reached. Wait a minute and try again');
+  for(let w=Math.ceil(minWait)+2;w>0;w--){try{toast('Free AI limit: waiting '+w+'s and retrying…')}catch(e){}await sleep(1000)}}
  throw new Error('No model could read the photo. '+errs.slice(0,4).join(' | '))}
 const GEM_KEY='';
 async function callGemini(d){
  let key=GEM_KEY;if(!key)try{key=localStorage.getItem('gemKey')||''}catch(e){}
  if(!key){window._kp=window._kp||askKey();key=await window._kp;window._kp=null;if(!key)throw new Error('AI key not added');try{localStorage.setItem('gemKey',key)}catch(e){}}
- if(/^gsk_/.test(key))return callOAI('groq',key,d);if(/^sk-or-/.test(key))return callOAI('or',key,d);
+ const k2=(()=>{try{return localStorage.getItem('gemKey2')||''}catch(e){return ''}})(),isOA=k=>/^(gsk_|sk-or-)/.test(k),OA=(k,f)=>callOAI(k.startsWith('gsk_')?'groq':'or',k,d,f);
+ if(isOA(key)){if(k2&&isOA(k2)&&k2!==key){try{return await OA(key,true)}catch(e){if(!/limit|used up|No model/i.test(e.message))throw e;return await OA(k2,false)}}return OA(key,false)}
  const m=/^data:(image\/[\w+.-]+);base64,(.+)$/.exec(d);if(!m)throw new Error('Photo could not be read');
  const gen={temperature:0,responseMimeType:'application/json'};
  const ct={'Content-Type':'application/json'};
@@ -1058,7 +1085,8 @@ async function callAI(d){
 const srcImg=s=>typeof s==='string'?new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>rej(new Error('Could not open the photo'));im.src=s}):loadPhoto(s);
 async function readMenu(src){const im=await srcImg(src),w=im.width||im.naturalWidth,h=im.height||im.naturalHeight,tall=h>=w,L=tall?h:w,Sh=tall?w:h,parts=L>1100?(L/Sh>2.2?3:2):1,tiles=[];
  for(let k=0;k<parts;k++){const ov=L*.06,a=Math.max(0,k*L/parts-ov),len=Math.min(L,(k+1)*L/parts+ov)-a,sx=tall?0:a,sy=tall?a:0,sw=tall?w:len,sh=tall?len:h,sc=Math.min(1,2000/Math.max(sw,sh)),c=document.createElement('canvas');c.width=Math.round(sw*sc);c.height=Math.round(sh*sc);const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,sx,sy,sw,sh,0,0,c.width,c.height);tiles.push(c.toDataURL('image/jpeg',.85))}
- const all=await Promise.all(tiles.map(callAI)),seen=new Set(),out=[];all.flat().forEach(i=>{if(!i||!i.name)return;const k=String(i.name).toLowerCase().replace(/\s+/g,' ').trim()+'|'+(+i.full||0)+'|'+(i.veg===false?'n':'v');if(!seen.has(k)){seen.add(k);out.push(i)}});return out}
+ const all=[];for(const t of tiles){all.push(await callAI(t));if(tiles.length>1)await new Promise(r=>setTimeout(r,2500))}
+ const seen=new Set(),out=[];all.flat().forEach(i=>{if(!i||!i.name)return;const k=String(i.name).toLowerCase().replace(/\s+/g,' ').trim()+'|'+(+i.full||0)+'|'+(i.veg===false?'n':'v');if(!seen.has(k)){seen.add(k);out.push(i)}});return out}
 function addItems(items){splitVeg(new Set());let n=0;const touched=new Set();items.forEach(i=>{const name=String(i.name||'').trim();if(!name)return;const raw=String(i.cat||'Menu').trim()||'Menu',cat=vegCat(raw,i.veg!==false),f=+i.full||+i.half||0,h=(+i.half&&+i.full)?+i.half:null;if(S.items.some(x=>x.name.toLowerCase()===name.toLowerCase()&&x.cat===cat))return;const it={id:S.nid++,cat,t:isNV(cat)?'n':isV(cat)?'v':(i.veg===false?'n':'v'),name};if(h)it.h=h;it.f=f;S.items.push(it);n++;if(pairable(baseCat(cat)))touched.add(baseCat(cat))});return n+splitVeg(touched)}
 const PAIR=/rice|noodle|soup|pasta|chowmein|chop ?suey/i,NOPAIR=/plain|jeera|steam/i,PROT=/chicken|mutton|egg|prawn|fish|keema|paneer|veg|mushroom|corn|potato|cheese|soya|baby/i;
 const baseCat=c=>String(c).replace(/^\s*(non[\s-]*veg(etarian)?|veg(etarian)?)\s*[-:]?\s*/i,'').trim()||String(c);
@@ -1086,7 +1114,7 @@ function fit(){const w=W();if(!w||L.style.display==='none')return;w.style.zoom=1
 const f=()=>setTimeout(fit,0);addEventListener('resize',fit);L.addEventListener('click',f);L.addEventListener('input',f);new MutationObserver(f).observe(L,{attributes:true,attributeFilter:['style']});[200,800,2000].forEach(t=>setTimeout(fit,t));
 const ig=document.querySelector('#login .dev a');if(ig)ig.onclick=e=>{const u='_.9.9.9.0._',web=ig.href,ua=navigator.userAgent;if(/Android/i.test(ua)){e.preventDefault();location.href='intent://instagram.com/_u/'+u+'/#Intent;package=com.instagram.android;scheme=https;S.browser_fallback_url='+encodeURIComponent(web)+';end'}else if(/iPhone|iPad|iPod/i.test(ua)){e.preventDefault();const t=Date.now();location.href='instagram://user?username='+u;setTimeout(()=>{if(!document.hidden&&Date.now()-t<2500)location.href=web},1200)}};})();
 initCloud();
-const APPV='v13-2026-11-21';
+const APPV='v16-2026-11-21';
 (async()=>{try{if(localStorage.getItem('appv')!==APPV&&'serviceWorker' in navigator){const rs=await navigator.serviceWorker.getRegistrations();for(const r of rs)await r.unregister();if(window.caches){for(const k of await caches.keys())await caches.delete(k)}localStorage.setItem('appv',APPV);location.reload();return}}catch(e){}
 if(!window.AndroidBridge&&'serviceWorker' in navigator&&location.protocol.indexOf('http')===0)navigator.serviceWorker.register('sw.js').catch(()=>{})})();
 </script>
