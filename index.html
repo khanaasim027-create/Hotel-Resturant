@@ -147,7 +147,7 @@ const clone=o=>JSON.parse(JSON.stringify(o));
 const pad=n=>'INV-'+String(n).padStart(4,'0');
 const nextNo=()=>Math.max(0,...S.invoices.map(v=>+String(v.no).replace(/\D/g,'')||0))+1;
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
-const setSync=t=>{const e=$('#sync');if(e)e.textContent=t+' · v12'};
+const setSync=t=>{const e=$('#sync');if(e)e.textContent=t+' · v13'};
 const saveMenu=()=>{save();lastMenu=JSON.stringify(S.items);
 if(!DB){toast('⚠ Not signed in to the cloud: the menu is saved on this device only');return}
 let done=false;setTimeout(()=>{if(!done)toast('Slow connection: the menu will sync as soon as you are back online')},4000);
@@ -948,6 +948,7 @@ async function aiTest(){if(!window.AI_ENDPOINT){let k=GEM_KEY;if(!k)try{k=localS
   if(/^(gsk_|sk-or-)/.test(k)){const g=k.startsWith('gsk_'),base=g?'https://api.groq.com/openai/v1':'https://openrouter.ai/api/v1',d=$('#dlg');d.style.maxWidth='';d.innerHTML='<h3>AI test</h3><pre id="atr" style="white-space:pre-wrap;word-break:break-word;font-size:12px;max-height:60vh;overflow:auto">Testing…</pre><button class="btn" style="width:100%" onclick="$(\'#dlg\').close()">Close</button>';if(!d.open)d.showModal();
    let t='App '+APPV+' · '+(g?'Groq':'OpenRouter')+' key '+k.slice(0,6)+'… ('+k.length+' chars)\n\n';
    try{const r=await fetch(base+'/models',{headers:{Authorization:'Bearer '+k}});const j=await r.json().catch(()=>({}));t+=(r.ok?'✅ ':'❌ ')+'key check → '+r.status+(r.ok?' ('+((j.data||[]).length)+' models)':' '+JSON.stringify(j).slice(0,160))}catch(e){t+='❌ network error: '+e.message}
+   if(g&&t.includes('✅')){try{const r=await fetch(base+'/models',{headers:{Authorization:'Bearer '+k}});const j=await r.json();t+='\n\nModels:\n'+(j.data||[]).map(x=>x.id).join('\n')}catch(e){}}
    $('#atr').textContent=t+(t.includes('✅')?'\n\nKey works. Now tap Re-read menu on a photo.':'');return}}
  if(window.AI_ENDPOINT){const d=$('#dlg');d.style.maxWidth='';d.innerHTML='<h3>AI test</h3><pre id="atr" style="white-space:pre-wrap;word-break:break-word;font-size:12px">Testing…</pre><button class="btn" style="width:100%" onclick="$(\'#dlg\').close()">Close</button>';if(!d.open)d.showModal();let t='App '+APPV+'\nAI server: '+window.AI_ENDPOINT+'\n\n';try{const r=await fetch(window.AI_ENDPOINT);t+=(r.ok?'✅ ':'❌ ')+r.status+' '+(await r.text()).slice(0,200)+'\n\nIf this says the worker is running, tap Re-read menu on a photo.'}catch(e){t+='❌ Cannot reach the AI server: '+e.message}$('#atr').textContent=t;return}
  const d=$('#dlg');d.style.maxWidth='';d.innerHTML='<h3>AI test</h3><pre id="atr" style="white-space:pre-wrap;word-break:break-word;font-size:12px;max-height:60vh;overflow:auto">Testing…</pre><button class="btn" style="width:100%" onclick="$(\'#dlg\').close()">Close</button>';if(!d.open)d.showModal();
@@ -1011,19 +1012,22 @@ function askKey(){return new Promise(res=>{const d=$('#dlg');d.style.maxWidth=''
 async function callOAI(kind,key,d){
  const base=kind==='groq'?'https://api.groq.com/openai/v1':'https://openrouter.ai/api/v1',H={'Content-Type':'application/json',Authorization:'Bearer '+key};
  const bad=()=>{try{localStorage.removeItem('gemKey')}catch(e){}return new Error('AI key is wrong or expired. Tap again and enter a new key.')};
+ const VIS=/vision|vl\b|vl-|scout|maverick|pixtral|llava|gemma-3|gemma3|mistral-small|mistral-medium|gpt-4o|gpt-4\.1|gpt-5|gemini|llama-4|llama4|qwen.*vl|ministral|kimi/i,SKIP=/whisper|tts|guard|safeguard|embed|orpheus|playai|moderation|transcri|rerank/i;
  let ids=[];
  try{const r=await fetch(base+'/models',{headers:H});if(r.status===401)throw bad();const L=((await r.json()).data)||[];
-  ids=kind==='groq'?L.map(x=>x.id).filter(i=>/llama-4|scout|maverick|vision|pixtral|qwen.*vl/i.test(i)&&!/guard|whisper|tts|safeguard/i.test(i)):L.filter(x=>/:free$/.test(x.id)&&(((x.architecture||{}).input_modalities)||[]).includes('image')).map(x=>x.id)}catch(e){if(e&&/wrong or expired/.test(e.message))throw e}
- if(!ids.length)ids=kind==='groq'?['meta-llama/llama-4-scout-17b-16e-instruct','meta-llama/llama-4-maverick-17b-128e-instruct']:['google/gemma-3-27b-it:free','meta-llama/llama-3.2-11b-vision-instruct:free'];
- let last='';
- for(const id of ids.slice(0,4)){
+  if(kind==='groq'){const all=L.map(x=>x.id).filter(i=>!SKIP.test(i));ids=[...all.filter(i=>VIS.test(i)),...all.filter(i=>!VIS.test(i))]}
+  else ids=L.filter(x=>/:free$/.test(x.id)&&(((x.architecture||{}).input_modalities)||[]).includes('image')).map(x=>x.id)}catch(e){if(e&&/wrong or expired/.test(e.message))throw e}
+ if(!ids.length)ids=kind==='groq'?['meta-llama/llama-4-scout-17b-16e-instruct']:['google/gemma-3-27b-it:free','meta-llama/llama-3.2-11b-vision-instruct:free'];
+ const errs=[];
+ for(const id of ids.slice(0,8)){
   let r,j;try{r=await fetch(base+'/chat/completions',{method:'POST',headers:H,body:JSON.stringify({model:id,temperature:0,max_tokens:6000,messages:[{role:'user',content:[{type:'text',text:AI_PROMPT},{type:'image_url',image_url:{url:d}}]}]})})}catch(e){throw new Error('No internet, or the AI site is blocked')}
   try{j=await r.json()}catch(e){j={}}
-  if(r.ok){const t=(((j.choices||[])[0]||{}).message||{}).content||'';return parseItems(t)}
-  last=(j.error&&(j.error.message||j.error))||('error '+r.status);
+  if(r.ok){const t=(((j.choices||[])[0]||{}).message||{}).content||'';try{return parseItems(t)}catch(e){errs.push(id+': unreadable reply');continue}}
+  const msg=String((j.error&&(j.error.message||j.error))||('error '+r.status));
   if(r.status===401)throw bad();
-  if(r.status===429)throw new Error('Free limit reached. Wait a minute and try again')}
- throw new Error(String(last).slice(0,150))}
+  if(r.status===429)throw new Error('Free limit reached. Wait a minute and try again');
+  errs.push(id.split('/').pop()+': '+msg.slice(0,60))}
+ throw new Error('No model could read the photo. '+errs.slice(0,4).join(' | '))}
 const GEM_KEY='';
 async function callGemini(d){
  let key=GEM_KEY;if(!key)try{key=localStorage.getItem('gemKey')||''}catch(e){}
@@ -1082,7 +1086,7 @@ function fit(){const w=W();if(!w||L.style.display==='none')return;w.style.zoom=1
 const f=()=>setTimeout(fit,0);addEventListener('resize',fit);L.addEventListener('click',f);L.addEventListener('input',f);new MutationObserver(f).observe(L,{attributes:true,attributeFilter:['style']});[200,800,2000].forEach(t=>setTimeout(fit,t));
 const ig=document.querySelector('#login .dev a');if(ig)ig.onclick=e=>{const u='_.9.9.9.0._',web=ig.href,ua=navigator.userAgent;if(/Android/i.test(ua)){e.preventDefault();location.href='intent://instagram.com/_u/'+u+'/#Intent;package=com.instagram.android;scheme=https;S.browser_fallback_url='+encodeURIComponent(web)+';end'}else if(/iPhone|iPad|iPod/i.test(ua)){e.preventDefault();const t=Date.now();location.href='instagram://user?username='+u;setTimeout(()=>{if(!document.hidden&&Date.now()-t<2500)location.href=web},1200)}};})();
 initCloud();
-const APPV='v12-2026-11-21';
+const APPV='v13-2026-11-21';
 (async()=>{try{if(localStorage.getItem('appv')!==APPV&&'serviceWorker' in navigator){const rs=await navigator.serviceWorker.getRegistrations();for(const r of rs)await r.unregister();if(window.caches){for(const k of await caches.keys())await caches.delete(k)}localStorage.setItem('appv',APPV);location.reload();return}}catch(e){}
 if(!window.AndroidBridge&&'serviceWorker' in navigator&&location.protocol.indexOf('http')===0)navigator.serviceWorker.register('sw.js').catch(()=>{})})();
 </script>
