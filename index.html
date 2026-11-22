@@ -1166,26 +1166,145 @@ function bkImport(rows,upd){let a=0,u=0;const cm={};cats().forEach(c=>cm[c.toLow
 function bkCopy(t){const done=()=>toast('Prompt copied ✓ Ab ChatGPT / Gemini me paste karo aur menu photo daalo');const fb=()=>{const x=document.createElement('textarea');x.value=t;x.style.cssText='position:fixed;opacity:0';document.body.appendChild(x);x.select();try{document.execCommand('copy');done()}catch(e){toast('Copy nahi hua')}x.remove()};try{navigator.clipboard.writeText(t).then(done,fb)}catch(e){fb()}}
 
 let OCRW=null,OCRP=null;
-async function bkOcr(file,cols,onP){
+// ===== Menu photo vision: clean image (remove dotted leaders / ornaments) =====
+function bkVision(px,W,H){
+ const n=W*H,g=new Uint8Array(n),hist=new Uint32Array(256);
+ for(let i=0,j=0;i<n;i++,j+=4){const v=(.299*px[j]+.587*px[j+1]+.114*px[j+2]+.5)|0;g[i]=v;hist[v]++}
+ let a=0,lo=0,hi=255,mean=0;for(let v=0;v<256;v++)mean+=v*hist[v];mean/=n;
+ for(let v=0;v<256;v++){a+=hist[v];if(a>=n*.02){lo=v;break}}a=0;for(let v=255;v>=0;v--){a+=hist[v];if(a>=n*.02){hi=v;break}}
+ const k=255/Math.max(40,hi-lo),inv=mean<115;
+ for(let i=0;i<n;i++){let v=(g[i]-lo)*k;v=v<0?0:v>255?255:v;g[i]=inv?255-v:v}
+ // local threshold (integral image)
+ const M=Math.max(W,H),r=Math.max(12,Math.round(M/90)),W1=W+1,I=new Uint32Array(W1*(H+1));
+ for(let y=0;y<H;y++){let row=0;for(let x=0;x<W;x++){row+=g[y*W+x];I[(y+1)*W1+x+1]=I[y*W1+x+1]+row}}
+ const bin=new Uint8Array(n);
+ for(let y=0;y<H;y++){const y0=Math.max(0,y-r),y1=Math.min(H,y+r+1);for(let x=0;x<W;x++){const x0=Math.max(0,x-r),x1=Math.min(W,x+r+1),s=I[y1*W1+x1]-I[y0*W1+x1]-I[y1*W1+x0]+I[y0*W1+x0],m=s/((y1-y0)*(x1-x0));if(g[y*W+x]<m-16)bin[y*W+x]=1}}
+ // connected components (8-neighbour)
+ const lab=new Int32Array(n),par=new Int32Array((n>>1)+2);let nl=0;
+ const find=x=>{while(par[x]!==x){par[x]=par[par[x]];x=par[x]}return x};
+ for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;if(!bin[i])continue;let m=0;
+  const c=[x>0?lab[i-1]:0,y>0?lab[i-W]:0,(y>0&&x>0)?lab[i-W-1]:0,(y>0&&x<W-1)?lab[i-W+1]:0];
+  for(const l of c)if(l){const r2=find(l);if(!m||r2<m)m=r2}
+  if(!m){m=++nl;par[m]=m}else for(const l of c)if(l){const r2=find(l);if(r2!==m){if(r2<m){par[m]=r2;m=r2}else par[r2]=m}}
+  lab[i]=m}
+ const id=new Int32Array(nl+1).fill(-1);let nc=0;for(let l=1;l<=nl;l++){const r2=find(l);if(id[r2]<0)id[r2]=nc++;id[l]=id[r2]}
+ const mnx=new Int32Array(nc).fill(1e9),mny=new Int32Array(nc).fill(1e9),mxx=new Int32Array(nc).fill(-1),mxy=new Int32Array(nc).fill(-1),ar=new Int32Array(nc);
+ for(let y=0;y<H;y++)for(let x=0;x<W;x++){const l=lab[y*W+x];if(!l)continue;const c=id[l];if(x<mnx[c])mnx[c]=x;if(x>mxx[c])mxx[c]=x;if(y<mny[c])mny[c]=y;if(y>mxy[c])mxy[c]=y;ar[c]++}
+ const hs=[];for(let c=0;c<nc;c++){const h=mxy[c]-mny[c]+1,w=mxx[c]-mnx[c]+1;if(h>=M*.008&&h<=M*.045&&w<M*.06&&ar[c]>40)hs.push(h)}
+ hs.sort((p,q)=>p-q);const Hm=hs.length?hs[hs.length>>1]:M*.016;
+ const keep=new Uint8Array(nc).fill(1),dots=[];
+ for(let c=0;c<nc;c++){const w=mxx[c]-mnx[c]+1,h=mxy[c]-mny[c]+1;
+  if(w>10*Hm||h>3.2*Hm||ar[c]<3||(w*h>40*Hm*Hm&&ar[c]/(w*h)>.3)){keep[c]=0;continue}
+  if(w<.45*Hm&&h<.45*Hm)dots.push({c,x:(mnx[c]+mxx[c])/2,y:(mny[c]+mxy[c])/2})}
+ dots.sort((p,q)=>p.y-q.y);
+ for(let i=0;i<dots.length;i++){let cnt=0;for(let j=i;j>=0&&dots[i].y-dots[j].y<.25*Hm;j--)if(j!==i&&Math.abs(dots[i].x-dots[j].x)<3*Hm)cnt++;for(let j=i+1;j<dots.length&&dots[j].y-dots[i].y<.25*Hm;j++)if(Math.abs(dots[i].x-dots[j].x)<3*Hm)cnt++;if(cnt>=4)dots[i].lead=1}
+ for(const d of dots)if(d.lead)keep[d.c]=0;
+ const out=new Uint8Array(n).fill(255);
+ for(let i=0;i<n;i++){const l=lab[i];if(l&&keep[id[l]])out[i]=0}
+ return{img:out,Hm}}
+
+// ===== Menu layout: words with boxes -> rows {cat,name,h,f,t} =====
+function bkLayout(words){
+ const W0=[];words.forEach(w=>{const t=String(w.t).trim();if(!t)return;const m=/^([^\dA-Za-z]?\d{2,4})[\/|\\!]+([^\dA-Za-z]?\d{2,4})$/.exec(t),push=(t,x0,x1)=>W0.push({t,x0,y0:w.y0,x1,y1:w.y1,cx:(x0+x1)/2,cy:(w.y0+w.y1)/2,h:w.y1-w.y0});
+  if(m){const L=m[1].length,R=m[2].length,mid=w.x0+(w.x1-w.x0)*L/(L+R+1);push(m[1],w.x0,mid);push(m[2],mid+(w.x1-w.x0)/(L+R+1),w.x1)}else push(t,w.x0,w.x1)});
+ if(W0.length<4)return[];
+ const hh=W0.filter(w=>/[A-Za-z]{3,}/.test(w.t)).map(w=>w.h).sort((a,b)=>a-b),Hm=hh.length?hh[hh.length>>1]:30;
+ const core=t=>t.replace(/^[^\dA-Za-z]+|[^\dA-Za-z]+$/g,'');
+ const isNum=t=>/^\d{2,4}$/.test(core(t))&&!/[A-Za-z]/.test(t);
+ const isDash=t=>/^[-–—−_~=]{1,4}$/.test(t),isSep=t=>/^[|\/\\!]+$/.test(t);
+ const isHalf=t=>/^h[a-z]lf$/i.test(core(t)),isFull=t=>/^fu[l1i]{1,2}$/i.test(core(t));
+ // rupee glyph is often read as 7 / 2 / % / ~ in front of the digits
+ const nums=W0.filter(w=>isNum(w.t));
+ const rup=nums.filter(w=>/^[7%~₹]\d{2,3}$/.test(w.t)||/^[%~₹]/.test(w.t)).length>=3;
+ const val=t=>{let c=core(t);if(rup&&/^\d{4}$/.test(c)&&/^[2-9]/.test(c))c=c.slice(1);return +c};
+ // price columns: x-centres of numbers that line up under each other
+ const cl=[];[...nums].sort((a,b)=>a.cx-b.cx).forEach(w=>{const c=cl[cl.length-1];if(c&&w.cx-c.sum/c.n<1.0*Hm){c.sum+=w.cx;c.n++}else cl.push({sum:w.cx,n:1})});
+ const pc=cl.filter(c=>c.n>=3).map(c=>c.sum/c.n),fb=pc.length===0;
+ const onCol=x=>fb||pc.some(p=>Math.abs(p-x)<1.0*Hm);
+ // rows
+ const S=[...W0].sort((a,b)=>a.cy-b.cy),rows=[];
+ S.forEach(w=>{const r=rows[rows.length-1];if(r&&Math.abs(w.cy-r.cy)<.55*Hm){r.w.push(w);r.cy=r.w.reduce((s,q)=>s+q.cy,0)/r.w.length}else rows.push({cy:w.cy,w:[w]})});
+ const anchors=[],recs=[],heads=[];
+ rows.forEach(r=>{r.w.sort((a,b)=>a.x0-b.x0);
+  const hasPrice=r.w.some(w=>isNum(w.t)&&onCol(w.cx));
+  const tk=[];
+  r.w.forEach(w=>{ if(!hasPrice&&(isHalf(w.t)||isFull(w.t))){anchors.push({k:isHalf(w.t)?'h':'f',cx:w.cx,cy:w.cy});return}
+   if(isNum(w.t)&&onCol(w.cx))tk.push({k:'n',w,v:val(w.t)});
+   else if(isDash(w.t)&&!fb&&onCol(w.cx))tk.push({k:'d',w});
+   else if(isSep(w.t))tk.push({k:'s',w});
+   else tk.push({k:'t',w})});
+  // separators only count when touching prices
+  tk.forEach((q,i)=>{if(q.k==='s'){const a=tk[i-1],b=tk[i+1];if(!((a&&(a.k==='n'||a.k==='d'))||(b&&(b.k==='n'||b.k==='d'))))q.k='x'}});
+  let cur=null;const flush=()=>{if(cur&&(cur.name.length||cur.pr.length))recs.push(cur);cur=null};
+  const junk=w=>/^[^A-Za-z0-9&(]+$/.test(w.t)||(w.t.length<=3&&/^[a-z]+$/.test(w.t)&&!/^(of|in|on|to|or|is|an|at|as|and|the|for)$/.test(w.t));
+  tk.forEach((q,i)=>{if(q.k!=='t'||!junk(q.w))return;const p=tk[i-1],n=tk[i+1];if(/^[-–—]$/.test(q.w.t)&&p&&n&&p.k==='t'&&n.k==='t'&&/[A-Za-z]/.test(p.w.t+n.w.t))return;q.k='x'});
+  tk.forEach(q=>{ if(q.k==='t'||q.k==='x'){ if(cur&&cur.pr.length)flush(); if(!cur)cur={name:[],pr:[],cy:r.cy}; if(q.k==='t')cur.name.push(q.w)}
+   else{ if(!cur)cur={name:[],pr:[],cy:r.cy}; if(q.k!=='s')cur.pr.push(q)}});
+  flush()});
+ const nameOf=ws=>ws.map(w=>w.t).join(' ');
+ const letters=s=>(s.match(/[A-Za-z]/g)||[]);
+ recs.forEach(r=>{const nw=r.name;r.x0=nw.length?nw[0].x0:r.pr[0].w.x0;r.x1=Math.max(...(nw.map(w=>w.x1)),...(r.pr.map(p=>p.w.x1)),0);r.y=r.cy});
+ // headings = unpriced rows that look like headings (split side-by-side headings at big gaps)
+ recs.filter(r=>!r.pr.length&&r.name.length).forEach(r=>{
+  const gr=[];r.name.forEach(w=>{const g=gr[gr.length-1];if(g&&w.x0-g[g.length-1].x1<2.5*Hm)g.push(w);else gr.push([w])});
+  gr.forEach(g=>{const ws=g.filter(w=>/[A-Za-z]{2,}/.test(w.t));if(!ws.length)return;
+   const txt=nameOf(ws).replace(/[^A-Za-z&\- ]/g,' ').replace(/\s+/g,' ').trim(),L=letters(txt),up=L.filter(c=>c===c.toUpperCase()).length/(L.length||1),ah=ws.reduce((s,w)=>s+w.h,0)/ws.length;
+   if(L.length<4)return;if(up>=.75||ah>=1.3*Hm)heads.push({txt,x0:g[0].x0,x1:g[g.length-1].x1,y:r.y,big:ah>=1.3*Hm})});
+  r.isHead=true});
+ heads.sort((a,b)=>a.y-b.y);
+ const ovl=(a0,a1,b0,b1)=>Math.max(0,Math.min(a1,b1)-Math.max(a0,b0));
+ const headFor=(x0,x1,y)=>{let best=null;for(const h of heads){if(h.y>=y-.3*Hm)break;const o=ovl(x0,x1,h.x0,h.x1);if(o<.2*Math.min(h.x1-h.x0,x1-x0)&&!(h.x0<=x0&&h.x1>=x1))continue;if(!best||h.y>best.y)best=h}return best};
+ const catOf=(x0,x1,y)=>{const h=headFor(x0,x1,y);if(!h)return'Menu';let t=h.txt;
+  if(/^(non[\s-]*veg(etarian)?|veg(etarian)?)$/i.test(t)){const p=heads.filter(q=>q.y<h.y&&q.big&&!/^(non[\s-]*veg|veg)/i.test(q.txt)).pop();if(p)t=t+' '+p.txt}
+  return t};
+ const anchorFor=(w,x0,x1)=>{let best=null;for(const a of anchors){if(a.cy>=w.cy)continue;if(Math.abs(a.cx-w.cx)>1.3*Hm)continue;
+   if(heads.some(h=>h.y>a.cy+.2*Hm&&h.y<w.cy-.2*Hm&&ovl(x0,x1,h.x0,h.x1)>0))continue;
+   if(!best||a.cy>best.cy)best=a}return best};
+ const out=[];
+ recs.filter(r=>r.pr.length&&r.name.length).forEach(r=>{
+  const raw=nameOf(r.name);let name=raw.replace(/^[^A-Za-z0-9(]+/,'').replace(/[^A-Za-z0-9)]+$/,'').replace(/\s+/g,' ');
+  if(letters(name).length<3)return;
+  let h=null,f=null;const nn=r.pr.filter(p=>p.k==='n');if(!nn.length)return;
+  const ax=nn.map(p=>anchorFor(p.w,r.x0,r.x1));
+  if(ax.every(Boolean)){nn.forEach((p,i)=>{if(ax[i].k==='h')h=p.v;else f=p.v})}
+  else if(nn.length===1)f=nn[0].v;else{h=nn[0].v;f=nn[nn.length-1].v}
+  if(f==null&&h!=null){f=h;h=null}
+  const cat=bkTitle(catOf(r.x0,r.x1,r.y)).replace(/\bNon Veg\b/i,'Non-Veg');
+  out.push({cat,name,h,f:f||0,y:r.y,x:r.x0,junk:/^[^A-Za-z0-9]/.test(raw)})});
+ // repair names that lost their first word (ornament touching the letters)
+ const byCat={};out.forEach(o=>(byCat[o.cat]=byCat[o.cat]||[]).push(o));
+ Object.values(byCat).forEach(L=>{if(L.length<5)return;const c={};L.forEach(o=>{const w=o.name.split(' ')[0];c[w]=(c[w]||0)+1});const[w,n]=Object.entries(c).sort((a,b)=>b[1]-a[1])[0];
+  if(n/L.length>=.7&&/^[A-Z][a-z]+$/.test(w))L.forEach(o=>{if(o.junk&&o.name.split(' ')[0]!==w)o.name=w+' '+o.name})});
+ // order: by category in page order, then top to bottom
+ const ord=[];out.forEach(o=>{if(!ord.includes(o.cat))ord.push(o.cat)});
+ out.sort((a,b)=>ord.indexOf(a.cat)-ord.indexOf(b.cat)||a.y-b.y);
+ const seen=new Set();
+ return out.filter(o=>{const k=o.cat+'|'+o.name.toLowerCase();if(seen.has(k))return false;seen.add(k);return true}).map(o=>({cat:o.cat,name:o.name,h:o.h,f:o.f}))}
+
+function bkWords(d){let L=[];
+ if(d&&d.words&&d.words.length)L=d.words.map(w=>{const b=w.bbox||w;return{t:w.text,x0:b.x0,y0:b.y0,x1:b.x1,y1:b.y1,c:w.confidence}});
+ else if(d&&d.tsv){String(d.tsv).split('\n').forEach(r=>{const c=r.split('\t');if(c[0]==='5'&&c.length>=12)L.push({t:c.slice(11).join('\t'),x0:+c[6],y0:+c[7],x1:+c[6]+ +c[8],y1:+c[7]+ +c[9],c:+c[10]})})}
+ else if(d&&d.blocks){d.blocks.forEach(b=>(b.paragraphs||[]).forEach(p=>(p.lines||[]).forEach(l=>(l.words||[]).forEach(w=>L.push({t:w.text,x0:w.bbox.x0,y0:w.bbox.y0,x1:w.bbox.x1,y1:w.bbox.y1,c:w.confidence})))))}
+ return L.filter(w=>w.t&&String(w.t).trim()&&isFinite(w.x0)&&isFinite(w.y1))}
+const bkType=(c,n)=>isNV(c)?'n':isV(c)?'v':(bkNVre.test(n)?'n':'v');
+const bkPipe=rows=>rows.map(r=>[r.cat,r.name,r.h==null?'':r.h,r.f||'',bkType(r.cat,r.name)==='n'?'N':'V'].join(' | ')).join('\n');
+async function bkOcr(file){
  if(!window.Tesseract)await loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js');
- if(!OCRW)OCRW=await Tesseract.createWorker('eng',1,{logger:m=>{if(OCRP)OCRP(m)}});
+ if(!OCRW){OCRW=await Tesseract.createWorker('eng',1,{logger:m=>{if(OCRP)OCRP(m)}});await OCRW.setParameters({tessedit_pageseg_mode:'11',preserve_interword_spaces:'1'})}
  const im=await loadPhoto(file),w0=im.width||im.naturalWidth,h0=im.height||im.naturalHeight,sc=Math.min(2.5,2600/Math.max(w0,h0)),W=Math.round(w0*sc),H=Math.round(h0*sc);
  const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d',{willReadFrequently:true});x.fillStyle='#fff';x.fillRect(0,0,W,H);x.drawImage(im,0,0,W,H);
- const id=x.getImageData(0,0,W,H),p=id.data,hist=new Array(256).fill(0);
- for(let i=0;i<p.length;i+=4){const g=Math.round(.299*p[i]+.587*p[i+1]+.114*p[i+2]);p[i]=p[i+1]=p[i+2]=g;hist[g]++}
- const n=W*H;let a=0,lo=0,hi=255,mean=0;for(let g=0;g<256;g++)mean+=g*hist[g];mean/=n;
- for(let g=0;g<256;g++){a+=hist[g];if(a>=n*.02){lo=g;break}}a=0;for(let g=255;g>=0;g--){a+=hist[g];if(a>=n*.02){hi=g;break}}
- const inv=mean<115,k=255/Math.max(40,hi-lo);
- for(let i=0;i<p.length;i+=4){let g=Math.max(0,Math.min(255,(p[i]-lo)*k));if(inv)g=255-g;p[i]=p[i+1]=p[i+2]=g}
- x.putImageData(id,0,0);
- let txt='';const N=Math.max(1,+cols||1);
- for(let q=0;q<N;q++){const ov=N>1?W*.01:0,sx=Math.max(0,Math.round(q*W/N-ov)),ex=Math.min(W,Math.round((q+1)*W/N+ov)),t=document.createElement('canvas');t.width=ex-sx;t.height=H;t.getContext('2d').drawImage(c,sx,0,ex-sx,H,0,0,ex-sx,H);
-  if(onP)onP(q,N);const r=await OCRW.recognize(t);txt+=(r.data.text||'')+'\n'}
- return txt}
+ if(OCRP)OCRP({status:'cleaning'});
+ await new Promise(r=>setTimeout(r,30));
+ const px=x.getImageData(0,0,W,H),v=bkVision(px.data,W,H),o=x.createImageData(W,H);
+ for(let i=0,j=0;i<v.img.length;i++,j+=4){o.data[j]=o.data[j+1]=o.data[j+2]=v.img[i];o.data[j+3]=255}
+ x.putImageData(o,0,0);
+ const r=await OCRW.recognize(c,{},{text:true,tsv:true,blocks:true}),d=r.data||{};
+ const rows=bkLayout(bkWords(d));
+ if(rows.length>=3)return{text:bkPipe(rows),ocr:false,n:rows.length};
+ return{text:d.text||'',ocr:true,n:0}}
 function bulkDlg(){const d=$('#dlg');d.style.maxWidth='760px';let rows=[];
- d.innerHTML=`<h3>📋 Bulk add dishes</h3><p class="mut" style="font-size:13px;margin:4px 0 8px">Menu ki photo daalo, app khud padhke saari dishes, category aur half-full price bhar dega. Neeche preview me ek baar check karke Import dabao.</p>
+ d.innerHTML=`<h3>📋 Bulk add dishes</h3><p class="mut" style="font-size:13px;margin:4px 0 8px">Menu ki photo daalo. App khud columns, category (Veg / Non-Veg heading), dish ka naam aur Half-Full price pakad ke bhar dega. Neeche preview me ek baar check karke Import dabao.</p>
 <button class="btn" id="bk_ph" style="width:100%;padding:16px;font-size:17px">📷 Menu ki photo select karo</button>
-<div style="display:flex;gap:8px;align-items:center;margin:8px 0;font-size:13px"><span class="mut" style="flex:1">Menu me side-by-side kitne column hain?</span><select id="bk_n" aria-label="Columns" style="width:auto"><option value="1">1 column</option><option value="2">2 column</option><option value="3">3 column</option><option value="4">4 column</option></select></div>
 <div id="bk_pg" style="font-size:14px;min-height:20px;margin-bottom:6px"></div>
 <input type="file" id="bk_pf" accept="image/*" multiple style="display:none">
 <div class="mut" style="font-size:13px;margin:10px 0 4px">Ya text paste karo (Excel / Sheets / ChatGPT / Notes):</div>
@@ -1210,9 +1329,9 @@ function bulkDlg(){const d=$('#dlg');d.style.maxWidth='760px';let rows=[];
  $('#bk_pf').onchange=async e=>{const fs=[...e.target.files];e.target.value='';if(!fs.length||run)return;run=true;const b=$('#bk_ph'),pg=$('#bk_pg');b.disabled=true;b.style.opacity='.6';let tot=0;
   for(let i=0;i<fs.length;i++){const tag=fs.length>1?'Photo '+(i+1)+'/'+fs.length+': ':'';
    try{pg.textContent=tag+'Pehli baar thoda time lagega, engine download ho raha hai (internet chahiye)...';
-    OCRP=m=>{if(m&&m.status==='recognizing text')pg.textContent=tag+'Padh raha hoon... '+Math.round((m.progress||0)*100)+'%'};
-    const t=await bkOcr(fs[i],$('#bk_n').value,(q,N)=>{if(N>1)pg.textContent=tag+'Column '+(q+1)+'/'+N+' padh raha hoon...'});
-    const ta=$('#bk_t');ta.value=(ta.value.trim()?ta.value.replace(/\s+$/,'')+'\n':'')+t.trim();rows=bkParse(ta.value,true);draw();tot++}
+    OCRP=m=>{if(!m)return;if(m.status==='cleaning')pg.textContent=tag+'Photo saaf kar raha hoon...';else if(m.status==='recognizing text')pg.textContent=tag+'Padh raha hoon... '+Math.round((m.progress||0)*100)+'%'};
+    const res=await bkOcr(fs[i]);
+    const ta=$('#bk_t');ta.value=(ta.value.trim()?ta.value.replace(/\s+$/,'')+'\n':'')+res.text.trim();rows=bkParse(ta.value,res.ocr&&!ta.value.includes('|'));draw();tot++;if(res.ocr)pg.textContent='Layout poora samajh nahi aaya, jo text mila wo daal diya. Check karo.'}
    catch(x){pg.innerHTML='<span style="color:var(--red)">Photo nahi padh paya. Internet check karo aur dobara try karo.</span>';toast('Photo read failed: '+((x&&x.message)||x));break}}
   OCRP=null;if(tot)pg.innerHTML='<b>'+tot+' photo padh li ✓</b> Neeche check karo: galat naam/price theek karo, phir Import dabao.';b.disabled=false;b.style.opacity='';run=false};
  $('#bk_f').onclick=()=>$('#bk_ff').click();
