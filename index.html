@@ -273,7 +273,7 @@ S.invoices.unshift(v);saveInv(v);closeT(false);toast('Saved '+v.no);showInv(v.no
 }finally{saving=false}}
 function menu(){
 const L=S.items.filter(i=>(cat==='All'||i.cat===cat)&&mt(i,q));
-$('#app').innerHTML=`<div class="card">${CAN?'':'<div style="background:var(--chip);border:1px solid var(--red);border-radius:8px;padding:10px;margin-bottom:10px;font-size:14px"><b>Only the owner can edit the menu.</b><br>Please sign in with the owner account.</div>'}<div class="row"><input id="q" placeholder="Search dishes" aria-label="Search dishes" value="${esc(q)}"><button class="btn alt fit" id="mc">Categories</button><button class="btn alt fit" id="md" style="display:none">🗑 Delete (0)</button><button class="btn fit" id="ai">Add dish</button></div><div style="margin-top:8px"><button class="btn sm" id="bk">📋 Bulk add (paste menu)</button> <button class="btn alt sm" id="vs">⚖ Veg / Non-Veg split</button></div><div class="chips" id="chips"></div><div class="wrap"><table id="mt"></table></div></div>`;
+$('#app').innerHTML=`<div class="card">${CAN?'':'<div style="background:var(--chip);border:1px solid var(--red);border-radius:8px;padding:10px;margin-bottom:10px;font-size:14px"><b>Only the owner can edit the menu.</b><br>Please sign in with the owner account.</div>'}<div class="row"><input id="q" placeholder="Search dishes" aria-label="Search dishes" value="${esc(q)}"><button class="btn alt fit" id="mc">Categories</button><button class="btn alt fit" id="md" style="display:none">🗑 Delete (0)</button><button class="btn fit" id="ai">Add dish</button></div><div style="margin-top:8px"><button class="btn sm" id="bk">📷 Bulk add (photo / paste)</button> <button class="btn alt sm" id="vs">⚖ Veg / Non-Veg split</button></div><div class="chips" id="chips"></div><div class="wrap"><table id="mt"></table></div></div>`;
 chips();const draw=()=>{const L=S.items.filter(i=>(cat==='All'||i.cat===cat)&&mt(i,q));
 $('#mt').innerHTML='<tr><th><input type="checkbox" id="sa" style="width:auto" aria-label="Select all"></th><th>Dish</th><th>Category</th><th class="n">Half</th><th class="n">Full</th><th></th></tr>'+L.map(i=>`<tr><td><input type="checkbox" class="sel" data-s="${i.id}" style="width:auto"></td><td><span class="dot ${i.t}"></span> ${esc(i.name)}</td><td class="mut">${esc(i.cat)}</td><td class="n">${i.h!=null?inr(i.h):'–'}</td><td class="n">${i.f?inr(i.f):'<span style="color:var(--red)">Set price</span>'}</td><td class="n">${CAN?`<button class="btn alt sm" data-e="${i.id}">Edit</button>`:''}</td></tr>`).join('');menuSel()};draw();
 $('#q').oninput=e=>{q=e.target.value;draw()};$('#chips').onclick=e=>{if(e.target.dataset.c){cat=e.target.dataset.c;chips();draw()}};
@@ -1123,10 +1123,13 @@ const bkNum=s=>{const m=String(s??'').replace(/[₹,]/g,'').match(/\d+(\.\d+)?/)
 const bkNVre=/chicken|mutton|egg|fish|prawn|keema|lamb|crab|pork|beef|murg|anda\b|seafood|shrimp|bacon|sausage|salami/i;
 function bkFlag(s){s=String(s||'').trim();if(/^(v|veg|vegetarian|yes|true|🟢|🟩)$/i.test(s))return'v';if(/^(n|nv|non|non[\s-]*veg|nonveg|egg|no|false|🔴|🟥)$/i.test(s))return'n';return''}
 function bkSplit(line,d){if(d!==',')return line.split(d).map(s=>s.trim());const o=[];let c='',q=false;for(let i=0;i<line.length;i++){const ch=line[i];if(q){if(ch==='"'){if(line[i+1]==='"'){c+='"';i++}else q=false}else c+=ch}else if(ch==='"')q=true;else if(ch===',')(o.push(c.trim()),c='');else c+=ch}o.push(c.trim());return o}
-function bkParse(text){
+const bkClean=t=>String(t).split(/\r?\n/).map(l=>l.replace(/[|¦]/g,' ').replace(/[^\p{L}\p{N}\s\/.,&()\-–:₹+'’"]/gu,' ').replace(/(^|\s)([\dOoIl]{2,4})(?=\s|$|\/)/g,(m,a,b)=>/\d/.test(b)?a+b.replace(/[Oo]/g,'0').replace(/[Il]/g,'1'):m).replace(/[ \t]+/g,' ').trim()).filter(Boolean).join('\n');
+function bkParse(text,ocr){
+ if(ocr)text=bkClean(text);
+ const hf=/\bhalf\b/i.test(text)&&/\bfull\b/i.test(text);
  const L=String(text||'').split(/\r?\n/).map(s=>s.replace(/^\uFEFF/,'').replace(/\s+$/,'')).filter(s=>s.trim());if(!L.length)return[];
  const half=L.length/2,cnt=f=>L.filter(f).length;let d=null;
- if(cnt(l=>l.includes('\t'))>=half)d='\t';else if(cnt(l=>l.includes('|'))>=half)d='|';else if(cnt(l=>(l.match(/,/g)||[]).length>=2||/^[^\d,]+,\s*[₹\d.]+\s*$/.test(l))>=half)d=',';
+ if(!ocr){if(cnt(l=>l.includes('\t'))>=half)d='\t';else if(cnt(l=>l.includes('|'))>=half)d='|';else if(cnt(l=>(l.match(/,/g)||[]).length>=2||/^[^\d,]+,\s*[₹\d.]+\s*$/.test(l))>=half)d=','}
  const out=[];let cat='';
  const typeOf=(c,n,fl)=>fl||(isNV(c)?'n':isV(c)?'v':(bkNVre.test(n)?'n':'v'));
  const mk=(c,n,h,f,fl)=>{n=String(n||'').replace(/\s+/g,' ').trim().replace(/[\s:\-–—=.…,]+$/,'').replace(/^[\s\-–—•▪●*]+/,'');if(!n)return;c=bkTitle(String(c||'').trim());if(c)cat=c;c=cat||'Menu';
@@ -1145,10 +1148,11 @@ function bkParse(text){
  for(let line of L){line=line.trim();
   let fl='';if(/🔴|🟥/.test(line))fl='n';if(/🟢|🟩/.test(line))fl='v';line=line.replace(/[🔴🟥🟢🟩]/g,'').trim();
   line=line.replace(/^\s*(\d{1,3}[.)]|[-*•▪●])\s+/,'');
-  if(!/\d/.test(line)||/^#/.test(line)){const c=line.replace(/^[#*=\-_\s]+|[#*=\-_:\s]+$/g,'').trim();if(c)cat=bkTitle(c);continue}
+  if(!/\d/.test(line)||/^#/.test(line)){let c=line.replace(/^[#*=\-_\s]+|[#*=\-_:\s]+$/g,'').trim();if(ocr&&(c.split(/\s+/).length>4||c.length>32))continue;c=c.replace(/\b(half|full|small|large)\b/gi,'').replace(/\s+/g,' ').trim();if(/^(half|full|small|large|price|prices|rate|qty|rs|₹|and|\W)+$/i.test(c))continue;if(c)cat=bkTitle(c);continue}
   let nm=line,h=null,f=null,m;
   const mh=/\bh(?:alf)?\b\.?\s*[:=\-]?\s*(?:₹|rs\.?)?\s*(\d+(?:\.\d+)?)/i.exec(line),mf=/\bf(?:ull)?\b\.?\s*[:=\-]?\s*(?:₹|rs\.?)?\s*(\d+(?:\.\d+)?)/i.exec(line);
   if(mh&&mf){h=+mh[1];f=+mf[1];nm=line.slice(0,Math.min(mh.index,mf.index));const t=/\((v|nv|n|veg|non[\s-]?veg)\)\s*$/i.exec(line);if(t)fl=bkFlag(t[1].replace(/\s/g,''))||fl}
+  else if(hf&&(m=/^(.*?\D)((?:\s+\d{2,4}){2,})\s*$/.exec(line))&&(()=>{const ns=m[2].trim().split(/\s+/).map(Number),a=ns[ns.length-2],b=ns[ns.length-1];if(a>=b)return false;if(ns.length===2&&a===65&&/chicken|paneer|gobi|mushroom|corn|veg|baby/i.test(m[1]))return false;nm=(m[1]+' '+ns.slice(0,-2).join(' ')).trim();h=a;f=b;return true})()){}
   else if((m=/^(.*?)[\s:\-–—=.…]*((?:₹|rs\.?)?\s*\d+(?:\.\d+)?(?:\s*(?:\/-?|\||,|&)\s*(?:₹|rs\.?)?\s*\d+(?:\.\d+)?)*|\/\s*\d+(?:\.\d+)?)\s*(?:\/-|rs\.?|₹)?\s*(?:\((v|nv|n|veg|non[\s-]?veg)\))?\s*$/i.exec(line))){
    nm=m[1];const ns=(m[2].match(/\d+(?:\.\d+)?/g)||[]).map(Number);if(ns.length===1)f=ns[0];else if(ns.length>1){h=ns[0];f=ns[ns.length-1]}if(m[3])fl=bkFlag(m[3].replace(/\s/g,''))||fl}
   else{const t=/\((v|nv|n|veg|non[\s-]?veg)\)/i.exec(line);if(t){fl=bkFlag(t[1].replace(/\s/g,''))||fl;nm=line.replace(t[0],'')}}
@@ -1160,11 +1164,34 @@ function bkImport(rows,upd){let a=0,u=0;const cm={};cats().forEach(c=>cm[c.toLow
   if(ex){if(upd){ex.t=r.t;if(f){ex.f=f;if(h!=null)ex.h=h;else delete ex.h}u++}return}
   const it={id:S.nid++,cat,t:r.t,name};if(h!=null)it.h=h;it.f=f;S.items.push(it);a++});return[a,u]}
 function bkCopy(t){const done=()=>toast('Prompt copied ✓ Ab ChatGPT / Gemini me paste karo aur menu photo daalo');const fb=()=>{const x=document.createElement('textarea');x.value=t;x.style.cssText='position:fixed;opacity:0';document.body.appendChild(x);x.select();try{document.execCommand('copy');done()}catch(e){toast('Copy nahi hua')}x.remove()};try{navigator.clipboard.writeText(t).then(done,fb)}catch(e){fb()}}
+
+let OCRW=null,OCRP=null;
+async function bkOcr(file,cols,onP){
+ if(!window.Tesseract)await loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js');
+ if(!OCRW)OCRW=await Tesseract.createWorker('eng',1,{logger:m=>{if(OCRP)OCRP(m)}});
+ const im=await loadPhoto(file),w0=im.width||im.naturalWidth,h0=im.height||im.naturalHeight,sc=Math.min(2.5,2600/Math.max(w0,h0)),W=Math.round(w0*sc),H=Math.round(h0*sc);
+ const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d',{willReadFrequently:true});x.fillStyle='#fff';x.fillRect(0,0,W,H);x.drawImage(im,0,0,W,H);
+ const id=x.getImageData(0,0,W,H),p=id.data,hist=new Array(256).fill(0);
+ for(let i=0;i<p.length;i+=4){const g=Math.round(.299*p[i]+.587*p[i+1]+.114*p[i+2]);p[i]=p[i+1]=p[i+2]=g;hist[g]++}
+ const n=W*H;let a=0,lo=0,hi=255,mean=0;for(let g=0;g<256;g++)mean+=g*hist[g];mean/=n;
+ for(let g=0;g<256;g++){a+=hist[g];if(a>=n*.02){lo=g;break}}a=0;for(let g=255;g>=0;g--){a+=hist[g];if(a>=n*.02){hi=g;break}}
+ const inv=mean<115,k=255/Math.max(40,hi-lo);
+ for(let i=0;i<p.length;i+=4){let g=Math.max(0,Math.min(255,(p[i]-lo)*k));if(inv)g=255-g;p[i]=p[i+1]=p[i+2]=g}
+ x.putImageData(id,0,0);
+ let txt='';const N=Math.max(1,+cols||1);
+ for(let q=0;q<N;q++){const ov=N>1?W*.01:0,sx=Math.max(0,Math.round(q*W/N-ov)),ex=Math.min(W,Math.round((q+1)*W/N+ov)),t=document.createElement('canvas');t.width=ex-sx;t.height=H;t.getContext('2d').drawImage(c,sx,0,ex-sx,H,0,0,ex-sx,H);
+  if(onP)onP(q,N);const r=await OCRW.recognize(t);txt+=(r.data.text||'')+'\n'}
+ return txt}
 function bulkDlg(){const d=$('#dlg');d.style.maxWidth='760px';let rows=[];
- d.innerHTML=`<h3>📋 Bulk add dishes</h3><p class="mut" style="font-size:13px;margin:4px 0 8px">Poora menu ek saath paste karo (Excel / Google Sheets / ChatGPT / Notes se). Name, category, half-full price sab ek saath aayega. Neeche preview me check ya edit karke Import dabao.</p>
+ d.innerHTML=`<h3>📋 Bulk add dishes</h3><p class="mut" style="font-size:13px;margin:4px 0 8px">Menu ki photo daalo, app khud padhke saari dishes, category aur half-full price bhar dega. Neeche preview me ek baar check karke Import dabao.</p>
+<button class="btn" id="bk_ph" style="width:100%;padding:16px;font-size:17px">📷 Menu ki photo select karo</button>
+<div style="display:flex;gap:8px;align-items:center;margin:8px 0;font-size:13px"><span class="mut" style="flex:1">Menu me side-by-side kitne column hain?</span><select id="bk_n" aria-label="Columns" style="width:auto"><option value="1">1 column</option><option value="2">2 column</option><option value="3">3 column</option><option value="4">4 column</option></select></div>
+<div id="bk_pg" style="font-size:14px;min-height:20px;margin-bottom:6px"></div>
+<input type="file" id="bk_pf" accept="image/*" multiple style="display:none">
+<div class="mut" style="font-size:13px;margin:10px 0 4px">Ya text paste karo (Excel / Sheets / ChatGPT / Notes):</div>
 <details style="margin-bottom:8px"><summary style="cursor:pointer;font-weight:600;font-size:14px">Kaunsa format chalta hai? (examples)</summary><pre style="white-space:pre-wrap;font-size:12px;background:var(--chip);padding:8px;border-radius:8px;margin:6px 0 0">${esc(BK_EX)}</pre></details>
 <textarea id="bk_t" rows="7" style="width:100%;box-sizing:border-box;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:13px/1.4 ui-monospace,Menlo,monospace"></textarea>
-<div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0"><button class="btn alt sm" id="bk_p">🤖 Copy AI prompt (photo ke liye)</button><button class="btn alt sm" id="bk_f">📄 Load CSV file</button><button class="btn alt sm" id="bk_e">⬇ Sample CSV</button><input type="file" id="bk_ff" accept=".csv,.tsv,.txt,text/*" style="display:none"></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0"><button class="btn alt sm" id="bk_f">📄 Load CSV file</button><button class="btn alt sm" id="bk_e">⬇ Sample CSV</button><input type="file" id="bk_ff" accept=".csv,.tsv,.txt,text/*" style="display:none"></div>
 <div id="bk_s" class="mut" style="font-size:14px;margin:6px 0"></div><div id="bk_l" style="max-height:38vh;overflow:auto"></div>
 <label style="display:flex;gap:8px;align-items:center;margin-top:8px;font-size:14px"><input type="checkbox" id="bk_u" checked style="width:auto"> Jo dish menu me pehle se hai, uska price update karo</label>
 <div class="row" style="margin-top:12px"><button class="btn alt" id="bk_c">Cancel</button><button class="btn" id="bk_i">Import</button></div>`;
@@ -1177,7 +1204,17 @@ function bulkDlg(){const d=$('#dlg');d.style.maxWidth='760px';let rows=[];
  $('#bk_t').oninput=()=>{rows=bkParse($('#bk_t').value);draw()};
  $('#bk_l').oninput=e=>{const t=e.target,i=+t.dataset.i,k=t.dataset.k;if(!k||!rows[i])return;rows[i][k]=(k==='h')?(t.value===''?null:+t.value):(k==='f')?(+t.value||0):t.value;if(k==='f')t.style.borderColor=+t.value>0?'':'var(--red)';sum()};
  $('#bk_l').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.tg!=null){const r=rows[+b.dataset.tg];r.t=r.t==='v'?'n':'v';draw()}else if(b.dataset.x!=null){rows.splice(+b.dataset.x,1);draw()}};
- $('#bk_p').onclick=()=>bkCopy(BK_PROMPT);
+
+ let run=false;
+ $('#bk_ph').onclick=()=>{if(run)return toast('Ruko, photo abhi padh raha hoon');$('#bk_pf').click()};
+ $('#bk_pf').onchange=async e=>{const fs=[...e.target.files];e.target.value='';if(!fs.length||run)return;run=true;const b=$('#bk_ph'),pg=$('#bk_pg');b.disabled=true;b.style.opacity='.6';let tot=0;
+  for(let i=0;i<fs.length;i++){const tag=fs.length>1?'Photo '+(i+1)+'/'+fs.length+': ':'';
+   try{pg.textContent=tag+'Pehli baar thoda time lagega, engine download ho raha hai (internet chahiye)...';
+    OCRP=m=>{if(m&&m.status==='recognizing text')pg.textContent=tag+'Padh raha hoon... '+Math.round((m.progress||0)*100)+'%'};
+    const t=await bkOcr(fs[i],$('#bk_n').value,(q,N)=>{if(N>1)pg.textContent=tag+'Column '+(q+1)+'/'+N+' padh raha hoon...'});
+    const ta=$('#bk_t');ta.value=(ta.value.trim()?ta.value.replace(/\s+$/,'')+'\n':'')+t.trim();rows=bkParse(ta.value,true);draw();tot++}
+   catch(x){pg.innerHTML='<span style="color:var(--red)">Photo nahi padh paya. Internet check karo aur dobara try karo.</span>';toast('Photo read failed: '+((x&&x.message)||x));break}}
+  OCRP=null;if(tot)pg.innerHTML='<b>'+tot+' photo padh li ✓</b> Neeche check karo: galat naam/price theek karo, phir Import dabao.';b.disabled=false;b.style.opacity='';run=false};
  $('#bk_f').onclick=()=>$('#bk_ff').click();
  $('#bk_ff').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const r=new FileReader();r.onload=()=>{$('#bk_t').value=String(r.result||'');$('#bk_t').oninput()};r.readAsText(f)};
  $('#bk_e').onclick=async()=>{const b=new Blob(['\uFEFFCategory,Dish Name,Half Price,Full Price,Veg/Non-Veg\nStarters,Paneer Tikka,,220,V\nStarters,Chicken 65,,240,N\nVeg Rice,Fried Rice,120,220,V\nNon-Veg Rice,Chicken Fried Rice,150,260,N\n'],{type:'text/csv'});try{if(!(await saveFile('menu-sample.csv',b)))toast('Saving is not available here')}catch(x){toast('Could not save the file')}};
