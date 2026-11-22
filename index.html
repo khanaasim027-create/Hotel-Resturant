@@ -273,11 +273,11 @@ S.invoices.unshift(v);saveInv(v);closeT(false);toast('Saved '+v.no);showInv(v.no
 }finally{saving=false}}
 function menu(){
 const L=S.items.filter(i=>(cat==='All'||i.cat===cat)&&mt(i,q));
-$('#app').innerHTML=`<div class="card">${CAN?'':'<div style="background:var(--chip);border:1px solid var(--red);border-radius:8px;padding:10px;margin-bottom:10px;font-size:14px"><b>Only the owner can edit the menu.</b><br>Please sign in with the owner account.</div>'}<div class="row"><input id="q" placeholder="Search dishes" aria-label="Search dishes" value="${esc(q)}"><button class="btn alt fit" id="mc">Categories</button><button class="btn alt fit" id="md" style="display:none">🗑 Delete (0)</button><button class="btn fit" id="ai">Add dish</button></div><div style="margin-top:8px"><button class="btn alt sm" id="vs">⚖ Veg / Non-Veg split</button></div><div class="chips" id="chips"></div><div class="wrap"><table id="mt"></table></div></div>`;
+$('#app').innerHTML=`<div class="card">${CAN?'':'<div style="background:var(--chip);border:1px solid var(--red);border-radius:8px;padding:10px;margin-bottom:10px;font-size:14px"><b>Only the owner can edit the menu.</b><br>Please sign in with the owner account.</div>'}<div class="row"><input id="q" placeholder="Search dishes" aria-label="Search dishes" value="${esc(q)}"><button class="btn alt fit" id="mc">Categories</button><button class="btn alt fit" id="md" style="display:none">🗑 Delete (0)</button><button class="btn fit" id="ai">Add dish</button></div><div style="margin-top:8px"><button class="btn sm" id="bk">📋 Bulk add (paste menu)</button> <button class="btn alt sm" id="vs">⚖ Veg / Non-Veg split</button></div><div class="chips" id="chips"></div><div class="wrap"><table id="mt"></table></div></div>`;
 chips();const draw=()=>{const L=S.items.filter(i=>(cat==='All'||i.cat===cat)&&mt(i,q));
 $('#mt').innerHTML='<tr><th><input type="checkbox" id="sa" style="width:auto" aria-label="Select all"></th><th>Dish</th><th>Category</th><th class="n">Half</th><th class="n">Full</th><th></th></tr>'+L.map(i=>`<tr><td><input type="checkbox" class="sel" data-s="${i.id}" style="width:auto"></td><td><span class="dot ${i.t}"></span> ${esc(i.name)}</td><td class="mut">${esc(i.cat)}</td><td class="n">${i.h!=null?inr(i.h):'–'}</td><td class="n">${i.f?inr(i.f):'<span style="color:var(--red)">Set price</span>'}</td><td class="n">${CAN?`<button class="btn alt sm" data-e="${i.id}">Edit</button>`:''}</td></tr>`).join('');menuSel()};draw();
 $('#q').oninput=e=>{q=e.target.value;draw()};$('#chips').onclick=e=>{if(e.target.dataset.c){cat=e.target.dataset.c;chips();draw()}};
-$('#ai').onclick=()=>editItem();if(!CAN)$('#ai').style.display='none';$('#mc').onclick=catMgr;if(!CAN)$('#mc').style.display='none';$('#mt').onclick=e=>{const b=e.target.closest('[data-e]');if(b)editItem(+b.dataset.e)};$('#mt').onchange=e=>{if(e.target.id==='sa')document.querySelectorAll('.sel').forEach(c=>c.checked=e.target.checked);menuSel()};$('#md').onclick=delSel;$('#vs').onclick=()=>{const all=new Set(S.items.map(i=>baseCat(i.cat)));const n=splitVeg(all);saveMenu();render();toast(n?n+' items updated ✓':'Everything is already set up')}}
+$('#ai').onclick=()=>editItem();if(!CAN)$('#ai').style.display='none';$('#mc').onclick=catMgr;if(!CAN)$('#mc').style.display='none';$('#bk').onclick=bulkDlg;if(!CAN)$('#bk').style.display='none';$('#mt').onclick=e=>{const b=e.target.closest('[data-e]');if(b)editItem(+b.dataset.e)};$('#mt').onchange=e=>{if(e.target.id==='sa')document.querySelectorAll('.sel').forEach(c=>c.checked=e.target.checked);menuSel()};$('#md').onclick=delSel;$('#vs').onclick=()=>{const all=new Set(S.items.map(i=>baseCat(i.cat)));const n=splitVeg(all);saveMenu();render();toast(n?n+' items updated ✓':'Everything is already set up')}}
 function editItem(id,pre){
 const it=S.items.find(i=>i.id===id)||{name:'',cat:cat==='All'?cats()[0]:cat,t:'v',h:null,f:''};const d=$('#dlg');
 d.innerHTML=`<h3>${id?'Edit dish':'Add dish'}</h3><p><input id="f1" placeholder="Dish name" value="${esc(it.name)}"></p><p><select id="f5s" aria-label="Category">${cats().map(c=>`<option value="${esc(c)}" ${!pre&&c===it.cat?'selected':''}>${esc(c)}</option>`).join('')}<option value="__new" ${pre?'selected':''}>＋ Create new category…</option></select></p><p><input id="f5" placeholder="New category name" value="${esc(pre||'')}" style="${pre?'':'display:none'}"></p>
@@ -1115,6 +1115,76 @@ function vegCat(cat,veg){const b=baseCat(cat);if(!pairable(b))return cat;return 
 function splitVeg(only){let n=0;S.items.forEach(i=>{const c=vegCat(i.cat,i.t==='v');if(c!==i.cat){i.cat=c;i.t=isNV(c)?'n':'v';n++}});
  const bases=new Set(S.items.filter(i=>pairable(baseCat(i.cat))).map(i=>baseCat(i.cat)));
  bases.forEach(b=>{if(only&&!only.has(b))return;[['Veg '+b,'Non-Veg '+b,'n'],['Non-Veg '+b,'Veg '+b,'v']].forEach(([from,to,tt])=>{S.items.filter(i=>i.cat===from).forEach(i=>{if(PROT.test(i.name))return;if(S.items.some(x=>x.cat===to&&x.name.toLowerCase()===i.name.toLowerCase()))return;const it={id:S.nid++,cat:to,t:tt,name:i.name};if(i.src)it.src=i.src;if(i.h!=null)it.h=i.h;it.f=i.f;S.items.push(it);n++})})});return n}
+// ===== Bulk add: paste / Excel / CSV / ChatGPT text -> preview -> import =====
+const BK_PROMPT=['Read this restaurant menu (photo / pdf / text) and list EVERY dish. Reply with plain text only, one dish per line, in EXACTLY this format:','Category | Dish Name | Half Price | Full Price | V or N','','Rules:','- V = veg, N = non-veg (egg counts as N).','- If a dish has only one price, leave Half Price empty and put that price in Full Price.','- Prices are numbers only (no Rs, no rupee sign).','- If the same dish is printed in both the VEG and NON-VEG column, list BOTH.','- Use the section heading printed on the menu as Category (for Rice / Noodles / Soup use "Veg Rice" / "Non-Veg Rice" style).','- Do not skip any row. No table, no bullets, no extra text.','','Example:','Starters | Paneer Tikka | | 220 | V','Veg Rice | Fried Rice | 120 | 220 | V','Non-Veg Rice | Chicken Fried Rice | 150 | 260 | N'].join('\n');
+const BK_EX=['FORMAT 1 (ChatGPT / Gemini / Notes):','Starters | Paneer Tikka | | 220 | V','Veg Rice | Fried Rice | 120 | 220 | V','','FORMAT 2 (Excel / Google Sheets, copy cells and paste):','Category  Dish Name  Half  Full  Veg/Non-Veg','','FORMAT 3 (simple text, heading then dishes):','STARTERS','Paneer Tikka 220','Chicken 65 200','NOODLES','Veg Hakka Noodles 100/180','Chicken Noodles H 130 F 220 (N)'].join('\n');
+const bkTitle=s=>s&&s===s.toUpperCase()&&/[A-Z]/.test(s)?s.toLowerCase().replace(/\b\w/g,c=>c.toUpperCase()):s;
+const bkNum=s=>{const m=String(s??'').replace(/[₹,]/g,'').match(/\d+(\.\d+)?/);return m?+m[0]:null};
+const bkNVre=/chicken|mutton|egg|fish|prawn|keema|lamb|crab|pork|beef|murg|anda\b|seafood|shrimp|bacon|sausage|salami/i;
+function bkFlag(s){s=String(s||'').trim();if(/^(v|veg|vegetarian|yes|true|🟢|🟩)$/i.test(s))return'v';if(/^(n|nv|non|non[\s-]*veg|nonveg|egg|no|false|🔴|🟥)$/i.test(s))return'n';return''}
+function bkSplit(line,d){if(d!==',')return line.split(d).map(s=>s.trim());const o=[];let c='',q=false;for(let i=0;i<line.length;i++){const ch=line[i];if(q){if(ch==='"'){if(line[i+1]==='"'){c+='"';i++}else q=false}else c+=ch}else if(ch==='"')q=true;else if(ch===',')(o.push(c.trim()),c='');else c+=ch}o.push(c.trim());return o}
+function bkParse(text){
+ const L=String(text||'').split(/\r?\n/).map(s=>s.replace(/^\uFEFF/,'').replace(/\s+$/,'')).filter(s=>s.trim());if(!L.length)return[];
+ const half=L.length/2,cnt=f=>L.filter(f).length;let d=null;
+ if(cnt(l=>l.includes('\t'))>=half)d='\t';else if(cnt(l=>l.includes('|'))>=half)d='|';else if(cnt(l=>(l.match(/,/g)||[]).length>=2||/^[^\d,]+,\s*[₹\d.]+\s*$/.test(l))>=half)d=',';
+ const out=[];let cat='';
+ const typeOf=(c,n,fl)=>fl||(isNV(c)?'n':isV(c)?'v':(bkNVre.test(n)?'n':'v'));
+ const mk=(c,n,h,f,fl)=>{n=String(n||'').replace(/\s+/g,' ').trim().replace(/[\s:\-–—=.…,]+$/,'').replace(/^[\s\-–—•▪●*]+/,'');if(!n)return;c=bkTitle(String(c||'').trim());if(c)cat=c;c=cat||'Menu';
+  if(f==null&&h!=null){f=h;h=null}if(h!=null&&f!=null&&h>f){const t=h;h=f;f=t}if(h!=null&&h<=0)h=null;
+  out.push({cat:c,name:n,h:h,f:f||0,t:typeOf(c,n,bkFlag(fl))})};
+ if(d){
+  const R=L.map(l=>bkSplit(l,d));let M=null,st=0;
+  if(!/\d/.test(R[0].join(' '))){const m={};R[0].forEach((h,i)=>{const s=h.toLowerCase();if(/categ|section|group/.test(s))m.cat=i;else if(/half|small/.test(s))m.h=i;else if(/full|large|price|rate|cost|amount|mrp/.test(s)){if(m.f==null)m.f=i}else if(/veg|^type$/.test(s))m.t=i;else if(/name|dish|item|product/.test(s))m.n=i});if(m.n!=null){M=m;st=1}}
+  if(!M){const c=Math.max(...R.slice(0,5).map(r=>r.length));M=c>=4?{cat:0,n:1,h:2,f:3,t:4}:c===3?(/^[\s₹\d.]+$/.test(R[0][1]||'x')?{n:0,h:1,f:2}:{cat:0,n:1,f:2}):{n:0,f:1}}
+  for(let i=st;i<R.length;i++){const r=R[i],g=k=>M[k]==null?'':(r[M[k]]||'');
+   const nm=g('n'),hv=bkNum(g('h')),fv=bkNum(g('f'));
+   if(!nm){const c=g('cat')||(M.cat==null?'':'');if(c&&hv==null&&fv==null)cat=bkTitle(c);continue}
+   if(M.cat==null&&hv==null&&fv==null&&!nm.match(/\d/)&&r.filter(Boolean).length===1){cat=bkTitle(nm);continue}
+   mk(g('cat'),nm,hv,fv,g('t'))}
+  return out}
+ for(let line of L){line=line.trim();
+  let fl='';if(/🔴|🟥/.test(line))fl='n';if(/🟢|🟩/.test(line))fl='v';line=line.replace(/[🔴🟥🟢🟩]/g,'').trim();
+  line=line.replace(/^\s*(\d{1,3}[.)]|[-*•▪●])\s+/,'');
+  if(!/\d/.test(line)||/^#/.test(line)){const c=line.replace(/^[#*=\-_\s]+|[#*=\-_:\s]+$/g,'').trim();if(c)cat=bkTitle(c);continue}
+  let nm=line,h=null,f=null,m;
+  const mh=/\bh(?:alf)?\b\.?\s*[:=\-]?\s*(?:₹|rs\.?)?\s*(\d+(?:\.\d+)?)/i.exec(line),mf=/\bf(?:ull)?\b\.?\s*[:=\-]?\s*(?:₹|rs\.?)?\s*(\d+(?:\.\d+)?)/i.exec(line);
+  if(mh&&mf){h=+mh[1];f=+mf[1];nm=line.slice(0,Math.min(mh.index,mf.index));const t=/\((v|nv|n|veg|non[\s-]?veg)\)\s*$/i.exec(line);if(t)fl=bkFlag(t[1].replace(/\s/g,''))||fl}
+  else if((m=/^(.*?)[\s:\-–—=.…]*((?:₹|rs\.?)?\s*\d+(?:\.\d+)?(?:\s*(?:\/-?|\||,|&)\s*(?:₹|rs\.?)?\s*\d+(?:\.\d+)?)*|\/\s*\d+(?:\.\d+)?)\s*(?:\/-|rs\.?|₹)?\s*(?:\((v|nv|n|veg|non[\s-]?veg)\))?\s*$/i.exec(line))){
+   nm=m[1];const ns=(m[2].match(/\d+(?:\.\d+)?/g)||[]).map(Number);if(ns.length===1)f=ns[0];else if(ns.length>1){h=ns[0];f=ns[ns.length-1]}if(m[3])fl=bkFlag(m[3].replace(/\s/g,''))||fl}
+  else{const t=/\((v|nv|n|veg|non[\s-]?veg)\)/i.exec(line);if(t){fl=bkFlag(t[1].replace(/\s/g,''))||fl;nm=line.replace(t[0],'')}}
+  mk('',nm,h,f,fl)}
+ return out}
+function bkImport(rows,upd){let a=0,u=0;const cm={};cats().forEach(c=>cm[c.toLowerCase()]=c);
+ rows.forEach(r=>{const name=String(r.name||'').trim();if(!name)return;const c0=String(r.cat||'').trim()||'Menu',k=c0.toLowerCase(),cat=cm[k]||(cm[k]=c0);
+  const f=+r.f||0,h=(+r.h>0&&f>0)?+r.h:null,ex=S.items.find(x=>x.cat===cat&&x.name.toLowerCase()===name.toLowerCase());
+  if(ex){if(upd){ex.t=r.t;if(f){ex.f=f;if(h!=null)ex.h=h;else delete ex.h}u++}return}
+  const it={id:S.nid++,cat,t:r.t,name};if(h!=null)it.h=h;it.f=f;S.items.push(it);a++});return[a,u]}
+function bkCopy(t){const done=()=>toast('Prompt copied ✓ Ab ChatGPT / Gemini me paste karo aur menu photo daalo');const fb=()=>{const x=document.createElement('textarea');x.value=t;x.style.cssText='position:fixed;opacity:0';document.body.appendChild(x);x.select();try{document.execCommand('copy');done()}catch(e){toast('Copy nahi hua')}x.remove()};try{navigator.clipboard.writeText(t).then(done,fb)}catch(e){fb()}}
+function bulkDlg(){const d=$('#dlg');d.style.maxWidth='760px';let rows=[];
+ d.innerHTML=`<h3>📋 Bulk add dishes</h3><p class="mut" style="font-size:13px;margin:4px 0 8px">Poora menu ek saath paste karo (Excel / Google Sheets / ChatGPT / Notes se). Name, category, half-full price sab ek saath aayega. Neeche preview me check ya edit karke Import dabao.</p>
+<details style="margin-bottom:8px"><summary style="cursor:pointer;font-weight:600;font-size:14px">Kaunsa format chalta hai? (examples)</summary><pre style="white-space:pre-wrap;font-size:12px;background:var(--chip);padding:8px;border-radius:8px;margin:6px 0 0">${esc(BK_EX)}</pre></details>
+<textarea id="bk_t" rows="7" style="width:100%;box-sizing:border-box;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:13px/1.4 ui-monospace,Menlo,monospace"></textarea>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0"><button class="btn alt sm" id="bk_p">🤖 Copy AI prompt (photo ke liye)</button><button class="btn alt sm" id="bk_f">📄 Load CSV file</button><button class="btn alt sm" id="bk_e">⬇ Sample CSV</button><input type="file" id="bk_ff" accept=".csv,.tsv,.txt,text/*" style="display:none"></div>
+<div id="bk_s" class="mut" style="font-size:14px;margin:6px 0"></div><div id="bk_l" style="max-height:38vh;overflow:auto"></div>
+<label style="display:flex;gap:8px;align-items:center;margin-top:8px;font-size:14px"><input type="checkbox" id="bk_u" checked style="width:auto"> Jo dish menu me pehle se hai, uska price update karo</label>
+<div class="row" style="margin-top:12px"><button class="btn alt" id="bk_c">Cancel</button><button class="btn" id="bk_i">Import</button></div>`;
+ $('#bk_t').placeholder='Yahan paste karo...\nStarters | Paneer Tikka | | 220 | V\nVeg Rice | Fried Rice | 120 | 220 | V';
+ const ex=r=>S.items.some(x=>x.cat.toLowerCase()===String(r.cat).trim().toLowerCase()&&x.name.toLowerCase()===String(r.name).trim().toLowerCase());
+ const sum=()=>{const ok=rows.filter(r=>String(r.name).trim()),np=ok.filter(r=>!(+r.f>0)).length,cs=new Set(ok.map(r=>(String(r.cat).trim()||'Menu').toLowerCase())).size;
+  $('#bk_s').innerHTML=ok.length?`<b>${ok.length}</b> dishes · <b>${cs}</b> categories`+(np?` · <span style="color:var(--red)">⚠ ${np} bina price</span>`:' · sab me price hai ✓'):'Abhi kuch paste nahi kiya';$('#bk_i').textContent=ok.length?'Import '+ok.length+' dishes':'Import'};
+ const draw=()=>{$('#bk_l').innerHTML=rows.map((r,i)=>`<div style="border:1px solid var(--line);border-radius:8px;padding:8px;margin-bottom:6px"><div class="row"><button class="btn alt sm fit" data-tg="${i}" aria-label="Veg or non-veg"><span class="dot ${r.t}"></span></button><input data-k="name" data-i="${i}" value="${esc(r.name)}" placeholder="Dish name" aria-label="Dish name">${ex(r)?'<small class="mut fit" style="white-space:nowrap">in menu</small>':''}<button class="btn alt sm fit" data-x="${i}" aria-label="Remove">✕</button></div><div class="row" style="margin-top:6px"><input data-k="cat" data-i="${i}" list="bk_dl" value="${esc(r.cat)}" placeholder="Category" aria-label="Category" style="flex:2"><input data-k="h" data-i="${i}" type="number" min="0" inputmode="decimal" value="${r.h??''}" placeholder="Half" aria-label="Half price"><input data-k="f" data-i="${i}" type="number" min="0" inputmode="decimal" value="${r.f||''}" placeholder="Full" aria-label="Full price" ${+r.f>0?'':'style="border-color:var(--red)"'}></div></div>`).join('')+`<datalist id="bk_dl">${cats().map(c=>`<option value="${esc(c)}">`).join('')}</datalist>`;sum()};
+ draw();
+ $('#bk_t').oninput=()=>{rows=bkParse($('#bk_t').value);draw()};
+ $('#bk_l').oninput=e=>{const t=e.target,i=+t.dataset.i,k=t.dataset.k;if(!k||!rows[i])return;rows[i][k]=(k==='h')?(t.value===''?null:+t.value):(k==='f')?(+t.value||0):t.value;if(k==='f')t.style.borderColor=+t.value>0?'':'var(--red)';sum()};
+ $('#bk_l').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.tg!=null){const r=rows[+b.dataset.tg];r.t=r.t==='v'?'n':'v';draw()}else if(b.dataset.x!=null){rows.splice(+b.dataset.x,1);draw()}};
+ $('#bk_p').onclick=()=>bkCopy(BK_PROMPT);
+ $('#bk_f').onclick=()=>$('#bk_ff').click();
+ $('#bk_ff').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const r=new FileReader();r.onload=()=>{$('#bk_t').value=String(r.result||'');$('#bk_t').oninput()};r.readAsText(f)};
+ $('#bk_e').onclick=async()=>{const b=new Blob(['\uFEFFCategory,Dish Name,Half Price,Full Price,Veg/Non-Veg\nStarters,Paneer Tikka,,220,V\nStarters,Chicken 65,,240,N\nVeg Rice,Fried Rice,120,220,V\nNon-Veg Rice,Chicken Fried Rice,150,260,N\n'],{type:'text/csv'});try{if(!(await saveFile('menu-sample.csv',b)))toast('Saving is not available here')}catch(x){toast('Could not save the file')}};
+ $('#bk_c').onclick=()=>d.close();
+ $('#bk_i').onclick=()=>{const ok=rows.filter(r=>String(r.name).trim());if(!ok.length)return toast('Pehle menu paste karo');const[a,u]=bkImport(ok,$('#bk_u').checked);saveMenu();d.close();render();toast(a+' dishes added'+(u?', '+u+' updated':'')+' ✓')};
+ d.addEventListener('close',()=>{d.style.maxWidth=''},{once:true});if(!d.open)d.showModal()}
+
 let BUSY=false,AIK={};
 async function uploadAll(files){if(!files.length)return;if(BUSY)return toast('Please wait, another task is still running');BUSY=true;let tot=0;
  for(let k=0;k<files.length;k++){const f=files[k],tag=(k+1)+'/'+files.length;
