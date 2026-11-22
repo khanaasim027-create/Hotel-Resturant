@@ -77,8 +77,8 @@ input,select{font-size:16px}
 .ph{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}.ph img{width:100%;height:150px;object-fit:cover;border-radius:8px;cursor:zoom-in}
 .plan{flex:1;border:2px solid var(--line);border-radius:12px;padding:12px;text-align:center}.plan b{display:block;font:700 22px Cinzel,serif}
 </style>
-<meta name="app-build" content="202611221800">
-<meta name="app-notes" content="Settings icon fixed|AI keys are now managed only by the admin and shared with all clients automatically|If one AI key reaches its free limit the app switches to the next key by itself|The app now updates itself when a new version is uploaded">
+<meta name="app-build" content="202611222200">
+<meta name="app-notes" content="Fixed the update message that kept repeating|App version is now shown in the header and in Settings|AI keys are managed only by the admin and shared with all clients|The app switches to the next AI key by itself when a limit is reached">
 <style>#gs{position:relative;z-index:5;touch-action:manipulation;-webkit-tap-highlight-color:transparent}</style>
 <script src="firebase-config.js"></script>
 </head>
@@ -947,7 +947,7 @@ function startProfile(u){unsubs.push(FS.doc('restaurants/'+u.uid).onSnapshot(sn=
  unsubs.push(FS.collection('restaurants/'+u.uid+'/menuPhotos').orderBy('at','desc').onSnapshot(sn=>{PHOTOS=sn.docs.map(d=>d.data());if(tab==='photos')photosTab()},()=>{}))}
 function applyProfile(){const P=PROFILE;if(!P)return;if(!P.name){$('#login').style.display='none';$('#onb').style.display='block';onboard();return}
  $('#onb').style.display='none';LANG=P.lang||'en';document.documentElement.lang=LANG;BIZ.name=P.name;BIZ.addr=P.addr||'';BIZ.phone=P.phone||'';
- LOGO=P.logo||mkLogo(P.name);$('#hl').src=LOGO;$('#hn').textContent=P.name.toUpperCase();$('#hs').textContent=tr('OWNER APP · POS & KOT');document.title=P.name;
+ LOGO=P.logo||mkLogo(P.name);$('#hl').src=LOGO;$('#hn').textContent=P.name.toUpperCase();$('#hs').textContent=tr('OWNER APP · POS & KOT')+(()=>{try{return ' · '+APPV}catch(e){return ''}})();document.title=P.name;
  $('#so').textContent='Sign out';remind();render();xw(document.body)}
 function onboard(){let logo='';$('#onb').innerHTML=`<div class="card" style="max-width:420px;margin:6vh auto 0"><h3>Set up your restaurant</h3><p class="mut">Choose your language and enter your restaurant name.</p><label class="mut">Language</label><select id="ol">${langOpts('en')}</select><label class="mut" style="display:block;margin-top:10px">Restaurant name</label><input id="on" maxlength="40" placeholder="e.g. Sai Kripa Restaurant"><label class="mut" style="display:block;margin-top:10px">Logo (optional)</label><input id="of" type="file" accept="image/*"><div style="margin-top:12px;padding:10px;border:1px solid #c9a24a;border-radius:8px;background:#fff8e1;color:#5a4300;font-size:13px">⚠️ Please check carefully. Once you save, you cannot change your restaurant name or logo again.</div><label style="display:flex;gap:8px;margin:12px 0;align-items:flex-start"><input id="oc2" type="checkbox" style="width:auto;margin-top:3px"><span>I understand that this is the last time I can set the restaurant name and logo. After I save, I cannot change either of them.</span></label><button class="btn" id="os" style="width:100%">Continue</button><div id="oe" style="color:var(--red);margin-top:8px;min-height:18px"></div></div>`;
  $('#of').onchange=async e=>{if(e.target.files[0])logo=await compress(e.target.files[0],256,.9,true)};
@@ -996,9 +996,10 @@ function settingsTab(){const P=PROFILE,exp=P.plan&&P.plan.expiresAt,lk=LOCKED();
 <div class="card"><div style="text-align:center"><img src="${LOGO}" width="96" height="96" style="border-radius:50%" alt="Logo"><div class="mut" style="font-size:12px;margin-top:4px">🔒 Restaurant name and logo are locked and cannot be changed</div></div>
 <label class="mut" style="display:block;margin-top:10px">Address</label><input id="sa" value="${esc(P.addr||'')}"><label class="mut" style="display:block;margin-top:10px">Phone</label><input id="sp" value="${esc(P.phone||'')}"><label class="mut" style="display:block;margin-top:10px">Language</label><select id="sl">${langOpts(LANG)}</select><button class="btn" id="ss" style="margin-top:12px">Save</button></div>
 <div class="card" style="margin-top:12px"><h3>Plan</h3><p>${lk?(exp?'Expired on '+new Date(exp).toLocaleDateString('en-IN'):'No active plan'):''+planLine(P)}</p><div class="row" style="align-items:stretch"><div class="plan"><b>₹300</b>per month<br><button class="btn sm" data-p="monthly" style="margin-top:8px">Pay monthly</button></div><div class="plan"><b>₹3,500</b>per year<br><button class="btn sm" data-p="yearly" style="margin-top:8px">Pay yearly</button></div></div>${payStatus()}</div>${adminCard()}
-<div class="card" style="margin-top:12px"><div class="cl"><span>Privacy Policy</span><button class="btn alt sm" data-l="privacy">Open</button></div><div class="cl"><span>Terms &amp; Conditions</span><button class="btn alt sm" data-l="terms">Open</button></div><div class="cl"><span>${esc(P.email||P.phone||'')}</span><button class="btn alt sm" data-l="out">${tr('Sign out')}</button></div></div>`;
+<div class="card" style="margin-top:12px"><div class="cl"><span>Privacy Policy</span><button class="btn alt sm" data-l="privacy">Open</button></div><div class="cl"><span>Terms &amp; Conditions</span><button class="btn alt sm" data-l="terms">Open</button></div><div class="cl"><span>${esc(P.email||P.phone||'')}</span><button class="btn alt sm" data-l="out">${tr('Sign out')}</button></div></div><div class="mut" id="ver" style="text-align:center;font-size:12px;margin:14px 0">Version ${APPV}</div>`;
   $('#ss').onclick=async()=>{const u={addr:$('#sa').value.trim(),phone:$('#sp').value.trim(),lang:$('#sl').value};try{await saveProfile(u);toast('Saved ✓')}catch(e){toast('Could not save')}};
- $('#app').onclick=e=>{const p=e.target.dataset.p,l=e.target.dataset.l,a=e.target.dataset.a;if(a==='keys')askKeys();if(a==='test')aiTest();if(a==='upd')askUpd();if(p)payNow(p);const ap=e.target.dataset.ap,rj=e.target.dataset.rj;if(ap)approvePay(ap,true);if(rj)approvePay(rj,false);if(l==='out')$('#so').click();if(l==='privacy'||l==='terms')legal(l)}}
+ $('#app').onclick=e=>{const p=e.target.dataset.p,l=e.target.dataset.l,a=e.target.dataset.a;if(e.target.id==='ver')verTap();if(a==='keys')askKeys();if(a==='test')aiTest();if(a==='upd')askUpd();if(p)payNow(p);const ap=e.target.dataset.ap,rj=e.target.dataset.rj;if(ap)approvePay(ap,true);if(rj)approvePay(rj,false);if(l==='out')$('#so').click();if(l==='privacy'||l==='terms')legal(l)}}
+let VT=0;function verTap(){if(++VT<5)return;VT=0;const u=window.AUTH&&AUTH.currentUser,d=$('#dlg');d.style.maxWidth='';d.innerHTML='<h3>App info</h3><pre style="white-space:pre-wrap;word-break:break-word;font-size:12px">Version: '+APPV+'\nSigned in: '+esc(u?(u.email||u.phoneNumber||''):'-')+'\nEmail verified: '+(u?u.emailVerified:'-')+'\nADMIN_EMAIL set: '+(window.ADMIN_EMAIL?'yes':'NO')+'\nAdmin: '+(isAdmin()?'yes':'no')+'\nUpdate link: '+esc(updUrl()||'-')+'\nAI keys saved: '+aiKeys().length+'</pre><button class="btn" style="width:100%" onclick="$(\'#dlg\').close()">Close</button>';if(!d.open)d.showModal()}
 function legal(k){const url=k==='privacy'?window.PRIVACY_URL:window.TERMS_URL;if(url)return window.open(url,'_blank');const w=$('#dlg');w.innerHTML=`<h3>${k==='privacy'?'Privacy Policy':'Terms &amp; Conditions'}</h3><p>${k==='privacy'?'We store your restaurant data (menu, bills, customers) securely in your private account and never sell it.':'The subscription is billed monthly or yearly. When a plan ends, features stay locked until the next payment.'}</p><button class="btn" style="width:100%" onclick="$('#dlg').close()">Close</button>`;w.showModal()}
 function payStatus(){const a=(MYPAY||[]).slice().sort((x,y)=>y.at-x.at).slice(0,3);if(!a.length)return'';return '<div style="margin-top:10px;font-size:13px;text-align:left">'+a.map(p=>'<div class="cl"><span>'+esc(PLANS[p.plan]?PLANS[p.plan].label:p.plan)+' ₹'+esc(p.amt)+'</span><span class="tag '+(p.status==='approved'?'paid':'')+'">'+(p.status==='approved'?'Approved':p.status==='rejected'?'Rejected':'Pending')+'</span></div>').join('')+'</div>'}
 function adminCard(){if(!isAdmin())return'';const a=(PENDING||[]).slice().sort((x,y)=>x.at-y.at);return '<div class="card" style="margin-top:12px"><h3>Admin tools</h3><div class="row" style="flex-direction:column;gap:8px"><button class="btn alt sm" data-a="keys" type="button" style="width:100%">🔑 AI keys (all clients)</button><button class="btn alt sm" data-a="test" type="button" style="width:100%">Test AI keys</button><button class="btn alt sm" data-a="upd" type="button" style="width:100%">🔄 Update link (GitHub)</button></div></div><div class="card" style="margin-top:12px"><h3>Payment requests (admin)</h3>'+(a.length?a.map(p=>'<div style="border-top:1px solid #ddd;padding:10px 0;font-size:13px"><b>'+esc(p.name)+'</b> · '+esc(p.email)+'<br>'+esc(PLANS[p.plan]?PLANS[p.plan].label:p.plan)+' · <b>₹'+esc(p.amt)+'</b><br><span class="mut">'+new Date(p.at).toLocaleString('en-IN')+'</span><div class="row" style="margin-top:8px"><button class="btn sm" data-ap="'+esc(p.utr)+'">Approve</button><button class="btn alt sm" data-rj="'+esc(p.utr)+'">Reject</button></div></div>').join(''):'<p class="mut">No pending payments.</p>')+'</div>'}
@@ -1133,17 +1134,17 @@ function fit(){const w=W();if(!w||L.style.display==='none')return;w.style.zoom=1
 const f=()=>setTimeout(fit,0);addEventListener('resize',fit);L.addEventListener('click',f);L.addEventListener('input',f);new MutationObserver(f).observe(L,{attributes:true,attributeFilter:['style']});[200,800,2000].forEach(t=>setTimeout(fit,t));
 const ig=document.querySelector('#login .dev a');if(ig)ig.onclick=e=>{const u='_.9.9.9.0._',web=ig.href,ua=navigator.userAgent;if(/Android/i.test(ua)){e.preventDefault();location.href='intent://instagram.com/_u/'+u+'/#Intent;package=com.instagram.android;scheme=https;S.browser_fallback_url='+encodeURIComponent(web)+';end'}else if(/iPhone|iPad|iPod/i.test(ua)){e.preventDefault();const t=Date.now();location.href='instagram://user?username='+u;setTimeout(()=>{if(!document.hidden&&Date.now()-t<2500)location.href=web},1200)}};})();
 initCloud();
-const APPV='v19';
+const APPV='v20';
 (async()=>{try{if('serviceWorker' in navigator){for(const r of await navigator.serviceWorker.getRegistrations())await r.unregister();if(window.caches)for(const k of await caches.keys())await caches.delete(k)}}catch(e){}})();
-const sigOf=doc=>{const t=[...doc.querySelectorAll('script:not([src]),style')].map(e=>e.textContent).join('\u0001');let h=5381;for(let i=0;i<t.length;i++)h=((h<<5)+h+t.charCodeAt(i))|0;return t.length+':'+h};
-const MYSIG=sigOf(document);
+const sigOf=window.__sigOf;
+const MYSIG=window.__MYSIG||sigOf(document);
 var UPD_CFG='',UPD_BUSY=false,NEWHTML='',NEWSIG='',NEWBUILD=0,NEWNOTES='';
 const normUrl=u=>{u=String(u||'').trim();const m=/^https?:\/\/github\.com\/([^\/]+)\/([^\/]+)\/blob\/([^\/]+)\/(.+)$/.exec(u);if(m)return 'https://raw.githubusercontent.com/'+m[1]+'/'+m[2]+'/'+m[3]+'/'+m[4];if(u&&/\/$/.test(u))u+='index.html';return u};
 const updUrl=()=>{let u=normUrl(UPD_CFG||window.UPDATE_URL||'');if(!u&&location.protocol.indexOf('http')===0){u=location.href.split('#')[0].split('?')[0];if(u.endsWith('/'))u+='index.html'}return u};
 const otaMode=()=>!!(UPD_CFG||window.UPDATE_URL);
 const metaOf=(doc,n)=>{const e=doc.querySelector('meta[name="'+n+'"]');return e?(e.getAttribute('content')||''):''};
 function showInstalling(){if(document.getElementById('upi'))return;const o=document.createElement('div');o.id='upi';o.style.cssText='position:fixed;inset:0;z-index:99;background:rgba(12,42,35,.96);color:#f3e9cf;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;font:600 16px Inter,sans-serif;text-align:center;padding:20px';o.innerHTML='<div style="font-size:44px">⬇️</div><div>Installing the new update…</div><small style="opacity:.7;font-weight:500">Please wait, the app will restart by itself</small>';document.body.appendChild(o)}
-function applyUpdate(){showInstalling();try{sessionStorage.setItem('updTry',String(Date.now()))}catch(e){}
+function applyUpdate(){showInstalling();try{sessionStorage.setItem('updTry',String(Date.now()));localStorage.setItem('upd.applied',NEWSIG)}catch(e){}
  setTimeout(async()=>{
   try{localStorage.setItem('justUpdated','1')}catch(e){}
   if(otaMode()&&NEWHTML){
@@ -1156,8 +1157,9 @@ async function checkUpdate(first){if(UPD_BUSY)return;try{const u=updUrl();if(!u)
   const r=await fetch(u+(u.includes('?')?'&':'?')+'t='+Date.now(),{cache:'no-store'});if(!r.ok){UPD_BUSY=false;return}
   const txt=await r.text();if(txt.indexOf('const APPV')<0||!/<\/html>\s*$/i.test(txt.trim())){UPD_BUSY=false;return}
   const doc=new DOMParser().parseFromString(txt,'text/html');if(!doc.getElementById('app-main')){UPD_BUSY=false;return}
-  const sig=sigOf(doc);let cur=MYSIG;try{cur=localStorage.getItem('ota.sig')||MYSIG}catch(e){}
-  if(sig===cur){UPD_BUSY=false;return}
+  const sig=sigOf(doc);
+  if(sig===MYSIG){UPD_BUSY=false;return}
+  try{if(localStorage.getItem('upd.applied')===sig){UPD_BUSY=false;return}}catch(e){}
   NEWHTML=txt;NEWSIG=sig;NEWNOTES=metaOf(doc,'app-notes');NEWBUILD=Math.max(+metaOf(doc,'app-build')||0,+metaOf(document,'app-build')||0);
   let t=0;try{t=+sessionStorage.getItem('updTry')||0}catch(e){}
   if(first&&Date.now()-t>120000)applyUpdate();else{UPD_BUSY=false;showUpdate()}
@@ -1171,6 +1173,7 @@ try{localStorage.removeItem('ota.booting')}catch(e){}
 (function(){
  var src=document.getElementById('app-main').text,h='';
  function run(t){var e=document.createElement('script');e.text=t;document.body.appendChild(e)}
+ window.__sigOf=function(doc){var a=doc.querySelectorAll('script#app-main,style'),t=[],i;for(i=0;i<a.length;i++)t.push(a[i].textContent);t=t.join('\u0001');var h=5381;for(i=0;i<t.length;i++)h=((h<<5)+h+t.charCodeAt(i))|0;return t.length+':'+h};
  try{
   h=localStorage.getItem('ota.html')||'';
   var b=+(localStorage.getItem('ota.build')||0),m=document.querySelector('meta[name="app-build"]'),me=m?(+m.getAttribute('content')||0):0;
@@ -1187,6 +1190,7 @@ try{localStorage.removeItem('ota.booting')}catch(e){}
    }else clr()
   }
  }catch(e){}
+ try{window.__MYSIG=window.__sigOf(document)}catch(e){}
  run(src)
 })();
 </script>
